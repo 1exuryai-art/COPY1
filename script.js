@@ -1,4 +1,4 @@
-const API_BASE = window.location.origin;
+const API_BASE = "https://cop1-production.up.railway.app";
 const TOTAL_STEPS = 8;
 
 const DISCOUNT_PERCENT = 10;
