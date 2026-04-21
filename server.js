@@ -773,6 +773,32 @@ app.post("/api/book", async (req, res) => {
   }
 });
 
+app.get("/api/test-calendar", async (_req, res) => {
+  try {
+    const calendar = getCalendarClient();
+
+    const meta = await calendar.calendars.get({
+      calendarId: GOOGLE_CALENDAR_ID
+    });
+
+    return res.json({
+      ok: true,
+      calendarId: GOOGLE_CALENDAR_ID,
+      summary: meta.data.summary,
+      timeZone: meta.data.timeZone
+    });
+  } catch (error) {
+    console.error("TEST CALENDAR ERROR:", error.response?.data || error.message);
+
+    return res.status(error.response?.status || 500).json({
+      ok: false,
+      error: error.response?.data?.error?.message || error.message,
+      details: error.response?.data || null,
+      calendarIdUsed: GOOGLE_CALENDAR_ID
+    });
+  }
+});
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`DOGMA booking app running on port ${PORT}`);
   console.log("PORT:", PORT);
