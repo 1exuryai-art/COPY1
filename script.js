@@ -1,4 +1,4 @@
-const API_BASE = "const API_BASE = "https://cop1-production.up.railway.app/";
+const API_BASE = window.location.origin;
 const TOTAL_STEPS = 8;
 
 const DISCOUNT_PERCENT = 10;
@@ -298,15 +298,16 @@ function normalizePhone(value) {
   if (digits.length > 3) result += ` ${digits.slice(3, 6)}`;
   if (digits.length > 6) result += ` ${digits.slice(6, 9)}`;
 
-  return result;
+  return result === "+48" ? "+48 " : result;
 }
 
 function isValidName(value) {
-  return value.trim().length >= 2;
+  return String(value || "").trim().length >= 2;
 }
 
 function isValidPhone(value) {
-  return /^\+48 \d{3} \d{3} \d{3}$/.test(value.trim());
+  const digits = String(value || "").replace(/\D/g, "");
+  return digits.length === 11 && digits.startsWith("48");
 }
 
 function timeToMinutes(timeStr) {
@@ -470,7 +471,7 @@ function updateBindings() {
     }
 
     if (priceDetails.hasDiscount) {
-      el.textContent = `${formatPrice(priceDetails.finalPrice)}  •  -${DISCOUNT_PERCENT}%`;
+      el.textContent = `${formatPrice(priceDetails.finalPrice)} • -${DISCOUNT_PERCENT}%`;
       return;
     }
 
@@ -696,11 +697,9 @@ function renderBarberSlider() {
   const barber = barbers[state.barberSlideIndex];
   if (!barber) return;
 
-  if (barberSlidePhoto) {
-    barberSlidePhoto.innerHTML = `
-      <img src="${barber.photo}" alt="${barber.name}" class="barber-photo-img" />
-    `;
-  }
+  barberSlidePhoto.innerHTML = `
+    <img src="${barber.photo}" alt="${barber.name}" class="barber-photo-img" />
+  `;
 
   barberSlideName.textContent = barber.name;
   barberSlideDescription.textContent = barber.description;
@@ -867,7 +866,6 @@ function renderSlots() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "slot-btn";
-    btn.textContent = slot.time;
 
     const service = getSelectedService();
     const discountActive = service && isDiscountWindow(state.selectedDate, slot.time);
@@ -878,6 +876,8 @@ function renderSlots() {
         <span class="slot-time">${slot.time}</span>
         <span class="slot-discount">-${DISCOUNT_PERCENT}%</span>
       `;
+    } else {
+      btn.textContent = slot.time;
     }
 
     if (state.selectedTime === slot.time) {
@@ -904,8 +904,8 @@ async function submitBooking() {
   const barber = getSelectedBarber();
 
   const payload = {
-    name: state.name,
-    phone: state.phone,
+    name: state.name.trim(),
+    phone: state.phone.trim(),
     serviceName: service?.name || "",
     serviceDuration: service?.duration || "",
     servicePrice: getServicePriceText(service, state.selectedDate, state.selectedTime),
@@ -1056,12 +1056,7 @@ phoneInput.addEventListener("keydown", (e) => {
 });
 
 phoneInput.addEventListener("input", (e) => {
-  let formatted = normalizePhone(e.target.value);
-
-  if (formatted === "+48") {
-    formatted = "+48 ";
-  }
-
+  const formatted = normalizePhone(e.target.value);
   e.target.value = formatted;
   state.phone = formatted;
   phoneError.textContent = "";
