@@ -1,3 +1,4 @@
+console.log("🚀 COPY1 SERVER STARTED");
 import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
