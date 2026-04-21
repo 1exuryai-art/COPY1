@@ -1025,14 +1025,14 @@ function prevStep() {
 }
 
 function callDogma() {
-  const phone = "+48792897149";
+  const phone = "+48532377701";
 
   try {
     window.location.href = `tel:${phone}`;
   } catch (error) {
     console.error("Call error:", error);
-    navigator.clipboard?.writeText("792 897 149");
-    alert("Nie udało się otworzyć połączenia. Numer został skopiowany: 792 897 149");
+    navigator.clipboard?.writeText("532 377 701");
+    alert("Nie udało się otworzyć połączenia. Numer został skopiowany: 532 377 701");
   }
 }
 
