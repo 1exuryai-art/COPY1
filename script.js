@@ -1,4 +1,4 @@
-const API_BASE = "https://dogma-production.up.railway.app";
+const API_BASE = "const API_BASE = "https://copy1-production.up.railway.app";
 const TOTAL_STEPS = 8;
 
 const DISCOUNT_PERCENT = 10;
