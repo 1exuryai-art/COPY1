@@ -1,4 +1,5 @@
 console.log("🚀 COPY1 SERVER STARTED");
+
 import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
@@ -205,6 +206,22 @@ function getCalendarClient() {
   return google.calendar({ version: "v3", auth: oauth2Client });
 }
 
+async function getTokenOwnerEmail() {
+  try {
+    const auth = createOAuthClient();
+    const oauth2 = google.oauth2({
+      version: "v2",
+      auth
+    });
+
+    const userInfo = await oauth2.userinfo.get();
+    return userInfo.data.email || null;
+  } catch (error) {
+    console.error("Failed to get token owner email:", error.response?.data || error.message);
+    return null;
+  }
+}
+
 function getBarberConfig(barberId) {
   const barber = BARBERS[barberId];
 
@@ -357,6 +374,11 @@ async function getEventsForDay(dateStr) {
     throw new Error("Date is required");
   }
 
+  console.log("=== GET EVENTS FOR DAY ===");
+  console.log("GOOGLE_CALENDAR_ID:", GOOGLE_CALENDAR_ID);
+  console.log("DATE:", dateStr);
+  console.log("TIMEZONE:", TIMEZONE);
+
   const calendar = getCalendarClient();
 
   const dayStart = getUtcDateFromTimeZoneLocal(dateStr, "00:00", TIMEZONE);
@@ -403,7 +425,6 @@ function generateBaseSlotsForDate(dateStr, durationMinutes) {
   for (let minutes = openHour * 60; minutes <= lastStartMinutes; minutes += 30) {
     const hour = Math.floor(minutes / 60);
     const minute = minutes % 60;
-
     slots.push(`${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`);
   }
 
@@ -521,19 +542,58 @@ async function createEvent(payload) {
   };
 }
 
-app.get("/api/health", (_req, res) => {
+app.get("/api/health", async (_req, res) => {
   const credentialsReady = missingEnv.length === 0;
+  const tokenOwnerEmail = credentialsReady ? await getTokenOwnerEmail() : null;
 
   res.json({
     ok: true,
     service: "DOGMA booking backend",
     credentialsReady,
+    missingEnv,
     timezone: TIMEZONE,
     calendarIdConfigured: Boolean(process.env.GOOGLE_CALENDAR_ID),
+    calendarIdUsed: GOOGLE_CALENDAR_ID,
     smsEnabled: Boolean(process.env.SMSAPI_TOKEN),
     ownerNotificationEnabled: Boolean(OWNER_NOTIFICATION_PHONE),
-    mode: "single-calendar-auto-assignment"
+    mode: "single-calendar-auto-assignment",
+    tokenOwnerEmail
   });
+});
+
+app.get("/api/debug-calendar", async (_req, res) => {
+  try {
+    if (missingEnv.length > 0) {
+      return res.status(500).json({
+        ok: false,
+        error: `Missing env variables: ${missingEnv.join(", ")}`
+      });
+    }
+
+    const calendar = getCalendarClient();
+    const tokenOwnerEmail = await getTokenOwnerEmail();
+    const result = await calendar.calendarList.list();
+
+    return res.json({
+      ok: true,
+      tokenOwnerEmail,
+      currentCalendarId: GOOGLE_CALENDAR_ID,
+      calendars: (result.data.items || []).map((item) => ({
+        id: item.id,
+        summary: item.summary,
+        primary: Boolean(item.primary),
+        accessRole: item.accessRole || null
+      }))
+    });
+  } catch (error) {
+    console.error("Debug calendar error:", error.response?.data || error.message);
+
+    return res.status(error.response?.status || 500).json({
+      ok: false,
+      error: error.response?.data?.error?.message || error.message || "Debug calendar failed",
+      details: error.response?.data || null
+    });
+  }
 });
 
 app.get("/api/availability", async (req, res) => {
@@ -599,11 +659,15 @@ app.get("/api/availability", async (req, res) => {
       workingHours: getWorkingHoursForDate(date)
     });
   } catch (error) {
-    console.error("Availability error:", error);
+    console.error("Availability error message:", error.message);
+    console.error("Availability error response:", error.response?.data);
+    console.error("Calendar ID used:", GOOGLE_CALENDAR_ID);
 
-    return res.status(error.statusCode || 500).json({
+    return res.status(error.statusCode || error.response?.status || 500).json({
       ok: false,
-      error: error.message || "Internal server error"
+      error: error.response?.data?.error?.message || error.message || "Internal server error",
+      googleDetails: error.response?.data || null,
+      calendarIdUsed: GOOGLE_CALENDAR_ID
     });
   }
 });
@@ -697,15 +761,22 @@ app.post("/api/book", async (req, res) => {
       resolvedBarberName: resolvedPayload.barberName
     });
   } catch (error) {
-    console.error("Booking error:", error);
+    console.error("Booking error:", error.message);
+    console.error("Booking error response:", error.response?.data);
 
-    return res.status(error.statusCode || 500).json({
+    return res.status(error.statusCode || error.response?.status || 500).json({
       ok: false,
-      error: error.message || "Internal server error"
+      error: error.response?.data?.error?.message || error.message || "Internal server error",
+      googleDetails: error.response?.data || null,
+      calendarIdUsed: GOOGLE_CALENDAR_ID
     });
   }
 });
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`DOGMA booking app running on port ${PORT}`);
+  console.log("PORT:", PORT);
+  console.log("TIMEZONE:", TIMEZONE);
+  console.log("GOOGLE_CALENDAR_ID:", GOOGLE_CALENDAR_ID);
+  console.log("SMS ENABLED:", Boolean(process.env.SMSAPI_TOKEN));
 });
