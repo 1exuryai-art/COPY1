@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DOGMA BARBERSHOP — Rezerwacja</title>
+  <meta name="description" content="Premium mobile-first booking flow dla DOGMA BARBERSHOP." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-grid"></div>
+
+  <main class="app-shell">
+    <section class="wizard-frame">
+      <header class="wizard-top">
+        <div class="wizard-top-row">
+          <div class="wizard-top-copy">
+            <div class="eyebrow">DOGMA BARBERSHOP</div>
+            <h1 id="stepTitle">Dane kontaktowe</h1>
+            <p id="stepSubtitle">Zostaw podstawowe dane i przejdź dalej.</p>
+          </div>
+          <div class="step-pill" id="stepPill">1 / 8</div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-text" id="progressText">13%</div>
+        </div>
+      </header>
+
+      <section class="wizard-card">
+        <!-- STEP 1 -->
+        <section class="step active" data-step="1">
+          <div class="step-content narrow">
+            <div class="intro-card">
+              <div class="intro-top">
+                <div class="logo-box logo-box-image">
+                  <img src="/dogma.png" alt="DOGMA logo" />
+                </div>
+
+                <div class="intro-copy">
+                  <span class="section-kicker">DOGMA BARBERSHOP</span>
+                  <strong>Umów wizytę szybko i wygodnie</strong>
+                </div>
+              </div>
+
+              <div class="intro-divider"></div>
+
+              <div class="card-head">
+                <h2>Wpisz imię i telefon</h2>
+                <p>
+                  Zostaw swoje dane, a potem wybierz usługę i termin wizyty.
+                </p>
+              </div>
+
+              <div class="intro-benefits">
+                <div class="intro-benefit">Szybko</div>
+                <div class="intro-benefit">Wygodnie</div>
+                <div class="intro-benefit">Online</div>
+              </div>
+            </div>
+
+            <label class="field">
+              <span>Imię</span>
+              <input id="nameInput" type="text" placeholder="Np. Michał" autocomplete="name" />
+              <small class="error" id="nameError"></small>
+            </label>
+
+            <label class="field">
+              <span>Telefon</span>
+              <input id="phoneInput" type="tel" placeholder="+48 123 456 789" autocomplete="tel" />
+              <small class="error" id="phoneError"></small>
+            </label>
+          </div>
+        </section>
+
+        <!-- STEP 2 -->
+        <section class="step" data-step="2">
+          <div class="step-content">
+            <div class="card-head">
+              <h2>Wybór usługi</h2>
+              <p>Najpierw wybierz kategorię, potem konkretną usługę.</p>
+            </div>
+
+            <div class="accordion-list" id="categoryAccordion"></div>
+          </div>
+        </section>
+
+        <!-- STEP 3 -->
+        <section class="step" data-step="3">
+          <div class="step-content narrow">
+            <div class="card-head">
+              <h2>Wybrać barbera?</h2>
+              <p>Możesz wybrać konkretnego barbera albo przejść dalej bez wyboru.</p>
+            </div>
+
+            <div class="summary-list">
+              <div class="summary-row">
+                <span>Imię</span>
+                <strong data-bind="name">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Telefon</span>
+                <strong data-bind="phone">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Usługa</span>
+                <strong data-bind="serviceName">—</strong>
+              </div>
+            </div>
+
+            <div class="choice-actions">
+              <button class="choice-btn choice-btn-strong" id="chooseBarberYes" type="button">Tak</button>
+              <button class="choice-btn choice-btn-strong" id="chooseBarberNo" type="button">Nie</button>
+            </div>
+
+            <div class="barber-skip-box hidden" id="barberSkipBox">
+              <div class="summary-list">
+                <div class="summary-row">
+                  <span>Barber</span>
+                  <strong>Bez wyboru</strong>
+                </div>
+                <div class="summary-row">
+                  <span>Status</span>
+                  <strong>System dobierze dostępnego barbera</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 4 -->
+        <section class="step" data-step="4">
+          <div class="step-content narrow">
+            <div class="card-head">
+              <h2>Wybór barbera</h2>
+              <p>Przeglądaj barbera strzałkami i wybierz konkretną osobę.</p>
+            </div>
+
+            <div class="barber-slider-card">
+              <div class="barber-slide-photo" id="barberSlidePhoto">
+                <img src="/tymur.png" alt="Barber" class="barber-photo-img" />
+              </div>
+
+              <div class="barber-slide-info">
+                <strong id="barberSlideName">—</strong>
+                <p id="barberSlideDescription">—</p>
+                <div class="barber-langs" id="barberSlideLangs"></div>
+              </div>
+
+              <div class="barber-slider-controls">
+                <button class="slider-arrow" id="barberPrevBtn" type="button">←</button>
+                <div class="slider-counter" id="barberCounter">1 / 3</div>
+                <button class="slider-arrow" id="barberNextBtn" type="button">→</button>
+              </div>
+
+              <button class="select-barber-btn" id="selectBarberBtn" type="button">
+                Wybierz tego barbera
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 5 -->
+        <section class="step" data-step="5">
+          <div class="step-content">
+            <div class="card-head">
+              <h2>Wybór daty</h2>
+              <p>Wybierz dogodny dzień wizyty.</p>
+            </div>
+
+            <div class="calendar-box">
+              <div class="calendar-header">
+                <button class="calendar-nav-btn" id="calendarPrevBtn" type="button">←</button>
+
+                <div class="calendar-title-wrap">
+                  <strong id="monthLabel">Miesiąc</strong>
+                  <span id="calendarStatus">Dostępne terminy</span>
+                </div>
+
+                <button class="calendar-nav-btn" id="calendarNextBtn" type="button">→</button>
+              </div>
+
+              <div class="calendar-weekdays">
+                <span>Pn</span>
+                <span>Wt</span>
+                <span>Śr</span>
+                <span>Cz</span>
+                <span>Pt</span>
+                <span>Sb</span>
+                <span>Nd</span>
+              </div>
+
+              <div class="calendar-month-grid" id="calendarGrid"></div>
+              <small class="error" id="dateError"></small>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 6 -->
+        <section class="step" data-step="6">
+          <div class="step-content">
+            <div class="card-head">
+              <h2>Wybór godziny</h2>
+              <p>Wybierz dogodną godzinę wizyty.</p>
+            </div>
+
+            <div class="slots-box">
+              <div class="calendar-top">
+                <strong>Godziny</strong>
+                <span id="slotsStatus">Wybierz datę</span>
+              </div>
+
+              <div class="slots-grid" id="slotsGrid"></div>
+              <small class="error" id="timeError"></small>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 7 -->
+        <section class="step" data-step="7">
+          <div class="step-content">
+            <div class="card-head">
+              <h2>Potwierdzenie danych</h2>
+              <p>Sprawdź wszystko przed zapisaniem wizyty.</p>
+            </div>
+
+            <div class="summary-list">
+              <div class="summary-row">
+                <span>Imię</span>
+                <strong data-bind="name">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Telefon</span>
+                <strong data-bind="phone">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Usługa</span>
+                <strong data-bind="serviceName">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Barber</span>
+                <strong data-bind="barberName">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Data</span>
+                <strong data-bind="dateText">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Godzina</span>
+                <strong data-bind="time">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Czas trwania</span>
+                <strong data-bind="serviceDuration">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Cena</span>
+                <strong data-bind="servicePrice">—</strong>
+              </div>
+            </div>
+
+            <div class="info-note">
+              Sprawdź dane i potwierdź, aby zapisać wizytę.
+            </div>
+
+            <small class="error" id="submitError"></small>
+          </div>
+        </section>
+
+        <!-- STEP 8 -->
+        <section class="step" data-step="8">
+          <div class="step-content narrow center">
+            <div class="success-icon">✓</div>
+
+            <div class="card-head center">
+              <h2>Rezerwacja zapisana</h2>
+              <p>Wizyta została pomyślnie dodana do systemu.</p>
+            </div>
+
+            <div class="summary-list">
+              <div class="summary-row">
+                <span>Usługa</span>
+                <strong data-bind="serviceName">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Barber</span>
+                <strong data-bind="barberName">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Data</span>
+                <strong data-bind="dateText">—</strong>
+              </div>
+              <div class="summary-row">
+                <span>Godzina</span>
+                <strong data-bind="time">—</strong>
+              </div>
+            </div>
+
+            <div class="success-links">
+              <a class="nav-btn nav-btn-primary" href="https://www.instagram.com/dogma.barbershop?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">
+                Wróć na Instagram
+              </a>
+              <a class="nav-btn" href="https://maps.app.goo.gl/ktq2k2eZRWyMU9V56" target="_blank" rel="noopener">
+                Jak dojechać?
+              </a>
+              <button class="nav-btn" type="button" onclick="callDogma()">
+  Zadzwoń: 792 897 149
+</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <footer class="wizard-nav">
+        <button class="nav-btn" id="backBtn" type="button">Wstecz</button>
+        <button class="nav-btn nav-btn-primary" id="nextBtn" type="button">Dalej</button>
+      </footer>
+    </section>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
