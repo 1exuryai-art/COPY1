@@ -86,9 +86,6 @@
       margin: 0 auto;
     }
 
-    /* =========================
-       HEADER DESKTOP
-    ========================= */
     .site-header {
       position: sticky;
       top: 0;
@@ -208,9 +205,6 @@
       border-color: rgba(239,186,115,0.16);
     }
 
-    /* =========================
-       HEADER MOBILE
-    ========================= */
     .mobile-topbar,
     .mobile-tabs,
     .mobile-drawer {
@@ -337,9 +331,6 @@
       font-weight: 700;
     }
 
-    /* =========================
-       GENERAL SECTIONS
-    ========================= */
     .landing-wrap {
       display: grid;
       gap: 20px;
@@ -928,7 +919,6 @@
       width: 100%;
     }
 
-    /* FLOAT BUTTON */
     .floating-book {
       position: fixed;
       right: 18px;
@@ -939,7 +929,16 @@
       box-shadow:
         0 22px 50px rgba(0,0,0,0.34),
         0 0 34px rgba(239,186,115,0.14);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
       transition: opacity .22s ease, transform .22s ease;
+    }
+
+    .floating-book.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
     }
 
     .floating-book.hidden-on-contact {
@@ -948,7 +947,6 @@
       transform: translateY(20px);
     }
 
-    /* BOOKING OVERLAY */
     .booking-overlay {
       position: fixed;
       inset: 0;
@@ -1025,7 +1023,6 @@
       line-height: 1;
     }
 
-    /* RESPONSIVE */
     @media (max-width: 1120px) {
       .hero-grid,
       .manifest-grid,
@@ -1132,12 +1129,6 @@
         width: auto;
         min-width: unset;
         bottom: 12px;
-      }
-
-      /* на мобиле скрываем внутреннюю нижнюю кнопку в статус-карте,
-         чтобы не было двух CTA друг на друге */
-      .status-card > .btn {
-        display: none;
       }
 
       .booking-overlay {
@@ -1456,9 +1447,6 @@
                   <button class="btn btn-primary" type="button" onclick="openMapsRoute()">
                     Jak dojechać
                   </button>
-                  <button class="btn" type="button" data-open-booking>
-                    Zarezerwuj termin
-                  </button>
                 </div>
               </div>
             </div>
@@ -1521,10 +1509,6 @@
                     </svg>
                   </a>
                 </div>
-
-                <button class="btn section-button-full" type="button" data-open-booking>
-                  Zarezerwuj termin
-                </button>
               </div>
             </div>
           </div>
@@ -1884,6 +1868,7 @@
       const body = document.body;
       const floatingBook = document.querySelector(".floating-book");
       const contactSection = document.getElementById("contact");
+      const heroSection = document.getElementById("hero");
       const mobileLinks = document.querySelectorAll(".mobile-drawer a, .mobile-tabs a");
 
       function triggerFlash() {
@@ -1990,15 +1975,24 @@
       }
 
       function handleFloatingButton() {
-        if (!floatingBook || !contactSection) return;
+        if (!floatingBook || !contactSection || !heroSection) return;
 
-        const rect = contactSection.getBoundingClientRect();
+        const heroRect = heroSection.getBoundingClientRect();
+        const contactRect = contactSection.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
 
-        if (window.innerWidth <= 900 && rect.top < viewportHeight - 140) {
+        const passedHero = heroRect.bottom < viewportHeight * 0.35;
+        const nearContact = contactRect.top < viewportHeight - 140;
+
+        floatingBook.classList.remove("is-visible", "hidden-on-contact");
+
+        if (nearContact) {
           floatingBook.classList.add("hidden-on-contact");
-        } else {
-          floatingBook.classList.remove("hidden-on-contact");
+          return;
+        }
+
+        if (passedHero) {
+          floatingBook.classList.add("is-visible");
         }
       }
 
