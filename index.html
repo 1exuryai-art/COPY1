@@ -29,10 +29,6 @@
       --amber-light: #f2c57b;
       --text-main: #f6f1ea;
       --text-soft: #b9ada0;
-      --line: rgba(255,255,255,0.08);
-      --panel: rgba(255,255,255,0.04);
-      --panel-strong: rgba(255,255,255,0.06);
-      --shadow: 0 18px 44px rgba(0,0,0,0.34);
       --green: #79e6a7;
       --red: #ff7b72;
       --header-desktop-h: 90px;
@@ -169,7 +165,6 @@
       width: 100%;
     }
 
-    .desktop-book-btn,
     .desktop-call-btn {
       min-height: 44px;
       padding: 0 16px;
@@ -184,22 +179,10 @@
       letter-spacing: 0.06em;
       text-transform: uppercase;
       transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-    }
-
-    .desktop-book-btn {
-      color: #18120b;
-      background: linear-gradient(180deg, var(--amber-light), var(--amber));
-      box-shadow:
-        0 14px 30px rgba(185,135,68,0.18),
-        0 0 26px rgba(239,186,115,0.10);
-    }
-
-    .desktop-call-btn {
       color: var(--text-main);
       background: rgba(255,255,255,0.03);
     }
 
-    .desktop-book-btn:hover,
     .desktop-call-btn:hover {
       transform: translateY(-1px);
       border-color: rgba(239,186,115,0.16);
@@ -1213,7 +1196,6 @@
           <a href="#contact">Kontakt</a>
         </nav>
         <a href="tel:+48123456789" class="desktop-call-btn">Zadzwoń</a>
-        <button class="desktop-book-btn" type="button" data-open-booking>Zarezerwuj</button>
       </div>
     </div>
 
@@ -1275,9 +1257,6 @@
               <div class="hero-actions">
                 <button class="btn btn-primary" type="button" onclick="openMapsRoute()">
                   Jak dojechać
-                </button>
-                <button class="btn" type="button" data-open-booking>
-                  Zarezerwuj termin
                 </button>
               </div>
             </div>
