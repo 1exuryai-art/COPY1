@@ -1769,6 +1769,394 @@
       }
     }
 
+    /* ORANGE / BLACK PREMIUM VERSION — landing only. Booking CSS stays untouched. */
+    :root {
+      --landing-bg-0: #030303;
+      --landing-bg-1: #070707;
+      --landing-bg-2: #0d0d0d;
+      --landing-bg-3: #141312;
+      --landing-surface: rgba(255, 255, 255, 0.045);
+      --landing-surface-strong: rgba(255, 255, 255, 0.072);
+      --landing-surface-heavy: rgba(255, 255, 255, 0.095);
+      --landing-text: #f5f1ea;
+      --landing-text-strong: #fff8f0;
+      --landing-muted: #b9ada0;
+      --landing-soft: #867d73;
+      --landing-accent: #d9a75d;
+      --landing-accent-strong: #f2c57b;
+      --landing-accent-deep: #efba73;
+      --landing-accent-soft: rgba(217, 167, 93, 0.16);
+      --landing-accent-faint: rgba(217, 167, 93, 0.08);
+      --landing-line: rgba(255, 255, 255, 0.08);
+      --landing-line-strong: rgba(255, 255, 255, 0.14);
+      --landing-line-blue: rgba(217, 167, 93, 0.22);
+      --landing-shadow-xl: 0 34px 100px rgba(0, 0, 0, 0.48);
+      --landing-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.38);
+      --landing-shadow-md: 0 18px 42px rgba(0, 0, 0, 0.32);
+      --landing-shadow-sm: 0 12px 28px rgba(0, 0, 0, 0.24);
+    }
+
+    html {
+      background: #030303;
+    }
+
+    body {
+      color: var(--landing-text);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(217, 167, 93, 0.12), transparent 25%),
+        radial-gradient(circle at 100% 8%, rgba(239, 186, 115, 0.075), transparent 25%),
+        radial-gradient(circle at 50% 100%, rgba(217, 167, 93, 0.055), transparent 32%),
+        linear-gradient(180deg, #030303 0%, #070707 42%, #0d0d0d 100%);
+    }
+
+    body::before {
+      background:
+        linear-gradient(rgba(3, 3, 3, 0.22), rgba(3, 3, 3, 0.62)),
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: auto, 34px 34px, 34px 34px;
+      mask-image: radial-gradient(circle at 50% 18%, black 18%, transparent 82%);
+    }
+
+    body::after {
+      background: radial-gradient(circle at center, rgba(217, 167, 93, 0.035), transparent 62%);
+    }
+
+    .landing-bg-orb.one {
+      background: rgba(217, 167, 93, 0.16);
+    }
+
+    .landing-bg-orb.two {
+      background: rgba(239, 186, 115, 0.12);
+    }
+
+    .landing-bg-orb.three {
+      background: rgba(217, 167, 93, 0.08);
+    }
+
+    .landing-noise {
+      opacity: 0.32;
+      background-image:
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.09) 0 1px, transparent 1px),
+        radial-gradient(circle at 75% 75%, rgba(217, 167, 93, 0.08) 0 1px, transparent 1px);
+    }
+
+    .screen-flash {
+      background:
+        radial-gradient(circle at center, rgba(239, 186, 115, 0.14), transparent 36%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 45%);
+    }
+
+    .site-header {
+      background: linear-gradient(180deg, rgba(6, 6, 6, 0.95), rgba(6, 6, 6, 0.82));
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+    }
+
+    .desktop-logo,
+    .mobile-brand {
+      overflow: hidden;
+      padding: 8px 12px;
+      border-color: rgba(255, 255, 255, 0.08);
+      background:
+        radial-gradient(circle at top, rgba(239, 186, 115, 0.12), transparent 44%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+      box-shadow:
+        0 16px 34px rgba(0, 0, 0, 0.26),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .desktop-logo img {
+      width: 100%;
+      max-width: 104px;
+      max-height: 44px;
+      object-fit: contain;
+      filter:
+        saturate(0.95)
+        contrast(1.05)
+        drop-shadow(0 0 14px rgba(239, 186, 115, 0.12));
+    }
+
+    .mobile-brand img {
+      width: 100%;
+      max-width: 88px;
+      max-height: 38px;
+      object-fit: contain;
+    }
+
+    .desktop-nav a {
+      color: rgba(245, 241, 234, 0.78);
+    }
+
+    .desktop-nav a:hover {
+      color: #fff8f0;
+    }
+
+    .desktop-nav a::after {
+      background: linear-gradient(90deg, var(--landing-accent-strong), var(--landing-accent));
+    }
+
+    .desktop-call-btn,
+    .mobile-call-btn {
+      color: var(--landing-accent-strong);
+      border-color: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.035);
+      box-shadow:
+        0 14px 28px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .mobile-icon-btn,
+    .mobile-drawer {
+      display: none !important;
+    }
+
+    .mobile-topbar {
+      justify-content: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .mobile-call-btn {
+      position: absolute;
+      right: 12px;
+    }
+
+    .mobile-tabs {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .mobile-tab {
+      color: rgba(245, 241, 234, 0.78);
+      background: rgba(255, 255, 255, 0.035);
+      border-color: rgba(255, 255, 255, 0.07);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+    }
+
+    .mobile-tab.active,
+    .mobile-tab:hover {
+      color: #18120b;
+      background: linear-gradient(180deg, var(--landing-accent-strong), var(--landing-accent));
+      border-color: rgba(239, 186, 115, 0.24);
+      box-shadow: 0 14px 30px rgba(217, 167, 93, 0.18);
+    }
+
+    .hero-card,
+    .section-card {
+      border-color: rgba(255, 255, 255, 0.085);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+        radial-gradient(circle at 16% 0%, rgba(239, 186, 115, 0.105), transparent 28%),
+        radial-gradient(circle at 100% 12%, rgba(217, 167, 93, 0.055), transparent 24%),
+        url('/marble-bg.png') center center / cover no-repeat;
+      box-shadow:
+        0 34px 100px rgba(0, 0, 0, 0.46),
+        inset 0 1px 0 rgba(255, 255, 255, 0.065),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.025);
+    }
+
+    .hero-card::before,
+    .section-card::before {
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.54)),
+        radial-gradient(circle at top, rgba(239, 186, 115, 0.08), transparent 32%);
+    }
+
+    .hero-card::after,
+    .section-card::after {
+      border-color: rgba(255, 255, 255, 0.055);
+    }
+
+    .section-chip {
+      color: #f2c57b;
+      border-color: rgba(239, 186, 115, 0.18);
+      background: rgba(255, 255, 255, 0.045);
+      box-shadow:
+        0 12px 26px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .section-chip::before,
+    .trust-pill::before {
+      background: var(--landing-accent-strong);
+      box-shadow: 0 0 16px rgba(239, 186, 115, 0.34);
+    }
+
+    .hero-title,
+    .section-head h2,
+    .hero-photo-badge strong,
+    .metric-card strong,
+    .feature-card strong,
+    .manifest-vertical__text,
+    .pricing-card__top strong,
+    .location-preview__inner strong,
+    .location-copy strong,
+    .contact-lead strong {
+      color: var(--landing-text-strong);
+    }
+
+    .hero-title span,
+    .manifest-line strong,
+    .pricing-card__price,
+    .hero-photo-badge span,
+    .mini-pill,
+    .service-tags span,
+    .booking-topbar__copy span {
+      color: var(--landing-accent-strong);
+    }
+
+    .hero-title span {
+      text-shadow: 0 18px 50px rgba(239, 186, 115, 0.16);
+    }
+
+    .hero-sub,
+    .section-head p,
+    .trust-pill,
+    .metric-card span,
+    .feature-card p,
+    .manifest-line p,
+    .pricing-card p,
+    .location-preview__inner span,
+    .location-copy p,
+    .contact-lead p,
+    .contact-note,
+    .status-list li {
+      color: var(--landing-muted);
+    }
+
+    .glass-card {
+      border-color: rgba(255, 255, 255, 0.085);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.058), rgba(255, 255, 255, 0.026)),
+        rgba(10, 10, 10, 0.48);
+      box-shadow:
+        0 20px 48px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .glass-card::after {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), transparent 45%);
+    }
+
+    .hero-photo::before {
+      background:
+        linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.7)),
+        radial-gradient(circle at 70% 0%, rgba(239, 186, 115, 0.16), transparent 34%);
+    }
+
+    .hero-photo img {
+      filter: grayscale(0.92) contrast(1.05) brightness(0.88);
+    }
+
+    .hero-photo-badge,
+    .trust-pill,
+    .mini-card,
+    .status-pill,
+    .status-list li {
+      border-color: rgba(255, 255, 255, 0.08);
+      background: rgba(10, 10, 10, 0.56);
+      box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .btn {
+      color: var(--landing-text);
+      border-color: rgba(255, 255, 255, 0.09);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.03));
+      box-shadow:
+        0 14px 30px rgba(0, 0, 0, 0.26),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .btn:hover {
+      border-color: rgba(239, 186, 115, 0.22);
+      box-shadow:
+        0 20px 42px rgba(0, 0, 0, 0.32),
+        0 0 0 4px rgba(239, 186, 115, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .btn-primary,
+    .mini-cta,
+    .feature-number {
+      color: #18120b;
+      border-color: rgba(239, 186, 115, 0.32);
+      background: linear-gradient(180deg, var(--landing-accent-strong), var(--landing-accent));
+      box-shadow:
+        0 18px 38px rgba(185, 135, 68, 0.22),
+        0 0 30px rgba(239, 186, 115, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+
+    .btn-ghost {
+      color: var(--landing-accent-strong);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.026));
+    }
+
+    .experience-showcase,
+    .showcase-phone,
+    .showcase-screen,
+    .manifest-vertical,
+    .location-preview,
+    .contact-lead,
+    .booking-topbar {
+      border-color: rgba(255, 255, 255, 0.085);
+      background:
+        radial-gradient(circle at 18% 0%, rgba(239, 186, 115, 0.12), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+      box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .mini-logo {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+    }
+
+    .mini-title,
+    .mini-card strong,
+    .status-list strong,
+    .booking-topbar__copy strong {
+      color: var(--landing-text-strong);
+    }
+
+    .mini-card span {
+      color: var(--landing-muted);
+    }
+
+    .service-tags span {
+      background: rgba(239, 186, 115, 0.105);
+      border-color: rgba(239, 186, 115, 0.16);
+    }
+
+    .location-map iframe {
+      filter: grayscale(1) invert(0.92) contrast(1.06) brightness(0.74) saturate(0.55);
+      opacity: 0.92;
+    }
+
+    .location-map::after {
+      background:
+        linear-gradient(180deg, rgba(5, 5, 5, 0.18), rgba(5, 5, 5, 0.34)),
+        radial-gradient(circle at center, transparent 42%, rgba(0, 0, 0, 0.18) 100%);
+    }
+
+    .social-icon {
+      color: var(--landing-accent-strong);
+      border-color: rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.026));
+      box-shadow:
+        0 14px 28px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .booking-overlay {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(239, 186, 115, 0.13), transparent 34%),
+        linear-gradient(180deg, rgba(3, 3, 3, 0.74), rgba(3, 3, 3, 0.88));
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *,
       *::before,
@@ -1814,12 +2202,6 @@
     </div>
 
     <div class="mobile-topbar">
-      <button class="mobile-icon-btn" id="mobileMenuToggle" type="button" aria-label="Otwórz menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
       <a href="#top" class="mobile-brand" aria-label="MONARCH start">
         <img src="/monarch-logo.png" alt="MONARCH logo" />
       </a>
@@ -1865,9 +2247,9 @@
               </h1>
 
               <p class="hero-sub">
-                Wybierz usługę, barbera, dzień i godzinę bez dzwonienia. Jasny, szybki
-                system rezerwacji online — stworzony tak, żeby od pierwszego kliknięcia
-                czuć porządek, poziom i spokojną obsługę.
+                Wybierz usługę, barbera, dzień i godzinę bez dzwonienia. Premium booking
+                prowadzi klienta od pierwszego kliknięcia do konkretnego terminu — spokojnie,
+                szybko i bez chaosu w wiadomościach.
               </p>
 
               <div class="hero-actions">
@@ -1882,7 +2264,7 @@
               <div class="hero-trust-row">
                 <div class="trust-pill">Rezerwacja online</div>
                 <div class="trust-pill">Wybór barbera</div>
-                <div class="trust-pill">Terminy z kalendarza</div>
+                <div class="trust-pill">Zajęte sloty ukryte</div>
               </div>
             </div>
 
@@ -1897,7 +2279,7 @@
 
               <div class="hero-info-grid">
                 <article class="glass-card metric-card">
-                  <span>Rezerwacja od wejścia do wyboru godziny</span>
+                  <span>Od wejścia na stronę do wyboru godziny</span>
                   <strong>8 kroków</strong>
                 </article>
 
@@ -1918,10 +2300,9 @@
           <div class="section-wrap">
             <div class="section-head center">
               <div class="section-chip">REZERWACJA ONLINE</div>
-              <h2>Cały proces wygląda lekko, ale pracuje jak porządny system.</h2>
+              <h2>To nie jest zwykły formularz. To system sprzedaży terminu.</h2>
               <p>
-                Klient nie musi pisać wiadomości, czekać na odpowiedź ani pytać o wolne godziny.
-                Wszystko dzieje się w jednym miejscu: dane, usługa, barber, data, godzina i potwierdzenie.
+                Klient nie musi pisać wiadomości, czekać na odpowiedź ani pytać o wolne godziny. Wszystko dzieje się w jednym miejscu: oferta, usługa, barber, data, godzina i potwierdzenie.
               </p>
             </div>
 
@@ -1984,7 +2365,7 @@
                   <div class="feature-number">03</div>
                   <div>
                     <strong>Terminy z logiką kalendarza</strong>
-                    <p>Godziny są pobierane z backendu, a zajęte sloty nie powinny wpadać klientowi pod palec.</p>
+                    <p>Zajęte terminy są automatycznie pomijane, więc klient widzi tylko dostępne godziny.</p>
                   </div>
                 </article>
               </div>
@@ -2000,10 +2381,9 @@
           <div class="section-wrap">
             <div class="section-head">
               <div class="section-chip">O NAS</div>
-              <h2>Nie robimy zamieszania. Robimy formę, która wygląda dobrze.</h2>
+              <h2>Rezerwacja może wyglądać tak dobrze jak sam lokal.</h2>
               <p>
-                MONARCH to miejsce, gdzie cięcie, atmosfera i obsługa mają być konkretne.
-                Bez przypadkowych ruchów. Bez nerwowego tłumaczenia. Po prostu dobry fotel i dobry efekt.
+                Ten układ działa jak gotowa prezentacja barbershopu: klimat miejsca, usługi, lokalizacja i booking w jednej płynnej ścieżce.
               </p>
             </div>
 
@@ -2015,23 +2395,19 @@
               <div class="manifest-copy">
                 <article class="glass-card manifest-line">
                   <p>
-                    <strong>Każda linia ma znaczenie.</strong> Dobre strzyżenie nie kończy się w chwili,
-                    gdy klient wstaje z fotela. Ono ma układać się później, w zwykły dzień,
-                    bez walki z lustrem.
+                    <strong>Wygląd sprzedaje zaufanie.</strong> Klient szybciej zostawia dane, kiedy strona wygląda jak część dopracowanej marki, a nie przypadkowy formularz z internetu.
                   </p>
                 </article>
 
                 <article class="glass-card manifest-line">
                   <p>
-                    <strong>Atmosfera też pracuje na efekt.</strong> Klient ma wejść, usiąść i czuć,
-                    że ktoś ogarnia proces — od rozmowy po finalne dopracowanie detalu.
+                    <strong>Rezerwacja skraca rozmowę.</strong> Zamiast pytań o ceny, godziny i usługi, klient dostaje gotową ścieżkę i sam przechodzi do terminu.
                   </p>
                 </article>
 
                 <article class="glass-card manifest-line">
                   <p>
-                    <strong>Rezerwacja ma być tak samo czysta jak fade.</strong> Dlatego cały system
-                    prowadzi klienta krok po kroku, bez chaosu i bez zbędnego pisania.
+                    <strong>System działa pod lokal.</strong> Możesz pokazać usługi, barberów, godziny pracy, mapę i kontakt — wszystko w jednym miejscu, podłączone do booking flow.
                   </p>
                 </article>
               </div>
@@ -2047,10 +2423,9 @@
           <div class="section-wrap">
             <div class="section-head">
               <div class="section-chip">USŁUGI</div>
-              <h2>Wybierz usługę i przejdź prosto do terminu.</h2>
+              <h2>Oferta wygląda jak produkt, nie jak lista cen w wiadomości.</h2>
               <p>
-                Najpopularniejsze opcje są pod ręką. Pełną listę usług, rabaty i dostępne godziny
-                zobaczysz już w systemie rezerwacji.
+                Najważniejsze usługi są pokazane od razu, a pełny wybór klient widzi w bookingu. To pomaga szybciej przejść od zainteresowania do konkretnej wizyty.
               </p>
             </div>
 
@@ -2183,20 +2558,18 @@
           <div class="section-wrap">
             <div class="section-head">
               <div class="section-chip">DOŁĄCZ DO MONARCH</div>
-              <h2>Zarezerwuj termin i wpadaj na fotel.</h2>
+              <h2>Zamień wejścia z Instagrama w konkretne rezerwacje.</h2>
               <p>
-                Najszybsza droga do wizyty to system online. Wybierz usługę, barbera,
-                dzień i godzinę — reszta zapisze się w tle.
+                Landing można podpiąć pod link w bio, DM automatyzację albo reklamę. Klient trafia na stronę, widzi ofertę i przechodzi prosto do bookingu.
               </p>
             </div>
 
             <div class="contact-grid">
               <div class="glass-card contact-card">
                 <div class="contact-lead">
-                  <strong>Gotowy na wizytę?</strong>
+                  <strong>Gotowy system pod barbershop.</strong>
                   <p>
-                    Kliknij, przejdź przez booking i potwierdź termin. Bez wiadomości typu
-                    „macie coś wolnego?” — system pokaże Ci dostępne godziny.
+                    To jest dokładnie ten typ strony, który możesz pokazać właścicielowi: wygląda premium, tłumaczy wartość i od razu ma działający booking w środku.
                   </p>
                 </div>
 
@@ -2205,8 +2578,7 @@
                 </button>
 
                 <div class="contact-note">
-                  Po potwierdzeniu dane rezerwacji trafiają do systemu. Wybierasz usługę,
-                  termin i barbera w kilku prostych krokach.
+                  W praktyce właściciel dostaje mniej ręcznego odpisywania, a klient szybszą drogę od zainteresowania do terminu.
                 </div>
               </div>
 
