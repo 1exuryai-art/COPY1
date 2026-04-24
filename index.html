@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MONARCH BARBERSHOP — Premium Booking</title>
+  <title>MONARCH BARBERSHOP — Premium Rezerwacja</title>
   <meta
     name="description"
-    content="MONARCH BARBERSHOP — premium barbershop z nowoczesnym systemem rezerwacji online."
+    content="MONARCH BARBERSHOP — jasny premium landing z rezerwacją online w kilka kliknięć."
   />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,19 +21,37 @@
   <style>
     html {
       scroll-behavior: smooth;
+      background: #f8fbff;
     }
 
     :root {
       --landing-max: 1240px;
-      --amber: #d9a75d;
-      --amber-light: #f2c57b;
-      --text-main: #f6f1ea;
-      --text-soft: #b9ada0;
-      --green: #79e6a7;
-      --red: #ff7b72;
-      --header-desktop-h: 90px;
-      --header-mobile-top-h: 82px;
-      --header-mobile-tabs-h: 66px;
+      --landing-bg-0: #f8fbff;
+      --landing-bg-1: #f5f7fb;
+      --landing-bg-2: #eef4ff;
+      --landing-bg-3: #e7eefc;
+      --landing-surface: rgba(255, 255, 255, 0.82);
+      --landing-surface-strong: rgba(255, 255, 255, 0.94);
+      --landing-surface-heavy: #ffffff;
+      --landing-text: #0f172a;
+      --landing-text-strong: #0b1220;
+      --landing-muted: #64748b;
+      --landing-soft: #94a3b8;
+      --landing-accent: #2563eb;
+      --landing-accent-strong: #3b82f6;
+      --landing-accent-deep: #1d4ed8;
+      --landing-accent-soft: #dbeafe;
+      --landing-accent-faint: rgba(37, 99, 235, 0.08);
+      --landing-line: rgba(15, 23, 42, 0.08);
+      --landing-line-strong: rgba(15, 23, 42, 0.12);
+      --landing-line-blue: rgba(37, 99, 235, 0.16);
+      --landing-shadow-xl: 0 34px 100px rgba(148, 163, 184, 0.22);
+      --landing-shadow-lg: 0 24px 60px rgba(148, 163, 184, 0.17);
+      --landing-shadow-md: 0 16px 34px rgba(148, 163, 184, 0.14);
+      --landing-shadow-sm: 0 10px 22px rgba(148, 163, 184, 0.1);
+      --header-desktop-h: 92px;
+      --header-mobile-top-h: 78px;
+      --header-mobile-tabs-h: 64px;
     }
 
     * {
@@ -43,33 +61,113 @@
     body {
       margin: 0;
       font-family: "Manrope", sans-serif;
-      color: var(--text-main);
+      color: var(--landing-text);
       background:
-        radial-gradient(circle at top, rgba(217,167,93,0.06), transparent 18%),
-        linear-gradient(180deg, #040404 0%, #090909 100%);
+        radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.12), transparent 26%),
+        radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.08), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(37, 99, 235, 0.05), transparent 32%),
+        linear-gradient(180deg, #fbfdff 0%, #f5f7fb 44%, #eef4ff 100%);
       overflow-x: hidden;
       position: relative;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
-    body.menu-open {
+    body.menu-open,
+    body.booking-open {
       overflow: hidden;
     }
 
-    .bg-grid,
-    .bg-orb,
-    .bg-logo {
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
       pointer-events: none;
+      z-index: 0;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.56), rgba(255, 255, 255, 0.18)),
+        linear-gradient(rgba(15, 23, 42, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.025) 1px, transparent 1px);
+      background-size: auto, 34px 34px, 34px 34px;
+      mask-image: radial-gradient(circle at 50% 18%, black 18%, transparent 82%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at center, rgba(255, 255, 255, 0.52), transparent 62%);
+    }
+
+    .landing-container {
+      width: min(var(--landing-max), calc(100% - 28px));
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .landing-bg-orb,
+    .landing-bg-blur,
+    .landing-noise,
+    .screen-flash {
+      pointer-events: none;
+    }
+
+    .landing-bg-orb {
+      position: fixed;
+      z-index: 1;
+      border-radius: 999px;
+      filter: blur(90px);
+      opacity: 0.9;
+    }
+
+    .landing-bg-orb.one {
+      width: 440px;
+      height: 440px;
+      left: -160px;
+      top: -120px;
+      background: rgba(59, 130, 246, 0.16);
+    }
+
+    .landing-bg-orb.two {
+      width: 520px;
+      height: 520px;
+      right: -220px;
+      top: 220px;
+      background: rgba(96, 165, 250, 0.12);
+    }
+
+    .landing-bg-orb.three {
+      width: 500px;
+      height: 500px;
+      left: 20%;
+      bottom: -260px;
+      background: rgba(37, 99, 235, 0.08);
+    }
+
+    .landing-noise {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.5;
+      background-image:
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.7) 0 1px, transparent 1px),
+        radial-gradient(circle at 75% 75%, rgba(37, 99, 235, 0.08) 0 1px, transparent 1px);
+      background-size: 34px 34px, 48px 48px;
+      mask-image: linear-gradient(to bottom, black, transparent 80%);
     }
 
     .screen-flash {
       position: fixed;
       inset: 0;
-      z-index: 200;
+      z-index: 300;
       opacity: 0;
-      pointer-events: none;
       background:
-        radial-gradient(circle at center, rgba(239,186,115,0.14), transparent 34%),
-        linear-gradient(180deg, rgba(255,255,255,0.05), transparent 30%, transparent 70%, rgba(255,255,255,0.03));
+        radial-gradient(circle at center, rgba(59, 130, 246, 0.12), transparent 36%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.7), transparent 45%);
       transition: opacity 160ms ease;
     }
 
@@ -77,20 +175,16 @@
       opacity: 1;
     }
 
-    .landing-container {
-      width: min(var(--landing-max), calc(100% - 28px));
-      margin: 0 auto;
-    }
-
     .site-header {
       position: sticky;
       top: 0;
-      z-index: 150;
+      z-index: 160;
       background:
-        linear-gradient(180deg, rgba(6,6,6,0.95), rgba(6,6,6,0.86));
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 251, 255, 0.78));
+      backdrop-filter: blur(20px) saturate(135%);
+      -webkit-backdrop-filter: blur(20px) saturate(135%);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+      box-shadow: 0 12px 28px rgba(148, 163, 184, 0.08);
     }
 
     .desktop-header {
@@ -119,13 +213,26 @@
       flex-shrink: 0;
     }
 
-    .desktop-logo img {
+    .desktop-logo {
       width: 128px;
+      min-height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 20px;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      background:
+        radial-gradient(circle at top, rgba(59, 130, 246, 0.08), transparent 44%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.88));
+      box-shadow:
+        0 10px 22px rgba(148, 163, 184, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    }
+
+    .desktop-logo img {
+      width: 108px;
       height: auto;
       display: block;
-      filter:
-        drop-shadow(0 0 14px rgba(239,186,115,0.12))
-        drop-shadow(0 0 28px rgba(239,186,115,0.06));
+      filter: saturate(0.88) contrast(1.03);
     }
 
     .desktop-nav {
@@ -137,55 +244,68 @@
 
     .desktop-nav a {
       position: relative;
-      color: rgba(255,255,255,0.84);
+      color: rgba(15, 23, 42, 0.72);
       text-decoration: none;
       font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      transition: color .2s ease;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      transition: color 0.2s ease;
     }
 
     .desktop-nav a::after {
       content: "";
       position: absolute;
       left: 0;
-      bottom: -8px;
+      bottom: -9px;
       width: 0;
       height: 2px;
       border-radius: 999px;
-      background: linear-gradient(90deg, var(--amber-light), var(--amber));
-      transition: width .22s ease;
+      background: linear-gradient(90deg, var(--landing-accent-strong), var(--landing-accent));
+      transition: width 0.22s ease;
     }
 
     .desktop-nav a:hover {
-      color: #fff;
+      color: var(--landing-text-strong);
     }
 
     .desktop-nav a:hover::after {
       width: 100%;
     }
 
+    .desktop-call-btn,
+    .mobile-call-btn,
+    .mobile-icon-btn {
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+      color: var(--landing-accent-deep);
+      box-shadow:
+        0 10px 20px rgba(148, 163, 184, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    }
+
     .desktop-call-btn {
-      min-height: 44px;
-      padding: 0 16px;
+      min-height: 46px;
+      padding: 0 17px;
       border-radius: 999px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(255,255,255,0.08);
       text-decoration: none;
       font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
+      font-weight: 900;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
-      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-      color: var(--text-main);
-      background: rgba(255,255,255,0.03);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
 
     .desktop-call-btn:hover {
       transform: translateY(-1px);
-      border-color: rgba(239,186,115,0.16);
+      border-color: rgba(37, 99, 235, 0.18);
+      box-shadow:
+        0 16px 28px rgba(148, 163, 184, 0.14),
+        0 0 0 4px rgba(37, 99, 235, 0.035),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     .mobile-topbar,
@@ -199,11 +319,22 @@
       padding: 0 14px;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .mobile-brand {
+      width: 112px;
+      min-height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     .mobile-brand img {
-      width: 112px;
+      width: 92px;
       height: auto;
       display: block;
     }
@@ -212,10 +343,7 @@
     .mobile-call-btn {
       width: 48px;
       height: 48px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.03);
-      color: #e4b86f;
+      border-radius: 16px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -231,7 +359,6 @@
     }
 
     .mobile-icon-btn span {
-      display: block;
       width: 20px;
       height: 2px;
       border-radius: 999px;
@@ -250,7 +377,7 @@
       gap: 8px;
       overflow-x: auto;
       scrollbar-width: none;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
     }
 
     .mobile-tabs::-webkit-scrollbar {
@@ -266,19 +393,21 @@
       justify-content: center;
       white-space: nowrap;
       text-decoration: none;
-      color: rgba(255,255,255,0.82);
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
+      color: rgba(15, 23, 42, 0.7);
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid rgba(15, 23, 42, 0.06);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
     }
 
     .mobile-tab.active,
     .mobile-tab:hover {
-      color: #18120b;
-      background: linear-gradient(180deg, var(--amber-light), var(--amber));
-      border-color: rgba(239,186,115,0.2);
+      color: #ffffff;
+      background: linear-gradient(180deg, var(--landing-accent-strong), var(--landing-accent));
+      border-color: rgba(37, 99, 235, 0.18);
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.16);
     }
 
     .mobile-drawer {
@@ -286,9 +415,10 @@
       top: 100%;
       left: 0;
       right: 0;
-      background: rgba(7,7,7,0.98);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(248, 251, 255, 0.98);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.07);
       padding: 10px 12px 14px;
+      box-shadow: 0 28px 60px rgba(148, 163, 184, 0.18);
     }
 
     .mobile-drawer.open {
@@ -307,25 +437,29 @@
       display: flex;
       align-items: center;
       text-decoration: none;
-      color: var(--text-main);
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--landing-text);
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid rgba(15, 23, 42, 0.06);
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 800;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     .landing-wrap {
       display: grid;
       gap: 20px;
-      padding: 20px 0 40px;
+      padding: 20px 0 46px;
+      position: relative;
+      z-index: 2;
     }
 
     #hero,
+    #experience,
     #manifest,
     #pricing,
     #location,
     #contact {
-      scroll-margin-top: 120px;
+      scroll-margin-top: 124px;
     }
 
     .hero-section {
@@ -334,16 +468,19 @@
 
     .hero-card,
     .section-card {
-      border-radius: 34px;
-      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 36px;
+      border: 1px solid var(--landing-line);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.018)),
-        url("/marble-bg.png") center center / cover no-repeat;
+        radial-gradient(circle at 12% 0%, rgba(59, 130, 246, 0.11), transparent 28%),
+        radial-gradient(circle at 100% 10%, rgba(37, 99, 235, 0.06), transparent 24%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 251, 255, 0.84));
       box-shadow:
-        0 28px 80px rgba(0,0,0,0.42),
-        inset 0 1px 0 rgba(255,255,255,0.06);
+        var(--landing-shadow-xl),
+        inset 0 1px 0 rgba(255, 255, 255, 0.96),
+        inset 0 -1px 0 rgba(15, 23, 42, 0.02);
       overflow: hidden;
       position: relative;
+      isolation: isolate;
     }
 
     .hero-card::before,
@@ -351,20 +488,32 @@
       content: "";
       position: absolute;
       inset: 0;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,0.24), rgba(0,0,0,0.42)),
-        radial-gradient(circle at top, rgba(239,186,115,0.06), transparent 28%);
       pointer-events: none;
+      z-index: 0;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.72), transparent 38%),
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.74), transparent 46%);
+    }
+
+    .hero-card::after,
+    .section-card::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      z-index: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      border: 1px solid rgba(255, 255, 255, 0.62);
     }
 
     .hero-grid {
       position: relative;
       z-index: 1;
-      min-height: 720px;
+      min-height: 740px;
       display: grid;
       grid-template-columns: 1.05fr 0.95fr;
       gap: 18px;
-      padding: 28px;
+      padding: 30px;
       align-items: stretch;
     }
 
@@ -372,8 +521,8 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 16px;
-      max-width: 660px;
+      gap: 18px;
+      max-width: 680px;
     }
 
     .section-chip {
@@ -384,74 +533,137 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.03);
-      color: #d8c9b6;
-      font-size: 13px;
-      font-weight: 800;
+      border: 1px solid rgba(37, 99, 235, 0.12);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(239, 246, 255, 0.86));
+      color: var(--landing-accent-deep);
+      font-size: 12px;
+      font-weight: 900;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+      box-shadow:
+        0 10px 20px rgba(148, 163, 184, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
       position: relative;
       z-index: 1;
     }
 
     .section-chip::before {
       content: "";
-      width: 8px;
-      height: 8px;
+      width: 9px;
+      height: 9px;
       border-radius: 999px;
-      background: var(--amber-light);
-      box-shadow: 0 0 12px rgba(239,186,115,0.34);
+      background: var(--landing-accent-strong);
+      box-shadow: 0 0 16px rgba(37, 99, 235, 0.38);
     }
 
     .hero-title {
       margin: 0;
       font-family: "Sora", sans-serif;
-      font-size: clamp(54px, 8vw, 108px);
+      font-size: clamp(52px, 8vw, 104px);
       line-height: 0.92;
       letter-spacing: -0.08em;
-      color: #fff8f0;
-      max-width: 9ch;
+      color: var(--landing-text-strong);
+      max-width: 10ch;
+      text-wrap: balance;
+    }
+
+    .hero-title span {
+      display: inline-block;
+      color: var(--landing-accent-deep);
+      text-shadow: 0 18px 50px rgba(37, 99, 235, 0.16);
     }
 
     .hero-sub {
       margin: 0;
-      color: var(--text-soft);
+      color: var(--landing-muted);
       font-size: 18px;
-      line-height: 1.8;
-      max-width: 560px;
+      line-height: 1.78;
+      max-width: 600px;
     }
 
-    .hero-actions {
+    .hero-actions,
+    .section-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       margin-top: 6px;
     }
 
+    .hero-trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .trust-pill {
+      min-height: 38px;
+      padding: 0 13px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--landing-muted);
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1);
+    }
+
+    .trust-pill::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--landing-accent);
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.28);
+    }
+
     .hero-side {
       display: grid;
       gap: 16px;
-      align-content: end;
+      align-content: stretch;
     }
 
     .glass-card {
       border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(15, 23, 42, 0.07);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.024)),
-        rgba(10,10,10,0.46);
+        radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.06), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 251, 255, 0.86));
       box-shadow:
-        0 18px 42px rgba(0,0,0,0.3),
-        inset 0 1px 0 rgba(255,255,255,0.06);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+        var(--landing-shadow-md),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+      backdrop-filter: blur(14px) saturate(125%);
+      -webkit-backdrop-filter: blur(14px) saturate(125%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.32), transparent 45%);
     }
 
     .hero-photo {
-      min-height: 420px;
+      min-height: 440px;
       overflow: hidden;
+    }
+
+    .hero-photo::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(180deg, transparent 45%, rgba(15, 23, 42, 0.5)),
+        radial-gradient(circle at 70% 0%, rgba(59, 130, 246, 0.18), transparent 34%);
+      pointer-events: none;
     }
 
     .hero-photo img {
@@ -459,80 +671,133 @@
       height: 100%;
       display: block;
       object-fit: cover;
-      filter: grayscale(1) contrast(1.04) brightness(0.86);
+      filter: grayscale(0.15) contrast(1.02) brightness(1.02);
+      transform: scale(1.01);
     }
 
-    .hero-info {
-      padding: 20px;
+    .hero-photo-badge {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      z-index: 2;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.74);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 18px 38px rgba(15, 23, 42, 0.14);
       display: grid;
-      gap: 8px;
+      gap: 6px;
     }
 
-    .hero-info span {
-      color: var(--amber-light);
-      font-size: 12px;
-      font-weight: 800;
+    .hero-photo-badge span {
+      color: var(--landing-accent);
+      font-size: 11px;
+      font-weight: 900;
       letter-spacing: 0.14em;
       text-transform: uppercase;
     }
 
-    .hero-info strong {
+    .hero-photo-badge strong {
       font-family: "Sora", sans-serif;
       font-size: 24px;
-      line-height: 1.02;
+      line-height: 1;
       letter-spacing: -0.05em;
-      color: #fff2df;
+      color: var(--landing-text-strong);
     }
 
-    .hero-info p {
-      margin: 0;
-      color: var(--text-soft);
-      line-height: 1.7;
-      font-size: 15px;
+    .hero-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .metric-card {
+      min-height: 150px;
+      padding: 18px;
+      display: grid;
+      align-content: space-between;
+      gap: 12px;
+    }
+
+    .metric-card span {
+      color: var(--landing-muted);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .metric-card strong {
+      font-family: "Sora", sans-serif;
+      color: var(--landing-text-strong);
+      font-size: 34px;
+      line-height: 0.95;
+      letter-spacing: -0.07em;
     }
 
     .btn {
-      min-height: 54px;
+      min-height: 56px;
       padding: 0 22px;
       border-radius: 999px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      border: 1px solid rgba(255,255,255,0.09);
+      border: 1px solid rgba(15, 23, 42, 0.08);
       text-decoration: none;
       cursor: pointer;
-      color: var(--text-main);
+      color: var(--landing-text);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 252, 0.94));
+      font: inherit;
       font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 0.04em;
+      font-weight: 900;
+      letter-spacing: 0.03em;
       text-transform: uppercase;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.06),
-        0 12px 28px rgba(0,0,0,0.22);
+        var(--landing-shadow-sm),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
       transition:
-        transform .2s ease,
-        box-shadow .2s ease,
-        border-color .2s ease,
-        color .2s ease;
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        filter 0.2s ease;
     }
 
     .btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(239,186,115,0.2);
-      color: #fff;
+      transform: translateY(-2px);
+      border-color: rgba(37, 99, 235, 0.16);
+      box-shadow:
+        0 18px 34px rgba(148, 163, 184, 0.15),
+        0 0 0 4px rgba(37, 99, 235, 0.03),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     .btn-primary {
-      color: #18120b;
-      border-color: rgba(239,186,115,0.34);
-      background: linear-gradient(180deg, var(--amber-light), var(--amber));
+      color: #ffffff;
+      border-color: rgba(37, 99, 235, 0.18);
+      background: linear-gradient(180deg, var(--landing-accent-strong), var(--landing-accent));
       box-shadow:
-        0 0 0 1px rgba(255,255,255,0.06),
-        0 16px 34px rgba(185,135,68,0.22),
-        0 0 28px rgba(239,186,115,0.16);
+        0 18px 34px rgba(37, 99, 235, 0.22),
+        0 0 0 1px rgba(37, 99, 235, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.03) saturate(1.03);
+      box-shadow:
+        0 22px 42px rgba(37, 99, 235, 0.28),
+        0 0 0 5px rgba(37, 99, 235, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-ghost {
+      color: var(--landing-accent-deep);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(239, 246, 255, 0.88));
     }
 
     .section {
@@ -540,49 +805,247 @@
     }
 
     .section-wrap {
-      padding: 26px;
+      padding: 28px;
       position: relative;
       z-index: 1;
     }
 
     .section-head {
       display: grid;
-      gap: 10px;
-      max-width: 840px;
-      margin-bottom: 18px;
+      gap: 11px;
+      max-width: 880px;
+      margin-bottom: 20px;
+    }
+
+    .section-head.center {
+      margin-left: auto;
+      margin-right: auto;
+      justify-items: center;
+      text-align: center;
     }
 
     .section-head h2 {
       margin: 0;
       font-family: "Sora", sans-serif;
       font-size: clamp(34px, 5vw, 68px);
-      line-height: 0.96;
-      letter-spacing: -0.06em;
-      color: #fff8f0;
-      max-width: 12ch;
+      line-height: 0.97;
+      letter-spacing: -0.065em;
+      color: var(--landing-text-strong);
+      max-width: 13ch;
+      text-wrap: balance;
+    }
+
+    .section-head.center h2 {
+      max-width: 16ch;
     }
 
     .section-head p {
       margin: 0;
-      color: var(--text-soft);
+      color: var(--landing-muted);
       line-height: 1.75;
       font-size: 16px;
-      max-width: 760px;
+      max-width: 780px;
+    }
+
+    .experience-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .experience-showcase {
+      min-height: 520px;
+      padding: 22px;
+      display: grid;
+      align-content: end;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(59, 130, 246, 0.11), transparent 30%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(239, 246, 255, 0.82));
+    }
+
+    .showcase-phone {
+      width: min(360px, 92%);
+      margin: 0 auto;
+      border-radius: 38px;
+      padding: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+      box-shadow:
+        0 36px 80px rgba(148, 163, 184, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+      transform: rotate(-2deg);
+    }
+
+    .showcase-screen {
+      border-radius: 30px;
+      min-height: 500px;
+      overflow: hidden;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      background:
+        radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 36%),
+        linear-gradient(180deg, #ffffff, #f2f7ff);
+      padding: 18px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .mini-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .mini-logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      box-shadow: 0 10px 18px rgba(148, 163, 184, 0.11);
+      overflow: hidden;
+    }
+
+    .mini-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .mini-pill {
+      min-height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      color: var(--landing-accent-deep);
+      background: rgba(219, 234, 254, 0.72);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .mini-title {
+      font-family: "Sora", sans-serif;
+      color: var(--landing-text-strong);
+      font-size: 31px;
+      line-height: 0.98;
+      letter-spacing: -0.07em;
+      margin: 4px 0 8px;
+    }
+
+    .mini-card {
+      min-height: 68px;
+      border-radius: 18px;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 10px 20px rgba(148, 163, 184, 0.08);
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .mini-card strong {
+      color: var(--landing-text-strong);
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .mini-card span {
+      color: var(--landing-muted);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .mini-cta {
+      min-height: 56px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, var(--landing-accent-strong), var(--landing-accent));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      box-shadow: 0 18px 34px rgba(37, 99, 235, 0.22);
+    }
+
+    .experience-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .feature-card {
+      padding: 22px;
+      min-height: 160px;
+      display: grid;
+      align-content: space-between;
+      gap: 14px;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(37, 99, 235, 0.14);
+      box-shadow:
+        0 24px 48px rgba(148, 163, 184, 0.16),
+        0 0 0 4px rgba(37, 99, 235, 0.025),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    }
+
+    .feature-number {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(180deg, var(--landing-accent-strong), var(--landing-accent));
+      box-shadow: 0 14px 26px rgba(37, 99, 235, 0.18);
+      font-weight: 900;
+    }
+
+    .feature-card strong {
+      display: block;
+      font-family: "Sora", sans-serif;
+      color: var(--landing-text-strong);
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: -0.055em;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      margin: 0;
+      color: var(--landing-muted);
+      line-height: 1.65;
+      font-size: 15px;
     }
 
     .manifest-grid {
       display: grid;
-      grid-template-columns: 0.7fr 1.3fr;
+      grid-template-columns: 0.72fr 1.28fr;
       gap: 18px;
     }
 
     .manifest-vertical {
-      min-height: 540px;
+      min-height: 560px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      position: relative;
+      background:
+        radial-gradient(circle at 50% 12%, rgba(37, 99, 235, 0.15), transparent 32%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(239, 246, 255, 0.82));
     }
 
     .manifest-vertical__text {
@@ -592,10 +1055,10 @@
       font-size: clamp(56px, 8vw, 108px);
       line-height: 0.8;
       letter-spacing: -0.08em;
-      color: #fff3e1;
+      color: var(--landing-text-strong);
       text-shadow:
-        0 0 14px rgba(239,186,115,0.14),
-        0 0 34px rgba(239,186,115,0.08);
+        0 22px 60px rgba(37, 99, 235, 0.14),
+        0 0 1px rgba(37, 99, 235, 0.16);
     }
 
     .manifest-copy {
@@ -604,32 +1067,43 @@
     }
 
     .manifest-line {
-      padding: 20px;
+      padding: 22px;
     }
 
     .manifest-line p {
       margin: 0;
-      color: #efe7dc;
+      color: var(--landing-text);
       font-size: 16px;
-      line-height: 1.8;
+      line-height: 1.82;
+    }
+
+    .manifest-line strong {
+      color: var(--landing-accent-deep);
     }
 
     .pricing-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 16px;
     }
 
     .pricing-card {
       padding: 24px;
-      position: relative;
-      overflow: hidden;
-      transition: transform .2s ease, border-color .2s ease;
+      min-height: 330px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .pricing-card:hover {
       transform: translateY(-4px);
-      border-color: rgba(239,186,115,0.18);
+      border-color: rgba(37, 99, 235, 0.16);
+      box-shadow:
+        0 26px 56px rgba(148, 163, 184, 0.18),
+        0 0 0 4px rgba(37, 99, 235, 0.026),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     .pricing-card__top {
@@ -637,41 +1111,61 @@
       justify-content: space-between;
       gap: 12px;
       align-items: flex-start;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .pricing-card__top strong {
       font-family: "Sora", sans-serif;
       font-size: 28px;
-      line-height: 0.96;
+      line-height: 0.98;
       letter-spacing: -0.06em;
-      color: #fff8f0;
+      color: var(--landing-text-strong);
     }
 
     .pricing-card__price {
       font-family: "Sora", sans-serif;
       font-size: 18px;
-      color: var(--amber-light);
+      color: var(--landing-accent-deep);
       font-weight: 800;
       white-space: nowrap;
     }
 
     .pricing-card p {
-      margin: 0 0 18px;
-      color: var(--text-soft);
-      line-height: 1.8;
+      margin: 0;
+      color: var(--landing-muted);
+      line-height: 1.75;
       font-size: 15px;
+    }
+
+    .service-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .service-tags span {
+      min-height: 32px;
+      padding: 0 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      background: rgba(219, 234, 254, 0.72);
+      border: 1px solid rgba(37, 99, 235, 0.1);
+      color: var(--landing-accent-deep);
+      font-size: 12px;
+      font-weight: 900;
     }
 
     .location-grid {
       display: grid;
-      grid-template-columns: 1.08fr 0.92fr;
+      grid-template-columns: 1.06fr 0.94fr;
       gap: 16px;
       align-items: stretch;
     }
 
     .location-map {
-      min-height: 520px;
+      min-height: 540px;
       overflow: hidden;
       position: relative;
     }
@@ -681,13 +1175,8 @@
       height: 100%;
       border: 0;
       display: block;
-      filter:
-        grayscale(1)
-        invert(0.92)
-        contrast(1.06)
-        brightness(0.74)
-        saturate(0.55);
-      opacity: 0.92;
+      filter: grayscale(0.05) contrast(1.02) brightness(1.03) saturate(0.82);
+      opacity: 0.96;
     }
 
     .location-map::after {
@@ -695,8 +1184,8 @@
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(180deg, rgba(5,5,5,0.16), rgba(5,5,5,0.32)),
-        radial-gradient(circle at center, transparent 42%, rgba(0,0,0,0.16) 100%);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(248, 251, 255, 0.16)),
+        radial-gradient(circle at center, transparent 42%, rgba(37, 99, 235, 0.07) 100%);
       pointer-events: none;
     }
 
@@ -708,24 +1197,17 @@
     }
 
     .location-preview {
-      min-height: 260px;
-      border-radius: 22px;
+      min-height: 280px;
+      border-radius: 24px;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(15, 23, 42, 0.07);
       display: grid;
       place-items: center;
       position: relative;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
-        radial-gradient(circle at 50% 40%, rgba(239,186,115,0.12), transparent 28%),
-        url("/marble-bg.png") center center / cover no-repeat;
-    }
-
-    .location-preview::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(5,5,5,0.28), rgba(5,5,5,0.54));
+        radial-gradient(circle at 50% 28%, rgba(59, 130, 246, 0.15), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.82));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     .location-preview__inner {
@@ -741,20 +1223,21 @@
       width: 150px;
       height: auto;
       display: block;
+      filter: saturate(0.9);
     }
 
     .location-preview__inner strong {
       font-family: "Sora", sans-serif;
-      font-size: 28px;
+      font-size: 30px;
       line-height: 0.96;
-      letter-spacing: -0.05em;
-      color: #fff2df;
+      letter-spacing: -0.06em;
+      color: var(--landing-text-strong);
     }
 
     .location-preview__inner span {
-      color: #ddcfbf;
+      color: var(--landing-muted);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 900;
       letter-spacing: 0.16em;
       text-transform: uppercase;
     }
@@ -766,16 +1249,16 @@
 
     .location-copy strong {
       font-family: "Sora", sans-serif;
-      font-size: 28px;
-      line-height: 0.96;
+      font-size: 30px;
+      line-height: 0.98;
       letter-spacing: -0.06em;
-      color: #fff8f0;
-      max-width: 12ch;
+      color: var(--landing-text-strong);
+      max-width: 14ch;
     }
 
     .location-copy p {
       margin: 0;
-      color: var(--text-soft);
+      color: var(--landing-muted);
       line-height: 1.78;
       font-size: 15px;
     }
@@ -792,17 +1275,42 @@
       padding: 22px;
     }
 
-    .contact-form {
+    .contact-card {
       display: grid;
-      gap: 14px;
-      margin-top: 0;
+      gap: 16px;
+    }
+
+    .contact-lead {
+      padding: 20px;
+      border-radius: 24px;
+      border: 1px solid rgba(37, 99, 235, 0.1);
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.09), transparent 32%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.88));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1);
+    }
+
+    .contact-lead strong {
+      display: block;
+      font-family: "Sora", sans-serif;
+      color: var(--landing-text-strong);
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: -0.06em;
+      margin-bottom: 10px;
+    }
+
+    .contact-lead p {
+      margin: 0;
+      color: var(--landing-muted);
+      line-height: 1.7;
+      font-size: 15px;
     }
 
     .contact-note {
-      color: var(--text-soft);
+      color: var(--landing-muted);
       font-size: 14px;
       line-height: 1.6;
-      margin-top: 10px;
     }
 
     .status-card {
@@ -819,12 +1327,13 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(15, 23, 42, 0.07);
+      background: rgba(255, 255, 255, 0.78);
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: 0.08em;
       text-transform: uppercase;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     .status-pill::before {
@@ -837,11 +1346,11 @@
     }
 
     .status-pill.open {
-      color: var(--green);
+      color: #16a34a;
     }
 
     .status-pill.closed {
-      color: var(--red);
+      color: #dc2626;
     }
 
     .status-list {
@@ -853,18 +1362,23 @@
     }
 
     .status-list li {
-      min-height: 54px;
+      min-height: 56px;
       padding: 0 16px;
       border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.07);
+      border: 1px solid rgba(15, 23, 42, 0.07);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: rgba(255,255,255,0.03);
-      color: #ded2c4;
+      background: rgba(255, 255, 255, 0.76);
+      color: var(--landing-muted);
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1);
+    }
+
+    .status-list strong {
+      color: var(--landing-text-strong);
     }
 
     .social-icons {
@@ -874,23 +1388,29 @@
     }
 
     .social-icon {
-      width: 54px;
-      height: 54px;
+      width: 56px;
+      height: 56px;
       border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(15, 23, 42, 0.08);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
-      color: var(--text-main);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 252, 0.96));
+      color: var(--landing-accent-deep);
       text-decoration: none;
-      transition: transform .2s ease, border-color .2s ease;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow:
+        var(--landing-shadow-sm),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     .social-icon:hover {
       transform: translateY(-2px);
-      border-color: rgba(239,186,115,0.18);
+      border-color: rgba(37, 99, 235, 0.16);
+      box-shadow:
+        0 16px 28px rgba(148, 163, 184, 0.14),
+        0 0 0 4px rgba(37, 99, 235, 0.03),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     .social-icon svg {
@@ -906,16 +1426,13 @@
       position: fixed;
       right: 18px;
       bottom: 18px;
-      z-index: 120;
-      min-width: 172px;
-      min-height: 58px;
-      box-shadow:
-        0 22px 50px rgba(0,0,0,0.34),
-        0 0 34px rgba(239,186,115,0.14);
+      z-index: 130;
+      min-width: 190px;
+      min-height: 60px;
       opacity: 0;
       pointer-events: none;
       transform: translateY(20px);
-      transition: opacity .22s ease, transform .22s ease;
+      transition: opacity 0.22s ease, transform 0.22s ease;
     }
 
     .floating-book.is-visible {
@@ -933,14 +1450,16 @@
     .booking-overlay {
       position: fixed;
       inset: 0;
-      z-index: 180;
+      z-index: 220;
       display: none;
       align-items: stretch;
       justify-content: center;
       padding: 24px;
-      background: linear-gradient(180deg, rgba(3,3,3,0.72), rgba(3,3,3,0.84));
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(59, 130, 246, 0.15), transparent 34%),
+        linear-gradient(180deg, rgba(248, 251, 255, 0.74), rgba(238, 244, 255, 0.88));
+      backdrop-filter: blur(22px) saturate(140%);
+      -webkit-backdrop-filter: blur(22px) saturate(140%);
     }
 
     .booking-overlay.open {
@@ -954,6 +1473,8 @@
       align-content: start;
       overflow: auto;
       padding-right: 4px;
+      position: relative;
+      z-index: 2;
     }
 
     .booking-topbar {
@@ -961,6 +1482,15 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
+      padding: 14px;
+      border-radius: 28px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow:
+        0 24px 60px rgba(148, 163, 184, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
 
     .booking-topbar__left {
@@ -970,8 +1500,9 @@
     }
 
     .booking-topbar__left img {
-      width: 108px;
-      height: auto;
+      width: 86px;
+      min-height: 52px;
+      object-fit: contain;
       display: block;
     }
 
@@ -981,9 +1512,9 @@
     }
 
     .booking-topbar__copy span {
-      color: var(--amber-light);
+      color: var(--landing-accent);
       font-size: 11px;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: 0.16em;
       text-transform: uppercase;
     }
@@ -992,8 +1523,8 @@
       font-family: "Sora", sans-serif;
       font-size: 22px;
       line-height: 1;
-      letter-spacing: -0.04em;
-      color: #fff8f0;
+      letter-spacing: -0.05em;
+      color: var(--landing-text-strong);
     }
 
     .booking-close {
@@ -1002,12 +1533,48 @@
       height: 52px;
       padding: 0;
       border-radius: 999px;
-      font-size: 22px;
+      font-size: 24px;
       line-height: 1;
+    }
+
+    .wizard-host .app-shell {
+      min-height: auto;
+      padding: 0;
+      place-items: center;
+    }
+
+    .wizard-host .wizard-frame {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    @keyframes floatSoft {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .reveal {
+      animation: fadeUp 680ms cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    .hero-side .hero-photo {
+      animation: floatSoft 7s ease-in-out infinite;
     }
 
     @media (max-width: 1120px) {
       .hero-grid,
+      .experience-grid,
       .manifest-grid,
       .pricing-grid,
       .location-grid,
@@ -1061,7 +1628,7 @@
 
       .hero-card,
       .section-card {
-        border-radius: 26px;
+        border-radius: 28px;
       }
 
       .hero-grid {
@@ -1070,14 +1637,10 @@
         gap: 14px;
       }
 
-      .hero-copy {
-        gap: 14px;
-      }
-
       .hero-title {
-        font-size: 42px;
+        font-size: 43px;
         max-width: none;
-        line-height: 0.95;
+        line-height: 0.96;
       }
 
       .hero-sub {
@@ -1102,8 +1665,16 @@
         font-size: 15px;
       }
 
-      .contact-grid {
-        grid-template-columns: 1fr;
+      .showcase-phone {
+        transform: none;
+      }
+
+      .experience-showcase {
+        min-height: auto;
+      }
+
+      .showcase-screen {
+        min-height: 430px;
       }
 
       .floating-book {
@@ -1115,11 +1686,16 @@
       }
 
       .booking-overlay {
-        padding: 12px;
+        padding: 10px;
+      }
+
+      .booking-topbar {
+        border-radius: 22px;
+        padding: 10px;
       }
 
       .booking-topbar__left img {
-        width: 92px;
+        width: 72px;
       }
 
       .booking-topbar__copy strong {
@@ -1132,12 +1708,16 @@
         padding: 0 12px;
       }
 
+      .mobile-brand {
+        width: 104px;
+      }
+
       .mobile-brand img {
-        width: 102px;
+        width: 86px;
       }
 
       .hero-title {
-        font-size: 36px;
+        font-size: 37px;
       }
 
       .section-head h2 {
@@ -1145,12 +1725,22 @@
       }
 
       .btn,
-      .btn-primary {
+      .btn-primary,
+      .btn-ghost {
         width: 100%;
       }
 
-      .hero-actions {
+      .hero-actions,
+      .section-actions {
         display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .hero-trust-row {
+        display: grid;
+      }
+
+      .hero-info-grid {
         grid-template-columns: 1fr;
       }
 
@@ -1164,14 +1754,37 @@
       .location-side {
         padding: 16px;
       }
+
+      .showcase-screen {
+        min-height: 390px;
+        padding: 14px;
+      }
+
+      .mini-title {
+        font-size: 27px;
+      }
+
+      .booking-topbar__copy span {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="bg-orb bg-orb-1"></div>
-  <div class="bg-orb bg-orb-2"></div>
-  <div class="bg-grid"></div>
-  <div class="bg-logo"></div>
+  <div class="landing-bg-orb one"></div>
+  <div class="landing-bg-orb two"></div>
+  <div class="landing-bg-orb three"></div>
+  <div class="landing-noise"></div>
   <div class="screen-flash" id="screenFlash"></div>
 
   <header class="site-header" id="top">
@@ -1179,23 +1792,24 @@
       <div class="desktop-left">
         <nav class="desktop-nav">
           <a href="#hero">Start</a>
+          <a href="#experience">Rezerwacja</a>
           <a href="#manifest">O nas</a>
-          <a href="#pricing">Usługi</a>
         </nav>
       </div>
 
       <div class="desktop-center">
-        <a href="#top" class="desktop-logo">
+        <a href="#top" class="desktop-logo" aria-label="MONARCH start">
           <img src="/monarch-logo.png" alt="MONARCH logo" />
         </a>
       </div>
 
       <div class="desktop-right">
         <nav class="desktop-nav">
+          <a href="#pricing">Usługi</a>
           <a href="#location">Dojazd</a>
           <a href="#contact">Kontakt</a>
         </nav>
-        <a href="tel:+48123456789" class="desktop-call-btn">Zadzwoń</a>
+        <a href="tel:+48532377701" class="desktop-call-btn">Zadzwoń</a>
       </div>
     </div>
 
@@ -1206,11 +1820,11 @@
         <span></span>
       </button>
 
-      <a href="#top" class="mobile-brand">
+      <a href="#top" class="mobile-brand" aria-label="MONARCH start">
         <img src="/monarch-logo.png" alt="MONARCH logo" />
       </a>
 
-      <a href="tel:+48123456789" class="mobile-call-btn" aria-label="Zadzwoń">
+      <a href="tel:+48532377701" class="mobile-call-btn" aria-label="Zadzwoń">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.35 1.77.68 2.6a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.48-1.25a2 2 0 0 1 2.11-.45c.83.33 1.7.56 2.6.68A2 2 0 0 1 22 16.92z"/>
         </svg>
@@ -1218,7 +1832,8 @@
     </div>
 
     <div class="mobile-tabs">
-      <a href="#hero" class="mobile-tab active">Rezerwacja</a>
+      <a href="#hero" class="mobile-tab active">Start</a>
+      <a href="#experience" class="mobile-tab">Booking</a>
       <a href="#manifest" class="mobile-tab">O nas</a>
       <a href="#pricing" class="mobile-tab">Usługi</a>
       <a href="#location" class="mobile-tab">Dojazd</a>
@@ -1227,7 +1842,8 @@
 
     <div class="mobile-drawer" id="mobileDrawer">
       <nav class="mobile-drawer-nav">
-        <a href="#hero">Rezerwacja</a>
+        <a href="#hero">Start</a>
+        <a href="#experience">Jak działa rezerwacja</a>
         <a href="#manifest">O nas</a>
         <a href="#pricing">Usługi</a>
         <a href="#location">Jak dojechać</a>
@@ -1239,41 +1855,139 @@
   <main class="landing-wrap">
     <section class="hero-section" id="hero">
       <div class="landing-container">
-        <div class="hero-card">
+        <div class="hero-card reveal">
           <div class="hero-grid">
             <div class="hero-copy">
               <div class="section-chip">MONARCH BARBERSHOP</div>
 
               <h1 class="hero-title">
-                Zarezerwuj termin
-                w kilka kliknięć.
+                Fryzura zaczyna się od <span>dobrego terminu.</span>
               </h1>
 
               <p class="hero-sub">
-                Bez szukania, bez wpisywania adresu ręcznie.
-                Po prostu otwierasz mapę i jedziesz prosto do MONARCH.
+                Wybierz usługę, barbera, dzień i godzinę bez dzwonienia. Jasny, szybki
+                system rezerwacji online — stworzony tak, żeby od pierwszego kliknięcia
+                czuć porządek, poziom i spokojną obsługę.
               </p>
 
               <div class="hero-actions">
-                <button class="btn btn-primary" type="button" onclick="openMapsRoute()">
+                <button class="btn btn-primary" type="button" data-open-booking>
+                  Zarezerwuj termin
+                </button>
+                <button class="btn btn-ghost" type="button" onclick="openMapsRoute()">
                   Jak dojechać
                 </button>
+              </div>
+
+              <div class="hero-trust-row">
+                <div class="trust-pill">Rezerwacja online</div>
+                <div class="trust-pill">Wybór barbera</div>
+                <div class="trust-pill">Terminy z kalendarza</div>
               </div>
             </div>
 
             <div class="hero-side">
               <article class="glass-card hero-photo">
                 <img src="/tymur.png" alt="MONARCH barber" />
+                <div class="hero-photo-badge">
+                  <span>BARBERSHOP &amp; SOCIAL CLUB</span>
+                  <strong>MONARCH</strong>
+                </div>
               </article>
 
-              <article class="glass-card hero-info">
-                <span>BARBERSHOP &amp; SOCIAL CLUB</span>
-                <strong>MONARCH</strong>
-                <p>
-                  Miejsce, w którym forma, klimat i finalny efekt mają wyglądać
-                  dokładnie tak, jak powinny.
-                </p>
+              <div class="hero-info-grid">
+                <article class="glass-card metric-card">
+                  <span>Rezerwacja od wejścia do wyboru godziny</span>
+                  <strong>8 kroków</strong>
+                </article>
+
+                <article class="glass-card metric-card">
+                  <span>Godziny pracy w systemie</span>
+                  <strong>10–20</strong>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="experience">
+      <div class="landing-container">
+        <div class="section-card reveal">
+          <div class="section-wrap">
+            <div class="section-head center">
+              <div class="section-chip">REZERWACJA ONLINE</div>
+              <h2>Cały proces wygląda lekko, ale pracuje jak porządny system.</h2>
+              <p>
+                Klient nie musi pisać wiadomości, czekać na odpowiedź ani pytać o wolne godziny.
+                Wszystko dzieje się w jednym miejscu: dane, usługa, barber, data, godzina i potwierdzenie.
+              </p>
+            </div>
+
+            <div class="experience-grid">
+              <article class="glass-card experience-showcase">
+                <div class="showcase-phone">
+                  <div class="showcase-screen">
+                    <div class="mini-top">
+                      <div class="mini-logo">
+                        <img src="/monarch-logo.png" alt="MONARCH logo" />
+                      </div>
+                      <div class="mini-pill">Online booking</div>
+                    </div>
+
+                    <div class="mini-title">Umów wizytę bez chaosu.</div>
+
+                    <div class="mini-card">
+                      <strong>Strzyżenie / Haircut</strong>
+                      <span>90 zł</span>
+                    </div>
+
+                    <div class="mini-card">
+                      <strong>Combo włosy + broda</strong>
+                      <span>140 zł</span>
+                    </div>
+
+                    <div class="mini-card">
+                      <strong>Wybierz barbera</strong>
+                      <span>3 osoby</span>
+                    </div>
+
+                    <div class="mini-card">
+                      <strong>Wolne godziny</strong>
+                      <span>10:00–20:00</span>
+                    </div>
+
+                    <div class="mini-cta">Zarezerwuj termin</div>
+                  </div>
+                </div>
               </article>
+
+              <div class="experience-stack">
+                <article class="glass-card feature-card">
+                  <div class="feature-number">01</div>
+                  <div>
+                    <strong>Bez rozmów w DM</strong>
+                    <p>Klient widzi usługi, ceny, czas trwania i przechodzi do terminu bez pytania o podstawowe rzeczy.</p>
+                  </div>
+                </article>
+
+                <article class="glass-card feature-card">
+                  <div class="feature-number">02</div>
+                  <div>
+                    <strong>Barber albo auto-dobór</strong>
+                    <p>Można wybrać konkretną osobę albo zostawić systemowi dobór dostępnego specjalisty.</p>
+                  </div>
+                </article>
+
+                <article class="glass-card feature-card">
+                  <div class="feature-number">03</div>
+                  <div>
+                    <strong>Terminy z logiką kalendarza</strong>
+                    <p>Godziny są pobierane z backendu, a zajęte sloty nie powinny wpadać klientowi pod palec.</p>
+                  </div>
+                </article>
+              </div>
             </div>
           </div>
         </div>
@@ -1282,14 +1996,14 @@
 
     <section class="section" id="manifest">
       <div class="landing-container">
-        <div class="section-card">
+        <div class="section-card reveal">
           <div class="section-wrap">
             <div class="section-head">
               <div class="section-chip">O NAS</div>
-              <h2>Nie licytujemy się na lata pracy. Liczy się efekt, który widzisz w lustrze.</h2>
+              <h2>Nie robimy zamieszania. Robimy formę, która wygląda dobrze.</h2>
               <p>
-                Czysta linia, dopracowana forma i Twój komfort od wejścia do wyjścia.
-                W MONARCH wszystko ma swój rytm, poziom i charakter.
+                MONARCH to miejsce, gdzie cięcie, atmosfera i obsługa mają być konkretne.
+                Bez przypadkowych ruchów. Bez nerwowego tłumaczenia. Po prostu dobry fotel i dobry efekt.
               </p>
             </div>
 
@@ -1301,22 +2015,23 @@
               <div class="manifest-copy">
                 <article class="glass-card manifest-line">
                   <p>
-                    Każde cięcie ma znaczenie. Liczy się precyzja, proporcja i efekt,
-                    który wygląda dobrze nie tylko po wyjściu, ale też później.
+                    <strong>Każda linia ma znaczenie.</strong> Dobre strzyżenie nie kończy się w chwili,
+                    gdy klient wstaje z fotela. Ono ma układać się później, w zwykły dzień,
+                    bez walki z lustrem.
                   </p>
                 </article>
 
                 <article class="glass-card manifest-line">
                   <p>
-                    Stawiamy na spokojną atmosferę, konkretną obsługę i poziom,
-                    przy którym klient czuje się pewnie od pierwszej minuty.
+                    <strong>Atmosfera też pracuje na efekt.</strong> Klient ma wejść, usiąść i czuć,
+                    że ktoś ogarnia proces — od rozmowy po finalne dopracowanie detalu.
                   </p>
                 </article>
 
                 <article class="glass-card manifest-line">
                   <p>
-                    Detale tworzą różnicę. Dlatego u nas nic nie jest przypadkowe —
-                    od formy strzyżenia po cały odbiór miejsca.
+                    <strong>Rezerwacja ma być tak samo czysta jak fade.</strong> Dlatego cały system
+                    prowadzi klienta krok po kroku, bez chaosu i bez zbędnego pisania.
                   </p>
                 </article>
               </div>
@@ -1328,53 +2043,78 @@
 
     <section class="section" id="pricing">
       <div class="landing-container">
-        <div class="section-card">
+        <div class="section-card reveal">
           <div class="section-wrap">
             <div class="section-head">
               <div class="section-chip">USŁUGI</div>
-              <h2>Usługi, które mają zostawić po sobie konkretny efekt.</h2>
+              <h2>Wybierz usługę i przejdź prosto do terminu.</h2>
               <p>
-                Wybierz to, czego potrzebujesz, i przejdź od razu do rezerwacji.
+                Najpopularniejsze opcje są pod ręką. Pełną listę usług, rabaty i dostępne godziny
+                zobaczysz już w systemie rezerwacji.
               </p>
             </div>
 
             <div class="pricing-grid">
               <article class="glass-card pricing-card">
-                <div class="pricing-card__top">
-                  <strong>Strzyżenie</strong>
-                  <div class="pricing-card__price">100–150 PLN</div>
+                <div>
+                  <div class="pricing-card__top">
+                    <strong>Strzyżenie</strong>
+                    <div class="pricing-card__price">od 90 zł</div>
+                  </div>
+                  <p>
+                    Klasyka albo nowocześniejsza forma. Dobór cięcia do twarzy, włosa i tego,
+                    jak naprawdę chcesz wyglądać po wyjściu.
+                  </p>
+                  <div class="service-tags">
+                    <span>1h</span>
+                    <span>Haircut</span>
+                    <span>Rabat pn–czw</span>
+                  </div>
                 </div>
-                <p>
-                  Klasyka lub nowoczesność. Dobieramy cięcie do kształtu twarzy i struktury włosa.
-                </p>
                 <button class="btn section-button-full" type="button" data-open-booking>
-                  Zarezerwuj termin
+                  Zarezerwuj
                 </button>
               </article>
 
               <article class="glass-card pricing-card">
-                <div class="pricing-card__top">
-                  <strong>Broda</strong>
-                  <div class="pricing-card__price">80–120 PLN</div>
+                <div>
+                  <div class="pricing-card__top">
+                    <strong>Broda</strong>
+                    <div class="pricing-card__price">od 70 zł</div>
+                  </div>
+                  <p>
+                    Kontur, proporcja i czyste wykończenie. Broda ma wyglądać jak element stylu,
+                    nie przypadkowy dodatek.
+                  </p>
+                  <div class="service-tags">
+                    <span>40min</span>
+                    <span>Kontury</span>
+                    <span>Golenie</span>
+                  </div>
                 </div>
-                <p>
-                  Perfekcyjne kontury i odżywienie. Podkreślamy męski charakter.
-                </p>
                 <button class="btn section-button-full" type="button" data-open-booking>
-                  Zarezerwuj termin
+                  Zarezerwuj
                 </button>
               </article>
 
               <article class="glass-card pricing-card">
-                <div class="pricing-card__top">
-                  <strong>Combo</strong>
-                  <div class="pricing-card__price">160–220 PLN</div>
+                <div>
+                  <div class="pricing-card__top">
+                    <strong>Combo</strong>
+                    <div class="pricing-card__price">od 140 zł</div>
+                  </div>
+                  <p>
+                    Włosy i broda w jednym rytmie. Opcja dla tych, którzy chcą wyjść gotowi,
+                    a nie „jeszcze coś poprawić”.
+                  </p>
+                  <div class="service-tags">
+                    <span>1h 30min</span>
+                    <span>Włosy + broda</span>
+                    <span>Premium</span>
+                  </div>
                 </div>
-                <p>
-                  Pełny serwis dla tych, którzy nie uznają kompromisów.
-                </p>
-                <button class="btn section-button-full" type="button" data-open-booking>
-                  Zarezerwuj termin
+                <button class="btn btn-primary section-button-full" type="button" data-open-booking>
+                  Zarezerwuj
                 </button>
               </article>
             </div>
@@ -1385,14 +2125,14 @@
 
     <section class="section" id="location">
       <div class="landing-container">
-        <div class="section-card">
+        <div class="section-card reveal">
           <div class="section-wrap">
             <div class="section-head">
               <div class="section-chip">JAK DO NAS TRAFIĆ</div>
               <h2>Jedno kliknięcie i jesteś w drodze.</h2>
               <p>
-                Bez szukania, bez wpisywania adresu ręcznie. Po prostu otwierasz mapę
-                i jedziesz prosto do MONARCH.
+                Odpal trasę, sprawdź lokalizację i przyjedź na godzinę. Bez ręcznego wpisywania adresu,
+                bez szukania po mapie, bez zgadywania.
               </p>
             </div>
 
@@ -1402,7 +2142,7 @@
                   title="MONARCH map"
                   loading="lazy"
                   referrerpolicy="no-referrer-when-downgrade"
-                  src="https://www.google.com/maps?q=Warszawa&z=13&output=embed"
+                  src="https://www.google.com/maps?q=Wroclaw&z=13&output=embed"
                 ></iframe>
               </div>
 
@@ -1422,10 +2162,13 @@
                   </p>
                 </div>
 
-                <div class="hero-actions">
+                <div class="section-actions">
                   <button class="btn btn-primary" type="button" onclick="openMapsRoute()">
                     Jak dojechać
                   </button>
+                  <a class="btn btn-ghost" href="tel:+48532377701">
+                    Zadzwoń
+                  </a>
                 </div>
               </div>
             </div>
@@ -1436,26 +2179,34 @@
 
     <section class="section" id="contact">
       <div class="landing-container">
-        <div class="section-card">
+        <div class="section-card reveal">
           <div class="section-wrap">
             <div class="section-head">
               <div class="section-chip">DOŁĄCZ DO MONARCH</div>
               <h2>Zarezerwuj termin i wpadaj na fotel.</h2>
               <p>
-                Najszybsza droga do wizyty to rezerwacja online.
+                Najszybsza droga do wizyty to system online. Wybierz usługę, barbera,
+                dzień i godzinę — reszta zapisze się w tle.
               </p>
             </div>
 
             <div class="contact-grid">
               <div class="glass-card contact-card">
-                <div class="contact-form">
-                  <button class="btn btn-primary section-button-full" type="button" data-open-booking>
-                    Zarezerwuj termin
-                  </button>
+                <div class="contact-lead">
+                  <strong>Gotowy na wizytę?</strong>
+                  <p>
+                    Kliknij, przejdź przez booking i potwierdź termin. Bez wiadomości typu
+                    „macie coś wolnego?” — system pokaże Ci dostępne godziny.
+                  </p>
                 </div>
 
+                <button class="btn btn-primary section-button-full" type="button" data-open-booking>
+                  Zarezerwuj termin
+                </button>
+
                 <div class="contact-note">
-                  Wybierz usługę i dogodny termin w systemie rezerwacji.
+                  Po potwierdzeniu dane rezerwacji trafiają do systemu. Wybierasz usługę,
+                  termin i barbera w kilku prostych krokach.
                 </div>
               </div>
 
@@ -1468,7 +2219,7 @@
                 </ul>
 
                 <div class="social-icons">
-                  <a class="social-icon" href="#" target="_blank" rel="noopener" aria-label="Instagram">
+                  <a class="social-icon" href="https://www.instagram.com/mrozowski.automation/" target="_blank" rel="noopener" aria-label="Instagram">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
                       <rect x="3" y="3" width="18" height="18" rx="5"></rect>
                       <circle cx="12" cy="12" r="4"></circle>
@@ -1524,7 +2275,7 @@
                 <div class="wizard-top-copy">
                   <div class="eyebrow">MONARCH BARBERSHOP</div>
                   <h1 id="stepTitle">Dane kontaktowe</h1>
-                  <p id="stepSubtitle">Wpisz swoje dane, aby rozpocząć rezerwację.</p>
+                  <p id="stepSubtitle">Zostaw podstawowe dane i przejdź dalej.</p>
                 </div>
                 <div class="step-pill" id="stepPill">1 / 8</div>
               </div>
@@ -1548,7 +2299,7 @@
 
                       <div class="intro-copy">
                         <span class="section-kicker">MONARCH BARBERSHOP</span>
-                        <strong>Zarezerwuj termin bez zbędnego czekania</strong>
+                        <strong>Umów wizytę szybko i wygodnie</strong>
                       </div>
                     </div>
 
@@ -1557,14 +2308,14 @@
                     <div class="card-head">
                       <h2>Wpisz imię i telefon</h2>
                       <p>
-                        To wystarczy, żeby przejść dalej i wybrać usługę oraz termin.
+                        Zostaw swoje dane, a potem wybierz usługę i termin wizyty.
                       </p>
                     </div>
 
                     <div class="intro-benefits">
                       <div class="intro-benefit">Szybko</div>
                       <div class="intro-benefit">Wygodnie</div>
-                      <div class="intro-benefit">Bez dzwonienia</div>
+                      <div class="intro-benefit">Online</div>
                     </div>
                   </div>
 
@@ -1596,8 +2347,8 @@
               <section class="step" data-step="3">
                 <div class="step-content narrow">
                   <div class="card-head">
-                    <h2>Chcesz wybrać konkretnego barbera?</h2>
-                    <p>Możesz wybrać konkretną osobę albo przejść dalej bez wyboru.</p>
+                    <h2>Wybrać barbera?</h2>
+                    <p>Możesz wybrać konkretnego barbera albo przejść dalej bez wyboru.</p>
                   </div>
 
                   <div class="summary-list">
@@ -1620,7 +2371,7 @@
                     <button class="choice-btn choice-btn-strong" id="chooseBarberNo" type="button">Nie</button>
                   </div>
 
-                  <div class="barberSkipBox hidden" id="barberSkipBox">
+                  <div class="barber-skip-box hidden" id="barberSkipBox">
                     <div class="summary-list">
                       <div class="summary-row">
                         <span>Barber</span>
@@ -1628,7 +2379,7 @@
                       </div>
                       <div class="summary-row">
                         <span>Status</span>
-                        <strong>Dobierzemy dostępnego specjalistę</strong>
+                        <strong>System dobierze dostępnego barbera</strong>
                       </div>
                     </div>
                   </div>
@@ -1763,7 +2514,7 @@
                   </div>
 
                   <div class="info-note">
-                    Sprawdź dane i potwierdź rezerwację.
+                    Sprawdź dane i potwierdź, aby zapisać wizytę.
                   </div>
 
                   <small class="error" id="submitError"></small>
@@ -1776,7 +2527,7 @@
 
                   <div class="card-head center">
                     <h2>Rezerwacja zapisana</h2>
-                    <p>Do zobaczenia w MONARCH.</p>
+                    <p>Wizyta została pomyślnie dodana do systemu.</p>
                   </div>
 
                   <div class="summary-list">
@@ -1799,14 +2550,14 @@
                   </div>
 
                   <div class="success-links">
-                    <a class="nav-btn nav-btn-primary" href="#" target="_blank" rel="noopener">
-                      Wróć na Instagram
+                    <a class="nav-btn nav-btn-primary" href="https://www.instagram.com/mrozowski.automation/" target="_blank" rel="noopener">
+                      Instagram
                     </a>
-                    <a class="nav-btn" href="#" target="_blank" rel="noopener">
-                      Jak dojechać?
+                    <a class="nav-btn" href="https://www.google.com/maps/search/?api=1&query=Wroclaw" target="_blank" rel="noopener">
+                      Lokalizacja
                     </a>
-                    <button class="nav-btn" type="button" onclick="callDogma()">
-                      Zadzwoń
+                    <button class="nav-btn" type="button" onclick="callBarbershop()">
+                      Zadzwoń: 532 377 701
                     </button>
                   </div>
                 </div>
@@ -1825,7 +2576,7 @@
 
   <script>
     function openMapsRoute() {
-      const mapsQuery = encodeURIComponent("MONARCH BARBERSHOP");
+      const mapsQuery = encodeURIComponent("MONARCH BARBERSHOP Wroclaw");
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
       if (isIOS) {
@@ -1834,6 +2585,13 @@
         window.open(`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`, "_blank");
       }
     }
+
+    function callBarbershop() {
+      window.location.href = "tel:+48532377701";
+    }
+
+    window.callBarbershop = callBarbershop;
+    window.callDogma = callBarbershop;
 
     (function () {
       const flash = document.getElementById("screenFlash");
@@ -1849,8 +2607,11 @@
       const contactSection = document.getElementById("contact");
       const heroSection = document.getElementById("hero");
       const mobileLinks = document.querySelectorAll(".mobile-drawer a, .mobile-tabs a");
+      const tabs = document.querySelectorAll(".mobile-tab");
+      const sections = [...document.querySelectorAll("main.landing-wrap > section[id]")];
 
       function triggerFlash() {
+        if (!flash) return;
         flash.classList.add("active");
         setTimeout(() => flash.classList.remove("active"), 130);
       }
@@ -1859,42 +2620,42 @@
         item.addEventListener("click", triggerFlash);
       });
 
+      function openBooking() {
+        if (!overlay) return;
+        overlay.classList.add("open");
+        overlay.setAttribute("aria-hidden", "false");
+        body.classList.add("booking-open");
+        if (mobileDrawer) {
+          mobileDrawer.classList.remove("open");
+          body.classList.remove("menu-open");
+        }
+      }
+
+      function closeBooking() {
+        if (!overlay) return;
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden", "true");
+        body.classList.remove("booking-open");
+      }
+
       openButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          if (!overlay) return;
-          overlay.classList.add("open");
-          overlay.setAttribute("aria-hidden", "false");
-          body.style.overflow = "hidden";
-          if (mobileDrawer) {
-            mobileDrawer.classList.remove("open");
-          }
-        });
+        btn.addEventListener("click", openBooking);
       });
 
       if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-          overlay.classList.remove("open");
-          overlay.setAttribute("aria-hidden", "true");
-          body.style.overflow = "";
-        });
+        closeBtn.addEventListener("click", closeBooking);
       }
 
       if (overlay) {
         overlay.addEventListener("click", (e) => {
-          if (e.target === overlay) {
-            overlay.classList.remove("open");
-            overlay.setAttribute("aria-hidden", "true");
-            body.style.overflow = "";
-          }
+          if (e.target === overlay) closeBooking();
         });
       }
 
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           if (overlay && overlay.classList.contains("open")) {
-            overlay.classList.remove("open");
-            overlay.setAttribute("aria-hidden", "true");
-            body.style.overflow = "";
+            closeBooking();
           }
 
           if (mobileDrawer && mobileDrawer.classList.contains("open")) {
@@ -1914,9 +2675,7 @@
         let open = 10 * 60;
         let close = 20 * 60;
 
-        if (day === 0) {
-          close = 18 * 60;
-        }
+        if (day === 0) close = 18 * 60;
 
         const isOpen = minutes >= open && minutes < close;
 
@@ -1975,9 +2734,36 @@
         }
       }
 
-      window.addEventListener("scroll", handleFloatingButton);
-      window.addEventListener("resize", handleFloatingButton);
+      function handleActiveTabs() {
+        if (!tabs.length || !sections.length) return;
+
+        let current = sections[0].id;
+        const marker = window.innerHeight * 0.34;
+
+        sections.forEach((section) => {
+          const rect = section.getBoundingClientRect();
+          if (rect.top <= marker && rect.bottom >= marker) {
+            current = section.id;
+          }
+        });
+
+        tabs.forEach((tab) => {
+          const href = tab.getAttribute("href") || "";
+          tab.classList.toggle("active", href === `#${current}`);
+        });
+      }
+
+      window.addEventListener("scroll", () => {
+        handleFloatingButton();
+        handleActiveTabs();
+      });
+      window.addEventListener("resize", () => {
+        handleFloatingButton();
+        handleActiveTabs();
+      });
+
       handleFloatingButton();
+      handleActiveTabs();
     })();
   </script>
 
