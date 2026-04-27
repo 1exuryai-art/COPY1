@@ -4642,169 +4642,507 @@
   </section>
 
   <script>
-  // ==============================
-  // GLOBAL FIXES + INTERACTIONS
-  // ==============================
+    const overlay = document.getElementById("bookingOverlay");
+    const flash = document.getElementById("screenFlash");
+    const siteHeader = document.querySelector(".site-header");
+    const mobileVersion = document.getElementById("mobile-version");
+    const faqSheet = document.getElementById("faqSheet");
+    const faqSheetTitle = document.getElementById("faqSheetTitle");
+    const faqSheetAnswer = document.getElementById("faqSheetAnswer");
 
-  // FIX: open booking from ANY button
-  document.querySelectorAll('[data-open-booking]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById('bookingOverlay').classList.add('active');
-      document.getElementById('bookingOverlay').setAttribute('aria-hidden', 'false');
-    });
-  });
+    const GOOGLE_REVIEWS_URL = "#";
+    const MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Wroclaw";
 
-  // FIX: close booking
-  document.getElementById('bookingCloseBtn')?.addEventListener('click', () => {
-    document.getElementById('bookingOverlay').classList.remove('active');
-    document.getElementById('bookingOverlay').setAttribute('aria-hidden', 'true');
-  });
+    let lastScrollY = window.scrollY;
+    let lastMobileScrollTop = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let ticking = false;
 
-  // ==============================
-  // FAQ SHEET FIX
-  // ==============================
+    const translations = {
+      pl: {
+        "nav.start": "Start",
+        "nav.services": "Usługi",
+        "nav.masters": "Barberzy",
+        "nav.effect": "Efekt",
+        "nav.reviews": "Opinie",
+        "nav.location": "Lokalizacja",
+        "nav.faq": "FAQ",
+        "nav.contact": "Kontakt",
 
-  const faqSheet = document.getElementById('faqSheet');
-  const faqTitle = document.getElementById('faqSheetTitle');
-  const faqAnswer = document.getElementById('faqSheetAnswer');
+        "common.call": "Zadzwoń",
+        "common.book": "Zarezerwuj termin",
+        "common.route": "Sprawdź dojazd",
 
-  const FAQ_DATA = {
-    message: {
-      q: 'Czy muszę pisać wiadomość?',
-      a: 'Nie. Wybierasz usługę, termin i wszystko zapisuje się automatycznie.'
-    },
-    barber: {
-      q: 'Czy mogę wybrać barbera?',
-      a: 'Tak — albo możesz zostawić wybór salonowi.'
-    },
-    duration: {
-      q: 'Ile trwa wizyta?',
-      a: 'Zależnie od usługi — od 30 min do 2h.'
-    },
-    combo: {
-      q: 'Czy mogę zrobić włosy i brodę?',
-      a: 'Tak — wybierz usługę typu combo.'
-    },
-    prices: {
-      q: 'Czy ceny są finalne?',
-      a: 'Tak — nie ma ukrytych kosztów.'
-    },
-    early: {
-      q: 'Czy trzeba przyjść wcześniej?',
-      a: 'Wystarczy przyjść na swoją godzinę.'
-    },
-    cancel: {
-      q: 'Czy mogę odwołać wizytę?',
-      a: 'Tak — najlepiej z wyprzedzeniem.'
-    },
-    weekend: {
-      q: 'Czy pracujecie w weekend?',
-      a: 'Tak — także w niedzielę.'
+        "hero.chip": "MONARCH BARBERSHOP",
+        "hero.titleA": "Fryzura zaczyna się",
+        "hero.titleB": "od dobrego terminu.",
+        "hero.sub": "Barbershop we Wrocławiu z wygodną rezerwacją online. Wybierz usługę, barbera, dzień i godzinę — bez dzwonienia, bez czekania, bez chaosu w wiadomościach.",
+        "hero.pill1": "Strzyżenie męskie",
+        "hero.pill2": "Broda i kontury",
+        "hero.pill3": "Combo włosy + broda",
+        "hero.metric1": "Rezerwacja od wyboru usługi do potwierdzenia",
+        "hero.metric2": "Godziny pracy w systemie",
+
+        "experience.chip": "REZERWACJA",
+        "experience.titleA": "Wybierasz usługę.",
+        "experience.titleB": "System prowadzi dalej.",
+        "experience.sub": "Klient nie musi pisać wiadomości i czekać na odpowiedź. Widzi ofertę, wybiera barbera, termin i przechodzi przez rezerwację krok po kroku.",
+        "experience.phoneTitle": "Rezerwacja wizyty",
+        "experience.barber": "Barber",
+        "experience.term": "Termin",
+        "experience.today": "dzisiaj",
+        "experience.chooseTerm": "Wybierz termin",
+        "experience.card1Title": "Oferta bez zgadywania",
+        "experience.card1Text": "Usługi, czas i cena są pokazane od razu — klient nie musi pytać o podstawy w DM.",
+        "experience.card2Title": "Wybór barbera",
+        "experience.card2Text": "Klient może wybrać konkretną osobę albo zostawić dobór dostępnego barbera systemowi.",
+        "experience.card3Title": "Rezerwacja online",
+        "experience.card3Text": "Cały proces odbywa się w środku strony — bez przełączania aplikacji i bez ręcznego ustalania godziny.",
+
+        "manifest.chip": "O NAS",
+        "manifest.titleA": "Miejsce, gdzie",
+        "manifest.titleB": "detal robi różnicę.",
+        "manifest.sub": "MONARCH BARBERSHOP to cięcie, broda i atmosfera bez pośpiechu. Strona ma oddać ten sam klimat: ciemno, premium, konkretnie.",
+        "manifest.line1": "Nie chodzi o “szybkie podcięcie”. Chodzi o wizytę, po której fryzura trzyma kształt, broda ma proporcję, a klient wie, że trafił do miejsca z charakterem.",
+        "manifest.line2": "Dobra rezerwacja nie przeszkadza w sprzedaży. Ona prowadzi klienta: od pierwszego kliknięcia, przez wybór usługi, aż do zapisanej godziny.",
+
+        "services.chip": "USŁUGI",
+        "services.titleA": "Wybierz usługę.",
+        "services.titleB": "Termin dobierzesz dalej.",
+        "services.sub": "Najczęściej wybierane usługi w MONARCH BARBERSHOP.",
+        "services.haircut.title": "Strzyżenie / Haircut",
+        "services.haircut.text": "Klasyczne albo nowoczesne cięcie dopasowane do twarzy, włosa i codziennego stylu.",
+        "services.combo.title": "Combo włosy + broda",
+        "services.combo.text": "Pełna wizyta: włosy, broda, kontur i wykończenie w jednym rytmie.",
+        "services.beard.title": "Broda + kontury",
+        "services.beard.text": "Opracowanie brody, linia policzka, szyja i czyste wykończenie bez przypadkowości.",
+        "services.note": "Pełny cennik i wszystkie warianty usług klient zobaczy w systemie rezerwacji.",
+
+        "masters.chip": "BARBERZY",
+        "masters.titleA": "Wybierz osobę, która rozumie",
+        "masters.titleB": "Twój styl.",
+        "masters.sub": "Każdy barber ma własny charakter pracy. Możesz wybrać konkretną osobę albo zostawić dobór dostępnego terminu systemowi.",
+        "masters.tymur": "Klasyka, czysta forma i spokojne prowadzenie wizyty.",
+        "masters.dima": "Włosy, broda i dopracowana proporcja bez zbędnego chaosu.",
+        "masters.vlad": "Świeże cięcia, energia i mocniejsze wykończenie stylu.",
+        "masters.bookTymur": "Zarezerwuj u Tymura",
+        "masters.bookDima": "Zarezerwuj u Dimy",
+        "masters.bookVlad": "Zarezerwuj u Vlada",
+
+        "gallery.chip": "EFEKT",
+        "gallery.titleA": "Cięcie, które wygląda dobrze",
+        "gallery.titleB": "z każdej strony.",
+        "gallery.sub": "Klimat barbershopu, detale usługi i wizualna pewność marki — wszystko przed kliknięciem w booking.",
+
+        "reviews.chip": "OPINIE",
+        "reviews.titleA": "Klienci wracają, gdy detal",
+        "reviews.titleB": "jest dopracowany.",
+        "reviews.sub": "Przykładowe opinie — później możesz podmienić na realne recenzje z Google.",
+        "reviews.r1": "“Cięcie bardzo równe, bez pośpiechu. Widać, że barber wie, co robi.”",
+        "reviews.r2": "“Combo wyszło świetnie. Broda w końcu ma kształt, a nie przypadek.”",
+        "reviews.r3": "“Klimat miejsca, obsługa i efekt po wizycie — wszystko na poziomie.”",
+        "reviews.r4": "“W końcu rezerwacja bez pisania pięciu wiadomości. Kliknąłem i termin był zapisany.”",
+        "reviews.r5": "“Barber dobrał kształt do twarzy. Prosto, męsko i bez gadania na siłę.”",
+        "reviews.more": "Zobacz więcej opinii",
+        "reviews.moreText": "Link możesz później podmienić na prawdziwy profil Google barbershopu.",
+        "reviews.google": "Zobacz opinie w Google",
+
+        "location.chip": "LOKALIZACJA",
+        "location.mapChip": "LOKALIZACJA",
+        "location.title": "Wrocław, prosty dojazd i konkretny termin.",
+        "location.sub": "Dokładny adres możesz później podmienić w kodzie.",
+        "location.openMap": "Otwórz mapę",
+
+        "faq.titleA": "Przed wizytą",
+        "faq.titleB": "warto wiedzieć.",
+        "faq.sub": "Kliknij pytanie — odpowiedź otworzy się jako osobny ekran.",
+        "faq.tap": "Dotknij, żeby zobaczyć odpowiedź.",
+        "faq.q.message": "Czy muszę pisać wiadomość?",
+        "faq.q.barber": "Czy mogę wybrać barbera?",
+        "faq.q.duration": "Ile trwa wizyta?",
+        "faq.q.combo": "Czy mogę zrobić włosy i brodę?",
+        "faq.q.prices": "Czy ceny są finalne?",
+        "faq.q.early": "Czy trzeba przyjść wcześniej?",
+        "faq.q.cancel": "Czy mogę odwołać wizytę?",
+        "faq.q.weekend": "Czy barbershop pracuje w weekend?",
+
+        "contact.chip": "KONTAKT",
+        "contact.title": "Wpadnij do MONARCH",
+        "contact.sub": "Najszybciej zapiszesz się online. Wybierz usługę, barbera, godzinę i potwierdź wizytę.",
+        "contact.note": "Rezerwacja działa bez dzwonienia — klient przechodzi przez cały proces w środku strony.",
+        "contact.open": "Otwarte dzisiaj",
+        "contact.monFri": "Pon — Pt",
+        "contact.sat": "Sobota",
+        "contact.sun": "Niedziela",
+        "contact.closed": "zamknięte",
+        "contact.phone": "Telefon",
+        "contact.address": "Adres",
+
+        "mobile.home.titleA": "Fryzura",
+        "mobile.home.titleB": "bez chaosu.",
+        "mobile.home.sub": "Wybierz usługę, barbera i termin online — szybko, konkretnie, wygodnie.",
+        "mobile.home.card": "Barbershop we Wrocławiu z rezerwacją online",
+        "mobile.home.stat1": "Usługi",
+        "mobile.home.stat2": "Godziny",
+        "mobile.services.titleA": "Wybierz",
+        "mobile.services.titleB": "usługę.",
+        "mobile.services.sub": "Przesuń karty i wybierz usługę.",
+        "mobile.services.choose": "Wybierz usługę",
+        "mobile.masters.titleA": "Każdy ma",
+        "mobile.masters.titleB": "swój styl.",
+        "mobile.masters.sub": "Przesuń karty i wybierz barbera.",
+        "mobile.gallery.titleA": "Detal robi",
+        "mobile.gallery.titleB": "całość.",
+        "mobile.gallery.sub": "Przesuń realizacje i zobacz klimat MONARCH.",
+        "mobile.gallery.card1": "Czysta forma, równa linia i fryzura, która trzyma kształt.",
+        "mobile.gallery.card2": "Broda z proporcją, konturem i wykończeniem bez przypadkowości.",
+        "mobile.gallery.card3": "Włosy i broda w jednym rytmie — spójny efekt po całej wizycie.",
+        "mobile.gallery.card4": "Ciemny salon, marmur, złoto i spokojny barbershopowy rytuał.",
+        "mobile.gallery.card5": "Detal przy wykończeniu robi różnicę, którą widać od razu.",
+        "mobile.reviews.titleA": "Klimat, detal,",
+        "mobile.reviews.titleB": "efekt.",
+        "mobile.reviews.sub": "Przewiń w dół i zobacz przykładowe opinie klientów.",
+        "mobile.location.titleA": "Barbershop we",
+        "mobile.location.titleB": "Wrocławiu.",
+        "mobile.location.book": "Rezerwuj",
+        "mobile.location.map": "Mapa",
+        "mobile.faq.titleA": "Krótko.",
+        "mobile.faq.titleB": "Bez chaosu.",
+        "mobile.contact.titleA": "Zadzwoń albo",
+        "mobile.contact.titleB": "zarezerwuj.",
+        "mobile.contact.sub": "Online jest najszybciej."
+      }
+    };
+
+    translations.ru = {
+      ...translations.pl,
+      "nav.start": "Старт",
+      "nav.services": "Услуги",
+      "nav.masters": "Барберы",
+      "nav.effect": "Работы",
+      "nav.reviews": "Отзывы",
+      "nav.location": "Локация",
+      "nav.contact": "Контакт",
+      "common.call": "Позвонить",
+      "common.book": "Записаться",
+      "common.route": "Маршрут",
+      "hero.titleA": "Стрижка начинается",
+      "hero.titleB": "с нормальной записи.",
+      "hero.sub": "Барбершоп во Вроцлаве с удобной онлайн-записью. Выбери услугу, барбера, день и время — без звонков, ожидания и хаоса в сообщениях.",
+      "mobile.home.titleA": "Стрижка",
+      "mobile.home.titleB": "без хаоса.",
+      "mobile.home.sub": "Выбери услугу, барбера и время онлайн — быстро, конкретно, удобно.",
+      "mobile.home.card": "Барбершоп во Вроцлаве с онлайн-записью",
+      "mobile.services.titleA": "Выбери",
+      "mobile.services.titleB": "услугу.",
+      "mobile.services.choose": "Выбрать услугу",
+      "mobile.contact.titleA": "Позвони или",
+      "mobile.contact.titleB": "запишись.",
+      "mobile.contact.sub": "Онлайн быстрее всего.",
+      "reviews.google": "Смотреть отзывы в Google",
+      "reviews.more": "Больше отзывов",
+      "reviews.moreText": "Ссылку позже можно заменить на реальный профиль Google барбершопа."
+    };
+
+    translations.en = {
+      ...translations.pl,
+      "nav.start": "Start",
+      "nav.services": "Services",
+      "nav.masters": "Barbers",
+      "nav.effect": "Results",
+      "nav.reviews": "Reviews",
+      "nav.location": "Location",
+      "nav.contact": "Contact",
+      "common.call": "Call",
+      "common.book": "Book now",
+      "common.route": "Directions",
+      "hero.titleA": "A haircut starts",
+      "hero.titleB": "with the right time.",
+      "hero.sub": "A barbershop in Wrocław with easy online booking. Choose a service, barber, date and time — no calls, no waiting, no message chaos.",
+      "mobile.home.titleA": "Haircut",
+      "mobile.home.titleB": "without chaos.",
+      "mobile.home.sub": "Choose a service, barber and time online — fast, clear, convenient.",
+      "mobile.home.card": "Barbershop in Wrocław with online booking",
+      "mobile.services.titleA": "Choose",
+      "mobile.services.titleB": "a service.",
+      "mobile.services.choose": "Choose service",
+      "mobile.contact.titleA": "Call or",
+      "mobile.contact.titleB": "book.",
+      "mobile.contact.sub": "Online is fastest.",
+      "reviews.google": "See Google reviews",
+      "reviews.more": "See more reviews",
+      "reviews.moreText": "You can later replace this with the real Google profile link."
+    };
+
+    const faqAnswers = {
+      pl: {
+        message: ["Czy muszę pisać wiadomość?", "Nie. Wystarczy kliknąć przycisk rezerwacji, wybrać usługę, barbera, datę i godzinę. System prowadzi przez cały proces bez czekania na odpowiedź w wiadomościach."],
+        barber: ["Czy mogę wybrać barbera?", "Tak. Możesz wybrać konkretnego barbera z poziomu strony albo przejść do rezerwacji i wskazać go w systemie."],
+        duration: ["Ile trwa wizyta?", "Strzyżenie trwa zwykle około 60 minut, combo włosy + broda około 90 minut, a sama broda około 40 minut."],
+        combo: ["Czy mogę zrobić włosy i brodę?", "Tak. Wybierz usługę combo, jeśli chcesz zrobić strzyżenie, brodę, kontur i wykończenie podczas jednej wizyty."],
+        prices: ["Czy ceny są finalne?", "Ceny na tej wersji strony są przykładowe. W realnym wdrożeniu barbershop może wpisać własny cennik."],
+        early: ["Czy trzeba przyjść wcześniej?", "Wystarczy przyjść kilka minut przed wizytą, żeby spokojnie zacząć bez pośpiechu."],
+        cancel: ["Czy mogę odwołać wizytę?", "Tak. Najlepiej zrobić to możliwie wcześniej telefonicznie, przez Instagram albo innym kanałem kontaktu salonu."],
+        weekend: ["Czy barbershop pracuje w weekend?", "W tej wersji sobota i niedziela są dostępne. Godziny możesz później podmienić pod realny grafik." ]
+      },
+      ru: {
+        message: ["Нужно ли писать сообщение?", "Нет. Достаточно нажать кнопку записи, выбрать услугу, барбера, дату и время. Система ведёт через весь процесс."],
+        barber: ["Можно выбрать барбера?", "Да. Можно выбрать конкретного барбера на странице или уже внутри системы бронирования."],
+        duration: ["Сколько длится визит?", "Стрижка обычно занимает около 60 минут, combo волосы + борода — около 90 минут, борода — около 40 минут."],
+        combo: ["Можно сделать волосы и бороду?", "Да. Выбери услугу combo, если хочешь стрижку, бороду, контур и финальное оформление за один визит."],
+        prices: ["Цены финальные?", "Цены в этой версии примерные. В реальном проекте барбершоп может поставить свой прайс."],
+        early: ["Нужно прийти раньше?", "Достаточно прийти за несколько минут до визита."],
+        cancel: ["Можно отменить визит?", "Да. Лучше сделать это заранее по телефону, через Instagram или другим каналом связи."],
+        weekend: ["Барбершоп работает в выходные?", "В этой версии суббота и воскресенье доступны. Часы можно заменить под реальный график." ]
+      },
+      en: {
+        message: ["Do I need to send a message?", "No. Just tap the booking button, choose a service, barber, date and time. The system guides the client through the whole process."],
+        barber: ["Can I choose my barber?", "Yes. You can choose a barber directly from the page or inside the booking system."],
+        duration: ["How long does a visit take?", "A haircut usually takes around 60 minutes, hair + beard combo around 90 minutes, and beard service around 40 minutes."],
+        combo: ["Can I book hair and beard?", "Yes. Choose the combo service if you want haircut, beard, contour and finish in one visit."],
+        prices: ["Are prices final?", "Prices in this version are examples. In a real launch, the barbershop can add its own price list."],
+        early: ["Should I come earlier?", "A few minutes before the visit is enough."],
+        cancel: ["Can I cancel a visit?", "Yes. It is best to do it as early as possible by phone, Instagram or another contact channel."],
+        weekend: ["Is the barbershop open on weekends?", "In this version, Saturday and Sunday are available. Hours can be replaced with the real schedule." ]
+      }
+    };
+
+    function getCurrentLang() {
+      return localStorage.getItem("monarch_lang") || "pl";
     }
-  };
 
-  document.querySelectorAll('[data-faq]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.faq;
-      const item = FAQ_DATA[key];
-      if (!item) return;
+    function setLanguage(lang) {
+      const dictionary = translations[lang] || translations.pl;
+      document.documentElement.lang = lang;
 
-      faqTitle.textContent = item.q;
-      faqAnswer.textContent = item.a;
-
-      faqSheet.classList.add('active');
-      faqSheet.setAttribute('aria-hidden', 'false');
-    });
-  });
-
-  document.querySelectorAll('[data-close-faq]').forEach(el => {
-    el.addEventListener('click', () => {
-      faqSheet.classList.remove('active');
-      faqSheet.setAttribute('aria-hidden', 'true');
-    });
-  });
-
-  // ==============================
-  // MAP ACTION
-  // ==============================
-
-  function openMapsRoute() {
-    window.open('https://www.google.com/maps/search/?api=1&query=Wroclaw', '_blank');
-  }
-
-  function callDogma() {
-    window.location.href = 'tel:+48532377701';
-  }
-
-  // ==============================
-  // NAV FIX (mobile tabs behavior)
-  // ==============================
-
-  const navButtons = document.querySelectorAll('.nav-btn[data-nav]');
-  const pages = document.querySelectorAll('.page');
-
-  navButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const target = btn.dataset.nav;
-
-      pages.forEach(p => {
-        p.style.display = (p.dataset.pageView === target) ? 'block' : 'none';
+      document.querySelectorAll("[data-i18n]").forEach(element => {
+        const key = element.dataset.i18n;
+        if (dictionary[key]) element.textContent = dictionary[key];
       });
 
-      navButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    });
-  });
+      document.querySelectorAll(".lang-btn").forEach(button => {
+        button.classList.toggle("active", button.dataset.lang === lang);
+      });
 
-  // ==============================
-  // CRITICAL FIX: BUTTON DEAD ZONES
-  // ==============================
-
-  document.addEventListener('click', function(e) {
-    const el = e.target.closest('button, a');
-    if (!el) return;
-
-    // Prevent ghost overlays blocking clicks
-    document.querySelectorAll('.overlay, .blocker').forEach(o => {
-      o.style.pointerEvents = 'none';
-    });
-  });
-
-  // ==============================
-  // MOBILE SCROLL HEADER FIX
-  // ==============================
-
-  let lastScroll = 0;
-  const header = document.querySelector('.mobile-header');
-
-  window.addEventListener('scroll', () => {
-    const current = window.scrollY;
-
-    if (!header) return;
-
-    if (current > lastScroll && current > 50) {
-      header.style.transform = 'translateY(-100%)';
-    } else {
-      header.style.transform = 'translateY(0)';
+      localStorage.setItem("monarch_lang", lang);
     }
 
-    lastScroll = current;
-  });
+    function bindLanguageSwitcher() {
+      document.querySelectorAll("[data-lang]").forEach(button => {
+        button.addEventListener("click", () => setLanguage(button.dataset.lang));
+      });
 
-  // ==============================
-  // INIT SAFE STATE
-  // ==============================
+      setLanguage(getCurrentLang());
+    }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // show first page only
-    pages.forEach((p, i) => {
-      p.style.display = i === 0 ? 'block' : 'none';
+    function bindGoogleReviewLinks() {
+      document.querySelectorAll(".google-review-link, .btn-google").forEach(link => {
+        link.href = GOOGLE_REVIEWS_URL;
+      });
+    }
+
+    function openBooking() {
+      if (!overlay) return;
+
+      overlay.classList.add("open");
+      overlay.setAttribute("aria-hidden", "false");
+      document.body.classList.add("booking-open");
+
+      if (flash) {
+        flash.classList.add("active");
+        setTimeout(() => flash.classList.remove("active"), 180);
+      }
+    }
+
+    function closeBooking() {
+      if (!overlay) return;
+
+      overlay.classList.remove("open");
+      overlay.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("booking-open");
+    }
+
+    function bindBookingButtons() {
+      document.querySelectorAll("[data-open-booking]").forEach(button => {
+        button.addEventListener("click", openBooking);
+      });
+
+      document.getElementById("bookingCloseBtn")?.addEventListener("click", closeBooking);
+
+      overlay?.addEventListener("click", event => {
+        if (event.target === overlay) closeBooking();
+      });
+    }
+
+    function openMapsRoute() {
+      window.open(MAPS_URL, "_blank");
+    }
+
+    function callDogma() {
+      window.location.href = "tel:+48532377701";
+    }
+
+    function openFaq(key) {
+      const lang = getCurrentLang();
+      const data = faqAnswers[lang]?.[key] || faqAnswers.pl[key];
+
+      if (!faqSheet || !data) return;
+
+      faqSheetTitle.textContent = data[0];
+      faqSheetAnswer.textContent = data[1];
+
+      faqSheet.classList.add("open");
+      faqSheet.setAttribute("aria-hidden", "false");
+      document.body.classList.add("faq-open");
+    }
+
+    function closeFaq() {
+      if (!faqSheet) return;
+
+      faqSheet.classList.remove("open");
+      faqSheet.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("faq-open");
+    }
+
+    function bindFaq() {
+      document.querySelectorAll("[data-faq]").forEach(button => {
+        button.addEventListener("click", () => openFaq(button.dataset.faq));
+      });
+
+      document.querySelectorAll("[data-close-faq]").forEach(button => {
+        button.addEventListener("click", closeFaq);
+      });
+    }
+
+    function bindMobileNavigation() {
+      const chips = document.querySelectorAll(".nav-chip");
+      const pages = document.querySelectorAll(".page");
+
+      chips.forEach(chip => {
+        chip.addEventListener("click", () => {
+          const page = chip.dataset.page;
+
+          chips.forEach(item => item.classList.toggle("active", item === chip));
+          pages.forEach(item => item.classList.toggle("active", item.dataset.pageView === page));
+
+          mobileVersion?.classList.remove("mobile-header-hidden");
+
+          chip.scrollIntoView({
+            behavior: "smooth",
+            inline: "center",
+            block: "nearest"
+          });
+
+          const activePage = document.querySelector(`.page[data-page-view="${page}"]`);
+          const scrollables = activePage?.querySelectorAll(
+            ".reviews-mobile-list, .faq-mobile-list"
+          );
+
+          scrollables?.forEach(item => {
+            item.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+          });
+
+          if (flash && window.innerWidth <= 900) {
+            flash.classList.add("active");
+            setTimeout(() => flash.classList.remove("active"), 120);
+          }
+        });
+      });
+    }
+
+    function bindMobileSmartHeader() {
+      document.addEventListener("touchstart", event => {
+        const touch = event.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+      }, { passive: true });
+
+      const verticalScrollers = document.querySelectorAll(".reviews-mobile-list, .faq-mobile-list");
+
+      verticalScrollers.forEach(scroller => {
+        scroller.addEventListener("scroll", () => {
+          if (!mobileVersion || window.innerWidth > 900) return;
+
+          const current = scroller.scrollTop;
+          const delta = current - lastMobileScrollTop;
+
+          if (delta > 8 && current > 40) {
+            mobileVersion.classList.add("mobile-header-hidden");
+          }
+
+          if (delta < -4 || current < 20) {
+            mobileVersion.classList.remove("mobile-header-hidden");
+          }
+
+          lastMobileScrollTop = Math.max(current, 0);
+        }, { passive: true });
+      });
+
+      document.addEventListener("touchmove", event => {
+        if (!mobileVersion || window.innerWidth > 900) return;
+
+        const touch = event.touches[0];
+        const dx = Math.abs(touch.clientX - touchStartX);
+        const dy = Math.abs(touch.clientY - touchStartY);
+
+        if (dx > dy) return;
+
+        if (touch.clientY < touchStartY - 18) {
+          mobileVersion.classList.add("mobile-header-hidden");
+        }
+
+        if (touch.clientY > touchStartY + 12) {
+          mobileVersion.classList.remove("mobile-header-hidden");
+        }
+      }, { passive: true });
+    }
+
+    function handleDesktopScroll() {
+      if (window.innerWidth <= 900) return;
+
+      const currentY = window.scrollY;
+
+      if (siteHeader) {
+        const delta = currentY - lastScrollY;
+        const goingDown = delta > 4;
+        const goingUp = delta < -2;
+
+        if (goingDown && currentY > 120) {
+          siteHeader.classList.add("header-hidden");
+        }
+
+        if (goingUp || currentY < 70) {
+          siteHeader.classList.remove("header-hidden");
+        }
+      }
+
+      lastScrollY = Math.max(currentY, 0);
+      ticking = false;
+    }
+
+    window.addEventListener("scroll", () => {
+      if (!ticking) {
+        window.requestAnimationFrame(handleDesktopScroll);
+        ticking = true;
+      }
+    }, { passive: true });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        closeBooking();
+        closeFaq();
+      }
     });
 
-    navButtons[0]?.classList.add('active');
-  });
-
+    bindLanguageSwitcher();
+    bindGoogleReviewLinks();
+    bindBookingButtons();
+    bindMobileNavigation();
+    bindMobileSmartHeader();
+    bindFaq();
   </script>
 
+  <script src="./script.js"></script>
 </body>
 </html>
