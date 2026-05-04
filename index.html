@@ -286,27 +286,207 @@
       opacity: 1;
     }
 
-    .portfolio-back {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 9999;
-      min-height: 42px;
-      padding: 0 14px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
+    .site-settings-btn {
+      flex: 0 0 auto;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 16px;
       border: 1px solid var(--line);
-      background: rgba(10, 10, 10, .64);
+      background: rgba(10, 10, 10, .55);
       backdrop-filter: var(--glass-light);
       -webkit-backdrop-filter: var(--glass-light);
       box-shadow: var(--shadow-xs), var(--glass-highlight);
+      color: var(--accent-2);
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .site-settings-btn:hover {
+      border-color: rgba(239, 186, 115, 0.35);
+      box-shadow: var(--shadow-sm), var(--glass-highlight);
+    }
+
+    .site-settings-btn[aria-expanded="true"] {
+      border-color: rgba(239, 186, 115, 0.45);
+    }
+
+    .site-settings-pop {
+      position: fixed;
+      top: calc(14px + env(safe-area-inset-top, 0px));
+      left: 12px;
+      z-index: 230;
+      min-width: min(280px, calc(100vw - 24px));
+      padding: 8px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(12, 12, 12, 0.94);
+      backdrop-filter: blur(18px) saturate(140%);
+      -webkit-backdrop-filter: blur(18px) saturate(140%);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .site-settings-pop.open {
+      display: flex;
+    }
+
+    .site-settings-pop a,
+    .site-settings-pop button {
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: transparent;
       color: var(--text-strong);
+      font-size: 14px;
+      font-weight: 700;
       text-decoration: none;
-      font-size: 13px;
-      font-weight: 900;
-      letter-spacing: -0.02em;
+      cursor: pointer;
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+
+    .site-settings-pop a:hover,
+    .site-settings-pop button:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .site-settings-pop button {
+      font-family: inherit;
+    }
+
+    .product-info-sheet {
+      position: fixed;
+      inset: 0;
+      z-index: 480;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 16px;
+      pointer-events: none;
+    }
+
+    .product-info-sheet.open {
+      display: flex;
+      pointer-events: auto;
+    }
+
+    .product-info-sheet__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.52);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .product-info-sheet__panel {
+      position: relative;
+      z-index: 2;
+      width: min(640px, 100%);
+      max-height: min(82svh, 720px);
+      overflow: auto;
+      padding: 20px 20px 22px;
+      border-radius: 28px 28px 22px 22px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: radial-gradient(circle at 50% 0%, rgba(239, 186, 115, 0.12), transparent 36%), linear-gradient(180deg, rgba(18, 18, 18, 0.98), rgba(8, 8, 8, 0.95));
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    .product-info-sheet__close {
+      width: 44px;
+      height: 44px;
+      margin-bottom: 10px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--accent-2);
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .product-info-sheet__panel h2 {
+      margin: 0 0 10px;
+      font-family: "Sora", sans-serif;
+      font-size: clamp(24px, 5vw, 34px);
+      letter-spacing: -0.06em;
+      color: var(--text-strong);
+    }
+
+    .product-info-sheet__panel .product-info-lead {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+
+    .product-info-sheet__panel ul {
+      margin: 0 0 16px;
+      padding-left: 1.1rem;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .admin-access-form {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .admin-access-form label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .admin-access-form input {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(8,8,8,.58);
+      color: var(--text-strong);
+      font: inherit;
+    }
+
+    .admin-access-form input:focus {
+      outline: none;
+      border-color: rgba(239,186,115,.45);
+      box-shadow: 0 0 0 3px rgba(239,186,115,.12);
+    }
+
+    .admin-access-status {
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+
+    @media (prefers-reduced-motion: reduce) {
+      .site-header {
+        transition: none !important;
+      }
+    }
+
+    @media (min-width: 901px) {
+      .site-settings-pop {
+        top: calc(var(--header-h) + 10px);
+      }
     }
 
     .site-header {
@@ -322,12 +502,6 @@
       box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
       transition: transform 360ms var(--ease-spring), opacity 240ms ease, box-shadow 260ms ease, background 260ms ease;
       will-change: transform;
-    }
-
-    .site-header.header-hidden {
-      transform: translateY(-112%);
-      opacity: 0;
-      pointer-events: none;
     }
 
     .desktop-header {
@@ -508,6 +682,19 @@
       padding: 20px 0 50px;
       position: relative;
       z-index: 2;
+    }
+
+    @media (min-width: 901px) {
+      .site-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+
+      .landing-wrap {
+        padding-top: calc(var(--header-h) + 26px);
+      }
     }
 
     #hero,
@@ -894,6 +1081,37 @@
       gap: 14px;
     }
 
+    .hero-salon-photo--clean .image-fallback {
+      opacity: 0;
+    }
+
+    .hero-contact-strip {
+      padding: 16px 18px;
+      display: grid;
+      gap: 10px;
+      border-radius: 24px;
+    }
+
+    .hero-contact-strip__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 14px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .hero-contact-strip__row strong {
+      color: var(--text-strong);
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .hero-contact-strip__row a {
+      color: var(--accent-2);
+      text-decoration: none;
+    }
+
     .metric-card {
       min-height: 150px;
       padding: 18px;
@@ -973,6 +1191,63 @@
 
     .gallery-tile.wide {
       grid-column: span 2;
+    }
+
+    .works-sticker-wall {
+      position: relative;
+      z-index: 1;
+    }
+
+    .sticker-wall {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+
+    .sticker-card {
+      margin: 0;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.085);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
+      box-shadow: var(--shadow-xs), var(--glass-highlight);
+      overflow: hidden;
+      transform: none;
+    }
+
+    .sticker-card .media-frame,
+    .sticker-card .dogma-video {
+      width: 100%;
+      min-height: 220px;
+      max-height: 320px;
+      display: block;
+      object-fit: cover;
+      border-radius: 0;
+    }
+
+    .sticker-card figcaption {
+      padding: 10px 12px 12px;
+      display: grid;
+      gap: 4px;
+      background: linear-gradient(180deg, rgba(9,9,9,.14), rgba(9,9,9,.92));
+    }
+
+    .sticker-card figcaption strong {
+      color: var(--text-strong);
+      font-size: 14px;
+      letter-spacing: -.02em;
+      line-height: 1.15;
+    }
+
+    .sticker-card figcaption p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .sticker-card figcaption:empty {
+      display: none;
     }
 
     .showcase-phone-wrap {
@@ -1215,6 +1490,30 @@
       font-size: 15px;
     }
 
+    .location-address-line {
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+
+    .location-address-line strong {
+      font-size: 17px;
+      letter-spacing: -0.03em;
+      color: var(--text-strong);
+    }
+
+    .location-desk-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .location-desk-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .manifest-logo-panel {
       min-height: 560px;
       display: grid;
@@ -1336,6 +1635,40 @@
       min-height: 470px;
       grid-template-rows: 230px 1fr auto auto;
       gap: 14px;
+    }
+
+    .master-card.master-card--hydrated {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .master-card.master-card--hydrated .master-photo--img {
+      flex: 0 0 auto;
+      height: 260px;
+      border-radius: 24px;
+      background-color: #12100e;
+    }
+
+    .master-card.master-card--hydrated .master-card__body {
+      flex: 1 1 auto;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .master-card.master-card--hydrated .master-card__body h3 {
+      margin: 0;
+      font-size: clamp(22px, 2.4vw, 28px);
+    }
+
+    .master-card.master-card--hydrated .master-card__body p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
     }
 
     .service-visual,
@@ -1847,10 +2180,12 @@
       align-items: flex-end;
       justify-content: center;
       padding: 16px;
+      pointer-events: none;
     }
 
     .faq-sheet.open {
       display: flex;
+      pointer-events: auto;
     }
 
     .faq-sheet__backdrop {
@@ -2083,19 +2418,22 @@
     }
 
     @media (max-width: 900px) {
+      /* Mobile shell: DOGMA-like grid, but root scroll is NOT blocked (no body fixed / no html overflow hidden). */
       html,
       body {
         width: 100%;
-        height: 100%;
+        margin: 0;
         min-height: 100%;
-        overflow: hidden;
-        overscroll-behavior: none;
+        min-height: 100dvh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior-y: none;
         background: #030303;
+        -webkit-overflow-scrolling: touch;
       }
 
       body {
-        position: fixed;
-        inset: 0;
+        position: relative;
         background:
           radial-gradient(circle at 12% -4%, rgba(217, 167, 93, 0.16), transparent 30%),
           radial-gradient(circle at 92% 4%, rgba(239, 186, 115, 0.09), transparent 28%),
@@ -2112,10 +2450,6 @@
         mask-image: linear-gradient(to bottom, black 0%, transparent 86%);
       }
 
-      .portfolio-back {
-        display: none;
-      }
-
       .desktop-version {
         display: none !important;
       }
@@ -2125,10 +2459,12 @@
         z-index: 2;
         display: grid !important;
         width: 100%;
-        height: 100svh;
-        min-height: 100svh;
+        box-sizing: border-box;
+        min-height: min(100dvh, 100svh);
+        height: min(100dvh, 100svh);
+        max-height: min(100dvh, 100svh);
         overflow: hidden;
-        grid-template-rows: auto auto 1fr;
+        grid-template-rows: auto auto minmax(0, 1fr);
         isolation: isolate;
       }
 
@@ -2163,19 +2499,62 @@
         transform: translateY(calc(-1 * (var(--mobile-top-h) + var(--safe-top))));
       }
 
+      .mobile-version.mobile-header-hidden .app-top,
+      .mobile-version.mobile-header-hidden .section-nav {
+        transform: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+
       .app-top {
         position: relative;
         z-index: 40;
-        padding: calc(10px + var(--safe-top)) 12px 8px;
-        display: grid;
-        grid-template-columns: 52px minmax(0, 1fr) 52px;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding: calc(10px + var(--safe-top)) clamp(8px, 2.4vw, 14px) 8px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
         align-items: center;
-        gap: 10px;
+        gap: clamp(5px, 1.4vw, 10px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.07);
         background: linear-gradient(180deg, rgba(6,6,6,.95), rgba(6,6,6,.82));
         backdrop-filter: blur(22px) saturate(148%);
         -webkit-backdrop-filter: blur(22px) saturate(148%);
         box-shadow: 0 14px 34px rgba(0,0,0,.22);
+      }
+
+      .app-top > button.site-settings-btn:first-child,
+      .app-top > a.icon-btn:first-child {
+        order: 1;
+        flex: 0 0 auto;
+        width: clamp(44px, 10.5vw, 52px);
+        height: clamp(44px, 10.5vw, 52px);
+        border-radius: clamp(16px, 4.2vw, 19px);
+      }
+
+      .app-top > a.icon-btn:last-child {
+        order: 4;
+        flex: 0 0 auto;
+        width: clamp(44px, 10.5vw, 52px);
+        height: clamp(44px, 10.5vw, 52px);
+        border-radius: clamp(16px, 4.2vw, 19px);
+      }
+
+      .app-top .logo-pill {
+        order: 2;
+      }
+
+      .app-top .mobile-lang-switcher {
+        order: 3;
+      }
+
+      button.icon-btn {
+        appearance: none;
+        padding: 0;
+        margin: 0;
       }
 
       .icon-btn {
@@ -2192,14 +2571,17 @@
         font: inherit;
         font-size: 20px;
         font-weight: 1000;
+        cursor: pointer;
         transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
       }
 
       .logo-pill {
-        justify-self: center;
-        width: min(246px, 100%);
-        height: 58px;
-        padding: 0 104px 0 14px;
+        flex: 1 1 auto;
+        min-width: 0;
+        width: auto;
+        max-width: 100%;
+        height: clamp(52px, 14vw, 58px);
+        padding: 0 clamp(10px, 3vw, 14px);
         display: grid;
         place-items: center;
         border-radius: 23px;
@@ -2223,40 +2605,47 @@
       .mobile-logo-img {
         position: relative;
         z-index: 1;
-        width: 92px;
+        width: min(92px, 26vw);
         max-height: 38px;
         object-fit: contain;
-        transform: translateX(-34px);
+        transform: none;
         filter: drop-shadow(0 10px 20px rgba(239,186,115,.10));
       }
 
       .mobile-lang-switcher {
-        position: absolute;
-        right: 90px;
-        top: calc(19px + var(--safe-top));
+        position: relative;
+        inset: auto;
         z-index: 80;
-        padding: 3px;
-        gap: 2px;
+        flex: 0 0 auto;
+        margin-left: 0;
+        margin-right: 0;
+        padding: clamp(3px, 0.9vw, 5px);
+        gap: clamp(2px, 0.7vw, 4px);
         background: rgba(10,10,10,.78);
         border-color: rgba(255,255,255,.08);
         box-shadow: 0 10px 24px rgba(0,0,0,.24), var(--glass-highlight);
+        max-width: fit-content;
       }
 
       .mobile-lang-switcher .lang-btn {
-        min-width: 34px;
-        height: 34px;
-        padding: 0;
-        font-size: 10px;
+        min-width: clamp(34px, 9.2vw, 40px);
+        height: clamp(36px, 9.8vw, 42px);
+        padding: 0 clamp(2px, 0.6vw, 5px);
+        font-size: clamp(10.5px, 2.9vw, 12px);
       }
 
       .section-nav {
         position: relative;
         z-index: 35;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
         display: flex;
         gap: 8px;
         overflow-x: auto;
         overflow-y: hidden;
-        padding: 10px 12px;
+        padding: 10px clamp(8px, 2.4vw, 12px);
         scrollbar-width: none;
         scroll-snap-type: x proximity;
         border-bottom: 1px solid rgba(255,255,255,.065);
@@ -2301,6 +2690,7 @@
         position: relative;
         overflow: hidden;
         min-height: 0;
+        min-width: 0;
         height: 100%;
         padding: 0;
       }
@@ -2310,6 +2700,7 @@
         inset: 0;
         display: none;
         min-height: 0;
+        min-width: 0;
         padding: 14px 12px 12px;
         overflow: hidden;
         animation: pageIn 360ms var(--ease-spring) both;
@@ -2317,9 +2708,6 @@
       }
 
       .page.active {
-        display: grid;
-        grid-template-rows: auto 1fr;
-        gap: 12px;
         pointer-events: auto;
       }
 
@@ -2383,9 +2771,29 @@
       .screen-body {
         min-height: 0;
         display: grid;
+        grid-template-rows: minmax(0, 1fr);
         align-content: stretch;
         gap: 10px;
         overflow: hidden;
+      }
+
+      .mobile-home-body {
+        min-height: 0;
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: grid;
+        gap: 12px;
+        align-content: start;
+        padding: 2px 2px calc(18px + var(--safe-bottom));
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+        touch-action: pan-y;
+      }
+
+      .mobile-home-body::-webkit-scrollbar {
+        display: none;
       }
 
       .hero-photo-card {
@@ -2430,6 +2838,18 @@
         place-items: center;
         color: rgba(255,248,240,.24);
         text-shadow: 0 18px 48px rgba(0,0,0,.30);
+      }
+
+      .hero-photo-card--clean .image-fallback {
+        opacity: 0;
+      }
+
+      .hero-photo-card--clean {
+        min-height: 220px;
+      }
+
+      .mobile-card-btn--primary {
+        letter-spacing: 0.05em;
       }
 
       .mobile-hero-floating {
@@ -2482,7 +2902,9 @@
       .mobile-gallery-card,
       .mobile-review-card,
       .mobile-faq-card,
-      .google-review-card {
+      .google-review-card,
+      .mobile-social-card,
+      .mobile-compact-info {
         position: relative;
         overflow: hidden;
         border: 1px solid rgba(255,255,255,.075);
@@ -2502,7 +2924,9 @@
       .mobile-gallery-card::after,
       .mobile-review-card::after,
       .mobile-faq-card::after,
-      .google-review-card::after {
+      .google-review-card::after,
+      .mobile-social-card::after,
+      .mobile-compact-info::after {
         content: "";
         position: absolute;
         inset: 0;
@@ -2539,44 +2963,149 @@
         letter-spacing: -.075em;
       }
 
+      /* Section body lists: vertical stacks only — scroll happens on .page.active, not on horizontal tracks. */
       .services-list,
       .masters-mobile-list,
-      .gallery-mobile-list {
-        min-height: 0;
-        display: flex;
-        gap: 12px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scroll-snap-type: x mandatory;
-        scrollbar-width: none;
-        padding: 2px 2px 8px;
-        align-items: stretch;
-        overscroll-behavior-x: contain;
-        overscroll-behavior-y: none;
-        touch-action: pan-x;
+      .gallery-mobile-list,
+      .bio-mobile-list,
+      .reviews-mobile-list,
+      .faq-mobile-list {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-auto-rows: max-content;
+        gap: 14px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 0 0 4px;
+        margin: 0;
+        overflow-x: hidden;
+        overflow-y: visible;
+        touch-action: pan-y;
+        scroll-snap-type: none;
       }
 
-      .services-list::-webkit-scrollbar,
-      .masters-mobile-list::-webkit-scrollbar,
-      .gallery-mobile-list::-webkit-scrollbar,
-      .reviews-mobile-list::-webkit-scrollbar,
-      .faq-mobile-list::-webkit-scrollbar {
-        display: none;
+      .mobile-social-card {
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .mobile-social-card strong,
+      .mobile-social-card p,
+      .mobile-social-row,
+      .mobile-social-card .mobile-card-btn,
+      .mobile-compact-info {
+        position: relative;
+        z-index: 1;
+      }
+
+      .mobile-social-card strong {
+        color: var(--text-strong);
+        font-family: "Sora", sans-serif;
+        font-size: 30px;
+        line-height: .94;
+        letter-spacing: -.075em;
+      }
+
+      .mobile-social-card p {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .mobile-social-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .mobile-social-row a {
+        min-height: 58px;
+        padding: 0 6px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background:
+          radial-gradient(circle at 50% 0%, rgba(239,186,115,.10), transparent 42%),
+          rgba(255,255,255,.04);
+        box-shadow: var(--shadow-xs), var(--glass-highlight);
+        color: var(--accent-2);
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 1000;
+        letter-spacing: .01em;
+      }
+
+      .mobile-social-row a svg {
+        width: 23px;
+        height: 23px;
+        display: block;
+        color: currentColor;
+      }
+
+      .mobile-compact-info {
+        padding: 12px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .mobile-compact-info-row {
+        position: relative;
+        z-index: 1;
+        min-height: 52px;
+        display: grid;
+        gap: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+        border-bottom: 1px solid rgba(255,255,255,.055);
+      }
+
+      .mobile-compact-info-row:last-child {
+        border-bottom: 0;
+      }
+
+      .mobile-compact-info-row strong {
+        color: var(--text-strong);
+        text-align: left;
+        font-family: "Sora", sans-serif;
+        font-size: 15px;
+        letter-spacing: -.035em;
       }
 
       .service-card {
-        flex: 0 0 min(82vw, 330px);
-        scroll-snap-align: center;
+        scroll-snap-align: start;
+        width: 100%;
+        min-height: 0;
         padding: 14px;
         display: grid;
-        grid-template-rows: 160px auto auto auto;
+        grid-template-rows: auto auto auto auto;
         gap: 12px;
-        align-self: stretch;
-        min-height: 430px;
+        align-content: start;
       }
 
       .service-img {
-        min-height: 160px;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        min-height: 0;
+        position: relative;
+        z-index: 1;
+        border-radius: 24px;
+        background-size: cover;
+        background-position: center center;
+      }
+
+      .service-card-header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: start;
+        position: relative;
+        z-index: 1;
       }
 
       .service-card p,
@@ -2608,33 +3137,69 @@
       }
 
       .mobile-master-card {
-        flex: 0 0 min(82vw, 330px);
-        scroll-snap-align: center;
-        min-height: 430px;
+        scroll-snap-align: start;
+        width: 100%;
+        min-height: 0;
         padding: 14px;
         display: grid;
-        grid-template-rows: 190px auto auto auto;
+        grid-template-rows: auto auto auto auto;
         gap: 12px;
+        align-content: start;
       }
 
       .mobile-master-photo {
-        min-height: 190px;
-        background-position: center 30%;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        min-height: 0;
+        position: relative;
+        z-index: 1;
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,.10);
+        background-color: #111;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center 18%;
+        overflow: hidden;
+      }
+
+      .mobile-master-card strong {
+        position: relative;
+        z-index: 1;
+        font-size: 28px;
+      }
+
+      .mobile-master-card .tags {
+        position: relative;
+        z-index: 1;
       }
 
       .mobile-gallery-card {
-        flex: 0 0 min(78vw, 315px);
-        scroll-snap-align: center;
-        min-height: 360px;
+        scroll-snap-align: start;
+        width: 100%;
+        min-height: 0;
         padding: 14px;
         display: grid;
-        grid-template-rows: 220px auto auto;
+        grid-template-rows: auto auto auto;
         gap: 12px;
+        align-content: start;
+      }
+
+      .mobile-gallery-card strong {
+        position: relative;
+        z-index: 1;
+        font-size: 26px;
       }
 
       .mobile-gallery-photo {
-        min-height: 220px;
-        filter: grayscale(.38) contrast(1.05) brightness(.84);
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        min-height: 0;
+        position: relative;
+        z-index: 1;
+        border-radius: 24px;
+        background-size: cover;
+        background-position: center;
+        filter: grayscale(.18) contrast(1.05) brightness(.92);
       }
 
       .mobile-gallery-photo.cut { background-image: url("/clean-haircut.jpg"); }
@@ -2643,18 +3208,37 @@
       .mobile-gallery-photo.shop { background-image: url("/marble-bg.png"); }
       .mobile-gallery-photo.detail { background-image: url("/beard.jpg"); }
 
-      .reviews-mobile-list,
-      .faq-mobile-list {
-        min-height: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
-        display: grid;
-        gap: 10px;
-        padding: 2px 2px calc(18px + var(--safe-bottom));
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: contain;
-        touch-action: pan-y;
+      .gallery-mobile-list .media-frame,
+      .gallery-mobile-list .media-frame--portrait {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,.075);
+        background:
+          radial-gradient(circle at 50% 0%, rgba(239,186,115,.08), transparent 42%),
+          rgba(0,0,0,.22);
+        box-shadow: var(--shadow-xs);
+      }
+
+      .gallery-mobile-list .media-frame img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: inherit;
+        object-fit: contain;
+        background: rgba(0,0,0,.22);
+      }
+
+      .gallery-mobile-list .mobile-gallery-photo video {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: inherit;
+        background: #050505;
       }
 
       .mobile-review-card {
@@ -2710,6 +3294,8 @@
         border-radius: 22px;
         text-align: left;
         cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(239, 186, 115, 0.12);
       }
 
       .mobile-faq-card::before {
@@ -2722,6 +3308,23 @@
 
       .mobile-faq-card p {
         display: none;
+      }
+
+      .page[data-page-view="where"] .page-head {
+        margin-top: 4px;
+      }
+
+      .page[data-page-view="where"] .location-card {
+        grid-template-rows: auto auto auto;
+        min-height: 0;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .page[data-page-view="where"] .map-glass {
+        min-height: clamp(132px, 24dvh, 188px);
+        max-height: min(30dvh, 248px);
+        height: min(28dvh, 220px);
       }
 
       .faq-sheet {
@@ -2845,7 +3448,7 @@
         display: grid;
         gap: 10px;
         grid-template-rows: auto auto 1fr;
-        overflow: hidden;
+        overflow: visible;
       }
 
       .contact-mobile-card {
@@ -2922,6 +3525,237 @@
         width: 100% !important;
       }
 
+      .page.active {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior-y: contain !important;
+        touch-action: pan-y !important;
+        scrollbar-width: none !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        padding: 14px 12px calc(12px + var(--safe-bottom)) !important;
+        gap: 12px !important;
+        grid-template-rows: unset !important;
+      }
+
+      .page.active::-webkit-scrollbar {
+        display: none;
+      }
+
+      .page.active .page-head {
+        flex: 0 0 auto !important;
+      }
+
+      .page.active .screen-body {
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        height: auto !important;
+      }
+
+      .page.active .mobile-home-body {
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        flex: 0 0 auto !important;
+        scroll-snap-type: none !important;
+        padding: 2px 2px calc(18px + var(--safe-bottom)) !important;
+      }
+
+      .page.active .services-list,
+      .page.active .masters-mobile-list,
+      .page.active .gallery-mobile-list,
+      .page.active .bio-mobile-list,
+      .page.active .reviews-mobile-list,
+      .page.active .faq-mobile-list {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-auto-rows: max-content !important;
+        gap: 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+        flex: 0 0 auto !important;
+        scroll-snap-type: none !important;
+        touch-action: pan-y !important;
+        padding: 0 0 8px !important;
+      }
+
+      .services-list[data-admin-zone="mobile-services"] .service-card > p {
+        display: block !important;
+        position: relative !important;
+        z-index: 2 !important;
+        margin: 0 !important;
+      }
+
+      .page.active .service-card,
+      .page.active .mobile-master-card,
+      .page.active .mobile-gallery-card {
+        overflow: visible !important;
+      }
+
+      .masters-mobile-list .barber-profile-card {
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        padding: 14px !important;
+        display: grid !important;
+        grid-template-rows: auto auto auto auto !important;
+        gap: 12px !important;
+        align-content: start !important;
+        overflow: hidden !important;
+        scroll-snap-align: start !important;
+        border-radius: 30px !important;
+        border: 1px solid rgba(255,255,255,.09) !important;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025)),
+          rgba(10,10,10,.58) !important;
+        box-shadow: var(--shadow-sm), var(--glass-highlight) !important;
+      }
+
+      .masters-mobile-list .barber-profile-photo {
+        position: relative !important;
+        z-index: 1 !important;
+        width: 100% !important;
+        aspect-ratio: 1 / 1 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(255,255,255,.10) !important;
+        background: #111 !important;
+        box-shadow: var(--shadow-xs), var(--glass-highlight) !important;
+      }
+
+      .masters-mobile-list .barber-profile-photo img {
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+        object-fit: cover !important;
+        object-position: center 18% !important;
+        border-radius: inherit !important;
+      }
+
+      .masters-mobile-list .barber-profile-copy,
+      .masters-mobile-list .barber-profile-tags,
+      .masters-mobile-list .barber-profile-btn {
+        position: relative !important;
+        z-index: 2 !important;
+      }
+
+      .masters-mobile-list .barber-profile-copy {
+        display: grid !important;
+        gap: 8px !important;
+      }
+
+      .masters-mobile-list .barber-profile-copy h3 {
+        margin: 0 !important;
+        color: var(--text-strong) !important;
+        font-family: "Sora", sans-serif !important;
+        font-size: 30px !important;
+        line-height: .96 !important;
+        letter-spacing: -.065em !important;
+      }
+
+      .masters-mobile-list .barber-profile-copy p {
+        margin: 0 !important;
+        color: var(--muted) !important;
+        font-size: 14px !important;
+        line-height: 1.48 !important;
+      }
+
+      .masters-mobile-list .barber-profile-tags {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+      }
+
+      .masters-mobile-list .barber-profile-tags span {
+        min-height: 30px !important;
+        padding: 0 10px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        border-radius: 999px !important;
+        border: 1px solid var(--accent-line) !important;
+        background: rgba(217,167,93,.10) !important;
+        color: var(--accent-2) !important;
+        font-size: 12px !important;
+        font-weight: 1000 !important;
+      }
+
+      .masters-mobile-list .barber-profile-btn {
+        width: 100% !important;
+        min-height: 52px !important;
+        margin-top: 2px !important;
+        border-radius: 999px !important;
+      }
+
+      .services-list[data-admin-zone="mobile-services"] .service-card {
+        scroll-snap-align: start !important;
+        width: 100% !important;
+        min-height: auto !important;
+        height: auto !important;
+        padding: 14px !important;
+        display: grid !important;
+        grid-template-rows: auto auto auto auto !important;
+        gap: 12px !important;
+        align-content: start !important;
+        overflow: visible !important;
+      }
+
+      .services-list[data-admin-zone="mobile-services"] .service-img {
+        width: 100% !important;
+        aspect-ratio: 1 / 1 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        position: relative !important;
+        z-index: 1 !important;
+        border-radius: 24px !important;
+        background-size: cover !important;
+        background-position: center center !important;
+        background-repeat: no-repeat !important;
+      }
+
+      .services-list[data-admin-zone="mobile-services"] .service-card-header,
+      .services-list[data-admin-zone="mobile-services"] .tags,
+      .services-list[data-admin-zone="mobile-services"] .mobile-card-btn {
+        position: relative !important;
+        z-index: 2 !important;
+      }
+
+      .services-list[data-admin-zone="mobile-services"] .service-card-header {
+        display: grid !important;
+        grid-template-columns: 1fr auto !important;
+        gap: 12px !important;
+        align-items: start !important;
+      }
+
+      .services-list[data-admin-zone="mobile-services"] .tags {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+      }
+
+      .services-list[data-admin-zone="mobile-services"] .mobile-card-btn {
+        width: 100% !important;
+        margin-top: 0 !important;
+      }
+
       .site-header,
       .app-top,
       .section-nav,
@@ -2936,11 +3770,6 @@
         transition: transform 260ms ease, opacity 260ms ease;
       }
 
-      .site-header.header-hidden {
-        transform: translateY(-110%) !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-      }
     }
 
     @media (max-width: 430px) {
@@ -2951,21 +3780,11 @@
       .page-title {
         font-size: clamp(38px, 12vw, 58px);
       }
-
-      .service-card,
-      .mobile-master-card {
-        flex-basis: min(84vw, 326px);
-      }
-
-      .mobile-gallery-card {
-        flex-basis: min(80vw, 312px);
-      }
     }
 
     @media (max-width: 390px) {
       .app-top {
-        grid-template-columns: 48px minmax(0, 1fr) 48px;
-        gap: 8px;
+        gap: 6px;
         padding-left: 10px;
         padding-right: 10px;
       }
@@ -2977,21 +3796,13 @@
       }
 
       .logo-pill {
-        width: min(218px, 100%);
         height: 54px;
         border-radius: 20px;
-        padding-right: 88px;
       }
 
       .mobile-logo-img {
         width: 78px;
         max-height: 34px;
-        transform: translateX(-32px);
-      }
-
-      .mobile-lang-switcher {
-        right: 60px;
-        top: calc(18px + var(--safe-top));
       }
 
       .mobile-lang-switcher .lang-btn {
@@ -3051,39 +3862,8 @@
         font-size: 26px;
       }
 
-      .service-card {
-        min-height: 400px;
-        grid-template-rows: 140px auto auto auto;
-      }
-
-      .service-img {
-        min-height: 140px;
-      }
-
       .service-card strong {
         font-size: 23px;
-      }
-
-      .mobile-master-card {
-        min-height: 392px;
-        grid-template-rows: 165px auto auto auto;
-      }
-
-      .mobile-master-photo {
-        min-height: 165px;
-      }
-
-      .mobile-gallery-card {
-        min-height: 330px;
-        grid-template-rows: 190px auto auto;
-      }
-
-      .mobile-gallery-photo {
-        min-height: 190px;
-      }
-
-      .map-glass {
-        min-height: 150px;
       }
 
       .address-box strong,
@@ -3334,13 +4114,79 @@
     border-radius: 16px;
   }
 }
+
+    .faq-sheet.open {
+      display: flex !important;
+      z-index: 10000 !important;
+      pointer-events: auto !important;
+    }
+
+    .faq-sheet.open .faq-sheet__backdrop {
+      opacity: 1 !important;
+    }
+
+    .faq-sheet.open .faq-sheet__panel {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
   </style>
+  <script src="/booking-i18n.js"></script>
 </head>
 
 <body>
-  <a href="https://mrozowski-automation-production.up.railway.app/?page=demos#demos" class="portfolio-back">
-  ← Wróć do wyboru
-</a>
+  <div id="siteSettingsPop" class="site-settings-pop" role="menu" aria-label="Menu ustawień">
+    <a href="https://mrozowski-automation-production.up.railway.app/?page=demos#demos" id="demoBackLink" target="_blank" rel="noopener">Powrót do demo</a>
+    <button type="button" id="openAdminAccessBtn" role="menuitem">Panel administratora</button>
+    <button type="button" id="openProductInfoBtn" role="menuitem">Więcej informacji</button>
+  </div>
+
+  <section class="product-info-sheet" id="adminAccessSheet" aria-hidden="true">
+    <div class="product-info-sheet__backdrop" data-close-admin-access tabindex="-1"></div>
+    <div class="product-info-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="adminAccessTitle">
+      <button type="button" class="product-info-sheet__close" data-close-admin-access aria-label="Zamknij">×</button>
+      <h2 id="adminAccessTitle">Panel administratora</h2>
+      <div class="product-info-lead">
+        <p>Zaloguj się, żeby zmieniać treści na stronie.</p>
+      </div>
+      <form id="adminAccessForm" class="admin-access-form">
+        <label for="adminAccessLogin">LOGIN</label>
+        <input id="adminAccessLogin" name="login" type="text" autocomplete="username" required>
+        <label for="adminAccessPassword">HASŁO</label>
+        <input id="adminAccessPassword" name="password" type="password" autocomplete="current-password" required>
+        <button id="adminAccessSubmit" class="btn btn-primary section-button-full" type="submit">Zaloguj</button>
+        <small id="adminAccessStatus" class="admin-access-status" aria-live="polite"></small>
+      </form>
+    </div>
+  </section>
+
+  <section class="product-info-sheet" id="productInfoSheet" aria-hidden="true">
+    <div class="product-info-sheet__backdrop" data-close-product-info tabindex="-1"></div>
+    <div class="product-info-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="productInfoTitle">
+      <button type="button" class="product-info-sheet__close" data-close-product-info aria-label="Zamknij">×</button>
+      <h2 id="productInfoTitle">Więcej informacji o produkcie</h2>
+      <div class="product-info-lead" id="productInfoBody">
+        <p>
+          Ten demo-site pokazuje, jak może wyglądać indywidualna strona internetowa dla salonu lub usługodawcy.
+          Wszystkie teksty, zdjęcia, usługi, ceny, specjaliści i sekcje są przygotowywane indywidualnie pod klienta.
+        </p>
+        <p>
+          System zawiera własny panel administratora, w którym można edytować treści, zdjęcia, usługi, specjalistów,
+          linki oraz ustawienia rezerwacji online.
+        </p>
+        <p>Rezerwacja online może być połączona z Google Calendar. Klient może otrzymywać SMS z potwierdzeniem wizyty,
+          a właściciel — powiadomienia o nowej rezerwacji.</p>
+        <p><strong>W rozszerzonych wersjach mogą pojawić się m.in.:</strong></p>
+        <ul>
+          <li>indywidualne kolory i styl marki,</li>
+          <li>automatyzacja Instagrama,</li>
+          <li>powiadomienia Telegram o nowej rezerwacji,</li>
+          <li>SMS do klienta,</li>
+          <li>rozbudowana automatyzacja lejka,</li>
+          <li>dodatkowe sekcje i integracje.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
   <div class="desktop-version" id="desktop-version">
     <div class="landing-bg-orb one"></div>
@@ -3352,6 +4198,7 @@
     <header class="site-header" id="top">
       <div class="landing-container desktop-header">
         <div class="desktop-left">
+          <button class="site-settings-btn" type="button" data-site-settings-btn aria-expanded="false" aria-haspopup="menu" aria-controls="siteSettingsPop" aria-label="Ustawienia">⚙</button>
           <nav class="desktop-nav">
             <a href="#hero" data-i18n="nav.start">Start</a>
             <a href="#pricing" data-i18n="nav.services">Usługi</a>
@@ -3380,7 +4227,7 @@
             <button class="lang-btn" type="button" data-lang="en">EN</button>
           </div>
 
-          <a href="tel:+48532377701" class="desktop-call-btn" data-i18n="common.call">Zadzwoń</a>
+          <a href="tel:+48532377701" class="desktop-call-btn" data-i18n="common.call" data-dogma-contact="phone">Zadzwoń</a>
         </div>
       </div>
     </header>
@@ -3420,24 +4267,23 @@
               </div>
 
               <div class="hero-side">
-                <article class="glass-card hero-logo-panel hero-salon-photo">
+                <article class="glass-card hero-logo-panel hero-salon-photo hero-salon-photo--clean">
                   <div class="image-fallback">MON<br />ARCH</div>
-                  <div class="hero-photo-badge">
-                    <span>BARBERSHOP • SOCIAL CLUB</span>
-                    <strong>MONARCH BARBERSHOP</strong>
-                  </div>
                 </article>
 
-                <div class="hero-info-grid">
-                  <article class="glass-card metric-card">
-                    <span data-i18n="hero.metric1">Rezerwacja od wyboru usługi do potwierdzenia</span>
-                    <strong>8 kroków</strong>
-                  </article>
-
-                  <article class="glass-card metric-card">
-                    <span data-i18n="hero.metric2">Godziny pracy w systemie</span>
-                    <strong>10–20</strong>
-                  </article>
+                <div class="hero-contact-strip glass-card">
+                  <div class="hero-contact-strip__row">
+                    <span data-i18n="mobile.home.addrLabel">Adres</span>
+                    <strong data-dogma-contact-address>ul. Przykładowa 12A, Wrocław</strong>
+                  </div>
+                  <div class="hero-contact-strip__row">
+                    <span data-i18n="mobile.home.hoursLabel">Godziny</span>
+                    <strong data-dogma-contact-hours>Pn–Sob 10:00–20:00</strong>
+                  </div>
+                  <div class="hero-contact-strip__row">
+                    <span data-i18n="contact.phone">Telefon</span>
+                    <strong><a href="tel:+48532377701" data-dogma-contact="phone">+48 532 377 701</a></strong>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3545,7 +4391,7 @@
                   <div class="manifest-visual"></div>
                   <div class="manifest-logo-mark">
                     <span>MON<br />ARCH</span>
-                    <span>BARBER • CUT • RITUAL</span>
+                    <span>BARBER CUT RITUAL</span>
                   </div>
                 </article>
 
@@ -3612,7 +4458,7 @@
                 </p>
               </div>
 
-              <div class="pricing-grid">
+              <div class="pricing-grid" data-admin-zone="desktop-services">
                 <article class="glass-card pricing-card">
                   <div class="service-visual haircut"></div>
                   <div class="pricing-card__content">
@@ -3701,7 +4547,7 @@
                 </p>
               </div>
 
-              <div class="masters-grid">
+              <div class="masters-grid" data-admin-zone="desktop-barbers">
                 <article class="glass-card master-card">
                   <div class="master-photo tymur-photo"></div>
                   <div>
@@ -3713,7 +4559,7 @@
                   <div class="master-tags">
                     <span>classic cut</span>
                     <span>clean shape</span>
-                    <span>🇺🇦 🇵🇱 🇬🇧</span>
+                    <span>🇷🇺 🇵🇱 🇬🇧</span>
                   </div>
                   <button class="master-book-btn" type="button" data-open-booking data-i18n="masters.bookTymur">
                     Zarezerwuj u Tymura
@@ -3731,7 +4577,7 @@
                   <div class="master-tags">
                     <span>combo</span>
                     <span>beard trim</span>
-                    <span>🇺🇦 🇵🇱 🇬🇧</span>
+                    <span>🇷🇺 🇵🇱 🇬🇧</span>
                   </div>
                   <button class="master-book-btn" type="button" data-open-booking data-i18n="masters.bookDima">
                     Zarezerwuj u Dimy
@@ -3776,12 +4622,8 @@
                 </p>
               </div>
 
-              <div class="gallery-grid">
-                <article class="gallery-tile gallery-cut large"><span>clean haircut</span></article>
-                <article class="gallery-tile gallery-beard"><span>sharp beard</span></article>
-                <article class="gallery-tile gallery-combo"><span>combo service</span></article>
-                <article class="gallery-tile gallery-shop wide"><span>MONARCH atmosphere</span></article>
-                <article class="gallery-tile gallery-detail"><span>royal detail</span></article>
+              <div class="works-sticker-wall" data-admin-zone="desktop-gallery-works" aria-label="Galeria prac">
+                <div class="sticker-wall"></div>
               </div>
             </div>
           </div>
@@ -3846,6 +4688,7 @@
               <div class="location-grid">
                 <article class="glass-card location-map">
                   <iframe
+                    data-dogma-map-embed
                     title="Mapa Wrocław"
                     loading="lazy"
                     src="https://www.google.com/maps?q=Wroc%C5%82aw&output=embed">
@@ -3863,7 +4706,7 @@
                   <div class="location-preview">
                     <div class="location-preview__inner">
                       <strong>MON<br />ARCH</strong>
-                      <span>Wrocław • barbershop</span>
+                      <span>Wrocław - barbershop</span>
                     </div>
                   </div>
 
@@ -3872,11 +4715,13 @@
                     <p data-i18n="location.sub">
                       Dokładny adres możesz później podmienić w kodzie.
                     </p>
+                    <p class="location-address-line"><strong data-dogma-contact-address>ul. Przykładowa 12A, Wrocław</strong></p>
                   </div>
 
-                  <button class="btn btn-primary section-button-full" type="button" onclick="openMapsRoute()" data-i18n="location.openMap">
-                    Otwórz mapę
-                  </button>
+                  <div class="location-desk-actions">
+                    <button class="btn btn-primary" type="button" data-open-booking data-i18n="mobile.location.book">REZERWUJ</button>
+                    <button class="btn btn-ghost" type="button" onclick="openMapsRoute()" data-i18n="mobile.location.map">MAPA</button>
+                  </div>
                 </article>
               </div>
             </div>
@@ -3965,7 +4810,7 @@
                   </p>
 
                   <div class="social-icons">
-                    <a class="social-icon" href="https://www.instagram.com/mrozowski.automation/" target="_blank" rel="noopener" aria-label="Instagram">
+                    <a class="social-icon" href="https://www.instagram.com/mrozowski.automation/" target="_blank" rel="noopener" aria-label="Instagram" data-dogma-contact="instagram">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="3" y="3" width="18" height="18" rx="5"></rect>
                         <circle cx="12" cy="12" r="4"></circle>
@@ -3973,7 +4818,7 @@
                       </svg>
                     </a>
 
-                    <a class="social-icon" href="https://www.tiktok.com/@mrozowski.automation" target="_blank" rel="noopener" aria-label="TikTok">
+                    <a class="social-icon" href="https://www.tiktok.com/@mrozowski.automation" target="_blank" rel="noopener" aria-label="TikTok" data-dogma-contact="tiktok">
                       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M15.7 3c.2 1.6 1.1 3 2.4 3.8.8.5 1.7.8 2.7.8v3.1c-1.4 0-2.9-.4-4.1-1.2v6.4c0 3.1-2.5 5.6-5.6 5.6S5.5 19 5.5 15.9s2.5-5.6 5.6-5.6c.3 0 .7 0 1 .1v3.2a2.7 2.7 0 0 0-1-.2 2.5 2.5 0 0 0 0 5 2.5 2.5 0 0 0 2.5-2.5V3h2.1Z"></path>
                       </svg>
@@ -4000,8 +4845,8 @@
                     <li><span data-i18n="contact.monFri">Pon — Pt</span><strong>10:00 — 20:00</strong></li>
                     <li><span data-i18n="contact.sat">Sobota</span><strong>10:00 — 20:00</strong></li>
                     <li><span data-i18n="contact.sun">Niedziela</span><strong>10:00 — 18:00</strong></li>
-                    <li><span data-i18n="contact.phone">Telefon</span><strong>+48 532 377 701</strong></li>
-                    <li><span data-i18n="contact.address">Adres</span><strong>ul. Przykładowa 12</strong></li>
+                    <li><span data-i18n="contact.phone">Telefon</span><strong data-dogma-contact-phone-display>+48 532 377 701</strong></li>
+                    <li><span data-i18n="contact.address">Adres</span><strong data-dogma-contact-address>ul. Przykładowa 12A, Wrocław</strong></li>
                   </ul>
                 </article>
               </div>
@@ -4014,21 +4859,19 @@
 
   <div class="mobile-version" id="mobile-version">
     <header class="app-top">
-      <a class="icon-btn" href="https://mrozowski-automation-production.up.railway.app/?page=demos#demos" aria-label="Wróć do wyboru">
-        ←
-      </a>
+      <button class="site-settings-btn icon-btn site-settings-btn--mobile" type="button" data-site-settings-btn aria-expanded="false" aria-haspopup="menu" aria-controls="siteSettingsPop" aria-label="Ustawienia">⚙</button>
 
       <div class="logo-pill">
         <img class="mobile-logo-img" src="/monarch-logo.png" alt="MONARCH" />
       </div>
-
-      <a class="icon-btn" href="tel:+48532377701" aria-label="Zadzwoń">☎</a>
 
       <div class="lang-switcher mobile-lang-switcher" aria-label="Language switcher">
         <button class="lang-btn active" type="button" data-lang="pl">PL</button>
         <button class="lang-btn" type="button" data-lang="ru">RU</button>
         <button class="lang-btn" type="button" data-lang="en">EN</button>
       </div>
+
+      <a class="icon-btn" href="tel:+48532377701" aria-label="Zadzwoń" data-dogma-contact="phone">☎</a>
     </header>
 
     <nav class="section-nav" aria-label="Nawigacja mobilna">
@@ -4056,23 +4899,54 @@
         </div>
 
         <div class="screen-body">
-          <div class="hero-photo-card">
-            <div class="image-fallback">MON<br />ARCH</div>
-            <div class="mobile-hero-floating">
-              <span>BARBER • CUT • RITUAL</span>
-              <strong data-i18n="mobile.home.card">Barbershop we Wrocławiu z rezerwacją online</strong>
+          <div class="mobile-home-body">
+            <div class="hero-photo-card hero-photo-card--clean">
+              <div class="image-fallback">MON<br />ARCH</div>
             </div>
-          </div>
 
-          <div class="mini-stats">
-            <div class="stat-card">
-              <span data-i18n="mobile.home.stat1">Usługi</span>
-              <strong>12+</strong>
-            </div>
-            <div class="stat-card">
-              <span data-i18n="mobile.home.stat2">Godziny</span>
-              <strong>10–20</strong>
-            </div>
+            <article class="mobile-social-card">
+              <strong data-i18n="mobile.home.socialTitle">Zacznij tutaj</strong>
+              <p data-i18n="mobile.home.socialSub">Najważniejsze kontakty i rezerwacja są pod ręką.</p>
+
+              <div class="mobile-social-row">
+                <a class="mobile-social-icon" href="tel:+48532377701" aria-label="Telefon" data-dogma-contact="phone">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.34 1.77.68 2.6a2 2 0 0 1-.45 2.11L8.1 9.91a16 16 0 0 0 6 6l1.48-1.24a2 2 0 0 1 2.11-.45c.83.34 1.7.56 2.6.68A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                </a>
+
+                <a class="mobile-social-icon" href="https://www.instagram.com/mrozowski.automation/" target="_blank" rel="noopener" aria-label="Instagram" data-dogma-contact="instagram">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"></circle>
+                  </svg>
+                </a>
+
+                <a class="mobile-social-icon" href="https://www.tiktok.com/@mrozowski.automation" target="_blank" rel="noopener" aria-label="TikTok" data-dogma-contact="tiktok">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M15.7 3c.2 1.6 1.1 3 2.4 3.8.8.5 1.7.8 2.7.8v3.1c-1.4 0-2.9-.4-4.1-1.2v6.4c0 3.1-2.5 5.6-5.6 5.6S5.5 19 5.5 15.9s2.5-5.6 5.6-5.6c.3 0 .7 0 1 .1v3.2a2.7 2.7 0 0 0-1-.2 2.5 2.5 0 0 0 0 5 2.5 2.5 0 0 0 2.5-2.5V3h2.1Z"></path>
+                  </svg>
+                </a>
+
+                <a class="mobile-social-maps mobile-social-icon" href="#" onclick="event.preventDefault(); openMapsRoute();" data-i18n="mobile.home.routeShort" aria-label="Dojazd">Dojazd</a>
+              </div>
+
+              <button class="mobile-card-btn mobile-card-btn--primary" type="button" data-open-booking data-i18n="mobile.home.bookCta">ZAREZERWUJ TERMIN</button>
+
+              <button class="mobile-card-btn" type="button" onclick="openMapsRoute()" data-i18n="mobile.home.routeShort">DOJAZD</button>
+
+              <div class="mobile-compact-info">
+                <div class="mobile-compact-info-row">
+                  <span data-i18n="mobile.home.addrLabel">Adres</span>
+                  <strong data-dogma-contact-address>ul. Przykładowa 12A, Wrocław</strong>
+                </div>
+                <div class="mobile-compact-info-row">
+                  <span data-i18n="mobile.home.hoursLabel">Godziny</span>
+                  <strong data-dogma-contact-hours>Pn–Sob 10:00–20:00</strong>
+                </div>
+              </div>
+            </article>
           </div>
         </div>
       </section>
@@ -4085,11 +4959,11 @@
             <span class="gold" data-i18n="mobile.services.titleB">usługę.</span>
           </h2>
           <p class="page-sub" data-i18n="mobile.services.sub">
-            Przesuń karty i wybierz usługę.
+            Przewiń w dół. Karty usług są pionowe, pełnej szerokości.
           </p>
         </div>
 
-        <div class="services-list">
+        <div class="services-list" data-admin-zone="mobile-services">
           <article class="service-card">
             <div class="service-img haircut"></div>
             <div class="service-card-header">
@@ -4104,7 +4978,7 @@
               <span>haircut</span>
               <span>clean</span>
             </div>
-            <button class="mobile-card-btn" type="button" data-open-booking data-i18n="mobile.services.choose">
+            <button class="mobile-card-btn" type="button" data-open-booking data-booking-service="haircut" data-i18n="mobile.services.choose">
               Wybierz usługę
             </button>
           </article>
@@ -4123,7 +4997,7 @@
               <span>combo</span>
               <span>premium</span>
             </div>
-            <button class="mobile-card-btn" type="button" data-open-booking data-i18n="mobile.services.choose">
+            <button class="mobile-card-btn" type="button" data-open-booking data-booking-service="combo" data-i18n="mobile.services.choose">
               Wybierz usługę
             </button>
           </article>
@@ -4142,7 +5016,7 @@
               <span>beard</span>
               <span>kontur</span>
             </div>
-            <button class="mobile-card-btn" type="button" data-open-booking data-i18n="mobile.services.choose">
+            <button class="mobile-card-btn" type="button" data-open-booking data-booking-service="beard-trim" data-i18n="mobile.services.choose">
               Wybierz usługę
             </button>
           </article>
@@ -4157,11 +5031,11 @@
             <span class="gold" data-i18n="mobile.masters.titleB">swój styl.</span>
           </h2>
           <p class="page-sub" data-i18n="mobile.masters.sub">
-            Przesuń karty i wybierz barbera.
+            Przewiń w dół — każdy barber ma osobną kartę.
           </p>
         </div>
 
-        <div class="masters-mobile-list">
+        <div class="masters-mobile-list" data-admin-zone="mobile-barbers">
           <article class="mobile-master-card">
             <div class="mobile-master-photo tymur"></div>
             <strong>Tymur</strong>
@@ -4214,11 +5088,11 @@
             <span class="gold" data-i18n="mobile.gallery.titleB">całość.</span>
           </h2>
           <p class="page-sub" data-i18n="mobile.gallery.sub">
-            Przesuń realizacje i zobacz klimat MONARCH.
+            Przewiń w dół i zobacz klimat MONARCH — karty są ułożone pionowo.
           </p>
         </div>
 
-        <div class="gallery-mobile-list">
+        <div class="gallery-mobile-list" data-admin-zone="mobile-gallery">
           <article class="mobile-gallery-card">
             <div class="mobile-gallery-photo cut"></div>
             <strong>Clean haircut</strong>
@@ -4320,7 +5194,7 @@
           <article class="location-card">
             <div class="address-box">
               <strong>MONARCH BARBERSHOP</strong>
-              <p>ul. Przykładowa 12, Wrocław</p>
+              <p data-dogma-contact-address>ul. Przykładowa 12A, Wrocław</p>
             </div>
 
             <div class="map-glass" onclick="openMapsRoute()">
@@ -4331,7 +5205,7 @@
 
             <div class="dual-actions">
               <button class="cta-btn" type="button" data-open-booking data-i18n="mobile.location.book">Rezerwuj</button>
-              <button class="ghost-btn" type="button" onclick="openMapsRoute()" data-i18n="mobile.location.map">Mapa</button>
+              <button class="ghost-btn" type="button" onclick="openMapsRoute()" data-i18n="mobile.location.map">MAPA</button>
             </div>
           </article>
         </div>
@@ -4432,7 +5306,7 @@
               </svg>
             </a>
 
-            <a href="https://www.tiktok.com/@mrozowski.automation" target="_blank" rel="noopener" aria-label="TikTok">
+            <a href="https://www.tiktok.com/@mrozowski.automation" target="_blank" rel="noopener" aria-label="TikTok" data-dogma-contact="tiktok">
               <svg class="social-icon-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M14 4v10.2a4.2 4.2 0 1 1-4.2-4.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
                 <path d="M14 5c1.1 3 3 4.6 6 4.8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
@@ -4606,7 +5480,7 @@
 
                   <div class="barber-slider-card">
                     <div class="barber-slide-photo" id="barberSlidePhoto">
-                      <img src="/images/barbers/tymur.jpg" alt="Barber" class="barber-photo-img" />
+                      <img src="/tymur.png" alt="Barber" class="barber-photo-img" />
                     </div>
 
                     <div class="barber-slide-info">
@@ -4731,7 +5605,7 @@
                     <a class="nav-btn" href="https://www.google.com/maps/search/?api=1&query=Wroclaw" target="_blank" rel="noopener">
                       Lokalizacja
                     </a>
-                    <button class="nav-btn" type="button" onclick="callDogma()">
+                    <button class="nav-btn" type="button" onclick="callMonarchPhone()">
                       Zadzwoń: 532 377 701
                     </button>
                   </div>
@@ -4757,15 +5631,12 @@
     const faqSheet = document.getElementById("faqSheet");
     const faqSheetTitle = document.getElementById("faqSheetTitle");
     const faqSheetAnswer = document.getElementById("faqSheetAnswer");
+    const siteSettingsPop = document.getElementById("siteSettingsPop");
+    const productInfoSheet = document.getElementById("productInfoSheet");
+    const ADMIN_TOKEN_KEY = "dogma_admin_token";
 
     const GOOGLE_REVIEWS_URL = "#";
     const MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Wroclaw";
-
-    let lastScrollY = window.scrollY;
-    let lastMobileScrollTop = 0;
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let ticking = false;
 
     const translations = {
       pl: {
@@ -4779,8 +5650,10 @@
         "nav.contact": "Kontakt",
 
         "common.call": "Zadzwoń",
-        "common.book": "Zarezerwuj termin",
-        "common.route": "Sprawdź dojazd",
+        "common.book": "ZAREZERWUJ TERMIN",
+        "common.route": "Dojazd",
+        "mobile.home.bookCta": "ZAREZERWUJ TERMIN",
+        "mobile.home.routeShort": "Dojazd",
 
         "hero.chip": "MONARCH BARBERSHOP",
         "hero.titleA": "Fryzura zaczyna się",
@@ -4893,16 +5766,20 @@
         "mobile.home.card": "Barbershop we Wrocławiu z rezerwacją online",
         "mobile.home.stat1": "Usługi",
         "mobile.home.stat2": "Godziny",
+        "mobile.home.socialTitle": "Zacznij tutaj",
+        "mobile.home.socialSub": "Najważniejsze kontakty i rezerwacja są pod ręką.",
+        "mobile.home.addrLabel": "Adres",
+        "mobile.home.hoursLabel": "Godziny",
         "mobile.services.titleA": "Wybierz",
         "mobile.services.titleB": "usługę.",
-        "mobile.services.sub": "Przesuń karty i wybierz usługę.",
+        "mobile.services.sub": "Przewiń w dół. Karty usług są pionowe, pełnej szerokości.",
         "mobile.services.choose": "Wybierz usługę",
         "mobile.masters.titleA": "Każdy ma",
         "mobile.masters.titleB": "swój styl.",
-        "mobile.masters.sub": "Przesuń karty i wybierz barbera.",
+        "mobile.masters.sub": "Przewiń w dół — każdy barber ma osobną kartę.",
         "mobile.gallery.titleA": "Detal robi",
         "mobile.gallery.titleB": "całość.",
-        "mobile.gallery.sub": "Przesuń realizacje i zobacz klimat MONARCH.",
+        "mobile.gallery.sub": "Przewiń w dół i zobacz klimat MONARCH — karty są ułożone pionowo.",
         "mobile.gallery.card1": "Czysta forma, równa linia i fryzura, która trzyma kształt.",
         "mobile.gallery.card2": "Broda z proporcją, konturem i wykończeniem bez przypadkowości.",
         "mobile.gallery.card3": "Włosy i broda w jednym rytmie — spójny efekt po całej wizycie.",
@@ -4913,8 +5790,8 @@
         "mobile.reviews.sub": "Przewiń w dół i zobacz przykładowe opinie klientów.",
         "mobile.location.titleA": "Barbershop we",
         "mobile.location.titleB": "Wrocławiu.",
-        "mobile.location.book": "Rezerwuj",
-        "mobile.location.map": "Mapa",
+        "mobile.location.book": "REZERWUJ",
+        "mobile.location.map": "MAPA",
         "mobile.faq.titleA": "Krótko.",
         "mobile.faq.titleB": "Bez chaosu.",
         "mobile.contact.titleA": "Zadzwoń albo",
@@ -4933,8 +5810,11 @@
       "nav.location": "Локация",
       "nav.contact": "Контакт",
       "common.call": "Позвонить",
-      "common.book": "Записаться",
+      "common.book": "ЗАПИСАТЬСЯ",
       "common.route": "Маршрут",
+      "mobile.home.bookCta": "ЗАПИСАТЬСЯ",
+      "mobile.home.routeShort": "Карта",
+      "nav.faq": "FAQ",
       "hero.titleA": "Стрижка начинается",
       "hero.titleB": "с нормальной записи.",
       "hero.sub": "Барбершоп во Вроцлаве с удобной онлайн-записью. Выбери услугу, барбера, день и время — без звонков, ожидания и хаоса в сообщениях.",
@@ -4942,6 +5822,13 @@
       "mobile.home.titleB": "без хаоса.",
       "mobile.home.sub": "Выбери услугу, барбера и время онлайн — быстро, конкретно, удобно.",
       "mobile.home.card": "Барбершоп во Вроцлаве с онлайн-записью",
+      "mobile.home.socialTitle": "Начни здесь",
+      "mobile.home.socialSub": "Контакты и запись под рукой.",
+      "mobile.home.addrLabel": "Адрес",
+      "mobile.home.hoursLabel": "Часы",
+      "mobile.services.sub": "Листай вниз. Карточки услуг вертикальные, на всю ширину.",
+      "mobile.masters.sub": "Листай вниз — у каждого барбера своя карточка.",
+      "mobile.gallery.sub": "Листай вниз и смотри атмосферу MONARCH.",
       "mobile.services.titleA": "Выбери",
       "mobile.services.titleB": "услугу.",
       "mobile.services.choose": "Выбрать услугу",
@@ -4950,7 +5837,9 @@
       "mobile.contact.sub": "Онлайн быстрее всего.",
       "reviews.google": "Смотреть отзывы в Google",
       "reviews.more": "Больше отзывов",
-      "reviews.moreText": "Ссылку позже можно заменить на реальный профиль Google барбершопа."
+      "reviews.moreText": "Ссылку позже можно заменить на реальный профиль Google барбершопа.",
+      "mobile.location.book": "ЗАПИСАТЬСЯ",
+      "mobile.location.map": "КАРТА"
     };
 
     translations.en = {
@@ -4963,8 +5852,10 @@
       "nav.location": "Location",
       "nav.contact": "Contact",
       "common.call": "Call",
-      "common.book": "Book now",
-      "common.route": "Directions",
+      "common.book": "BOOK NOW",
+      "common.route": "Map",
+      "mobile.home.bookCta": "BOOK NOW",
+      "mobile.home.routeShort": "Map",
       "hero.titleA": "A haircut starts",
       "hero.titleB": "with the right time.",
       "hero.sub": "A barbershop in Wrocław with easy online booking. Choose a service, barber, date and time — no calls, no waiting, no message chaos.",
@@ -4972,6 +5863,13 @@
       "mobile.home.titleB": "without chaos.",
       "mobile.home.sub": "Choose a service, barber and time online — fast, clear, convenient.",
       "mobile.home.card": "Barbershop in Wrocław with online booking",
+      "mobile.home.socialTitle": "Start here",
+      "mobile.home.socialSub": "Key contacts and booking in one place.",
+      "mobile.home.addrLabel": "Address",
+      "mobile.home.hoursLabel": "Hours",
+      "mobile.services.sub": "Scroll down. Service cards are vertical and full width.",
+      "mobile.masters.sub": "Scroll down — each barber has their own card.",
+      "mobile.gallery.sub": "Scroll down to see the MONARCH vibe — cards are stacked vertically.",
       "mobile.services.titleA": "Choose",
       "mobile.services.titleB": "a service.",
       "mobile.services.choose": "Choose service",
@@ -4980,8 +5878,42 @@
       "mobile.contact.sub": "Online is fastest.",
       "reviews.google": "See Google reviews",
       "reviews.more": "See more reviews",
-      "reviews.moreText": "You can later replace this with the real Google profile link."
+      "reviews.moreText": "You can later replace this with the real Google profile link.",
+      "mobile.location.book": "BOOK",
+      "mobile.location.map": "MAP"
     };
+
+    (function mergeMonarchBookingI18n() {
+      const bk = window.MONARCH_BOOKING_KEYS;
+      if (!bk) return;
+      Object.assign(translations.pl, bk.pl || {});
+      Object.assign(translations.en, bk.en || {});
+      Object.assign(translations.ru, bk.ru || bk.en || {});
+    })();
+
+    window.DOGMA_TRANSLATIONS = translations;
+
+    function applyI18nStrings() {
+      const lang = getCurrentLang();
+      const dictionary = translations[lang] || translations.pl;
+
+      document.querySelectorAll("[data-i18n]").forEach((element) => {
+        const key = element.dataset.i18n;
+        if (dictionary[key]) element.textContent = dictionary[key];
+      });
+
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+        const key = element.dataset.i18nPlaceholder;
+        if (dictionary[key]) element.setAttribute("placeholder", dictionary[key]);
+      });
+
+      document.querySelectorAll("[data-i18n-aria]").forEach((element) => {
+        const key = element.dataset.i18nAria;
+        if (dictionary[key]) element.setAttribute("aria-label", dictionary[key]);
+      });
+    }
+
+    window.__DOGMA_applyI18nStrings = applyI18nStrings;
 
     const faqAnswers = {
       pl: {
@@ -5017,23 +5949,49 @@
     };
 
     function getCurrentLang() {
-      return localStorage.getItem("monarch_lang") || "pl";
+      try {
+        const m = localStorage.getItem("monarch_lang");
+        if (m === "pl" || m === "en" || m === "ru") return m;
+        const d = localStorage.getItem("dogma_lang");
+        if (d === "en") return "en";
+        if (d === "ru") return "ru";
+        if (d === "ua") return "ru";
+        return "pl";
+      } catch {
+        return "pl";
+      }
     }
 
     function setLanguage(lang) {
-      const dictionary = translations[lang] || translations.pl;
-      document.documentElement.lang = lang;
+      const safe = lang === "en" || lang === "ru" ? lang : "pl";
+      const dictionary = translations[safe] || translations.pl;
+      const docLang = safe === "ru" ? "ru" : safe === "en" ? "en" : "pl";
+      document.documentElement.lang = docLang;
 
-      document.querySelectorAll("[data-i18n]").forEach(element => {
+      document.querySelectorAll("[data-i18n]").forEach((element) => {
         const key = element.dataset.i18n;
         if (dictionary[key]) element.textContent = dictionary[key];
       });
 
-      document.querySelectorAll(".lang-btn").forEach(button => {
-        button.classList.toggle("active", button.dataset.lang === lang);
+      document.querySelectorAll(".lang-btn").forEach((button) => {
+        button.classList.toggle("active", button.dataset.lang === safe);
       });
 
-      localStorage.setItem("monarch_lang", lang);
+      localStorage.setItem("monarch_lang", safe);
+      try {
+        localStorage.setItem("dogma_lang", safe);
+      } catch {
+        /* ignore */
+      }
+
+      applyI18nStrings();
+
+      if (typeof window.refreshBookingWizardLanguage === "function") {
+        window.refreshBookingWizardLanguage();
+      }
+      if (typeof window.dogmaReapplySiteContent === "function") {
+        window.dogmaReapplySiteContent();
+      }
     }
 
     function bindLanguageSwitcher() {
@@ -5050,12 +6008,150 @@
       });
     }
 
+    function positionSiteSettingsPop(anchor) {
+      if (!siteSettingsPop || !anchor) return;
+      const r = anchor.getBoundingClientRect();
+      const pad = 8;
+      siteSettingsPop.style.top = `${Math.round(r.bottom + pad)}px`;
+      siteSettingsPop.style.left = `${Math.round(r.left)}px`;
+    }
+
+    function closeSiteSettings() {
+      siteSettingsPop?.classList.remove("open");
+      document.querySelectorAll("[data-site-settings-btn]").forEach((b) => {
+        b.setAttribute("aria-expanded", "false");
+      });
+    }
+
+    function closeProductInfo() {
+      productInfoSheet?.classList.remove("open");
+      productInfoSheet?.setAttribute("aria-hidden", "true");
+    }
+
+    function closeAdminAccess() {
+      document.getElementById("adminAccessSheet")?.classList.remove("open");
+      document.getElementById("adminAccessSheet")?.setAttribute("aria-hidden", "true");
+    }
+
+    function openAdminAccess() {
+      closeSiteSettings();
+      closeProductInfo();
+      const m = document.getElementById("adminAccessSheet");
+      m?.classList.add("open");
+      m?.setAttribute("aria-hidden", "false");
+    }
+
+    function openProductInfo() {
+      closeSiteSettings();
+      closeAdminAccess();
+      productInfoSheet?.classList.add("open");
+      productInfoSheet?.setAttribute("aria-hidden", "false");
+    }
+
+    function bindSiteSettings() {
+      document.querySelectorAll("[data-site-settings-btn]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const wasOpen = siteSettingsPop?.classList.contains("open");
+          const thisIsActive = btn.getAttribute("aria-expanded") === "true";
+          if (wasOpen && thisIsActive) {
+            closeSiteSettings();
+            return;
+          }
+          closeSiteSettings();
+          siteSettingsPop?.classList.add("open");
+          document.querySelectorAll("[data-site-settings-btn]").forEach((b) => {
+            b.setAttribute("aria-expanded", b === btn ? "true" : "false");
+          });
+          positionSiteSettingsPop(btn);
+        });
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!siteSettingsPop?.classList.contains("open")) return;
+        const t = e.target;
+        if (t && t.closest && (t.closest("#siteSettingsPop") || t.closest("[data-site-settings-btn]"))) return;
+        closeSiteSettings();
+      });
+
+      window.addEventListener("resize", () => {
+        const openBtn = document.querySelector('[data-site-settings-btn][aria-expanded="true"]');
+        if (siteSettingsPop?.classList.contains("open") && openBtn) positionSiteSettingsPop(openBtn);
+      });
+
+      document.getElementById("openProductInfoBtn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        openProductInfo();
+      });
+
+      document.getElementById("openAdminAccessBtn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        openAdminAccess();
+      });
+
+      document.querySelectorAll("[data-close-product-info]").forEach((el) => {
+        el.addEventListener("click", () => closeProductInfo());
+      });
+
+      document.querySelectorAll("[data-close-admin-access]").forEach((el) => {
+        el.addEventListener("click", () => closeAdminAccess());
+      });
+
+      const adminForm = document.getElementById("adminAccessForm");
+      const adminStatus = document.getElementById("adminAccessStatus");
+      const adminSubmit = document.getElementById("adminAccessSubmit");
+      adminForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const login = document.getElementById("adminAccessLogin")?.value?.trim() || "";
+        const password = document.getElementById("adminAccessPassword")?.value || "";
+        if (!login || !password) {
+          if (adminStatus) adminStatus.textContent = "Wpisz login i hasło.";
+          return;
+        }
+        if (adminSubmit) {
+          adminSubmit.disabled = true;
+          adminSubmit.textContent = "Logowanie...";
+        }
+        if (adminStatus) adminStatus.textContent = "";
+        try {
+          const res = await fetch("/api/admin/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify({ login, password })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data?.token) {
+            if (adminStatus) adminStatus.textContent = "Błędny login lub hasło.";
+            return;
+          }
+          localStorage.setItem(ADMIN_TOKEN_KEY, String(data.token));
+          window.location.href = "/admin/";
+        } catch (_e) {
+          if (adminStatus) adminStatus.textContent = "Błąd połączenia. Spróbuj ponownie.";
+        } finally {
+          if (adminSubmit) {
+            adminSubmit.disabled = false;
+            adminSubmit.textContent = "Zaloguj";
+          }
+        }
+      });
+    }
+
     function openBooking() {
       if (!overlay) return;
+
+      closeSiteSettings();
+      closeProductInfo();
+      closeAdminAccess();
 
       overlay.classList.add("open");
       overlay.setAttribute("aria-hidden", "false");
       document.body.classList.add("booking-open");
+
+      if (typeof window.dogmaSyncBookingStep1Nav === "function") {
+        window.dogmaSyncBookingStep1Nav();
+      }
 
       if (flash) {
         flash.classList.add("active");
@@ -5072,23 +6168,40 @@
     }
 
     function bindBookingButtons() {
-      document.querySelectorAll("[data-open-booking]").forEach(button => {
-        button.addEventListener("click", openBooking);
-      });
+      document.addEventListener(
+        "click",
+        (event) => {
+          const opener = event.target.closest("[data-open-booking]");
+          if (!opener) return;
+          event.preventDefault();
+          const sid = opener.getAttribute("data-booking-service");
+          window.__DOGMA_BOOKING_PRESELECT_SERVICE = sid && sid.trim() ? sid.trim() : "";
+          openBooking();
+        },
+        true
+      );
+
+      document.addEventListener(
+        "click",
+        (event) => {
+          const closer = event.target.closest("[data-close-booking]");
+          if (!closer) return;
+          event.preventDefault();
+          closeBooking();
+        },
+        true
+      );
 
       document.getElementById("bookingCloseBtn")?.addEventListener("click", closeBooking);
 
-      overlay?.addEventListener("click", event => {
+      overlay?.addEventListener("click", (event) => {
         if (event.target === overlay) closeBooking();
       });
     }
 
     function openMapsRoute() {
-      window.open(MAPS_URL, "_blank");
-    }
-
-    function callDogma() {
-      window.location.href = "tel:+48532377701";
+      const url = window.DOGMA_MAPS_URL || MAPS_URL;
+      window.open(url, "_blank");
     }
 
     function openFaq(key) {
@@ -5096,6 +6209,9 @@
       const data = faqAnswers[lang]?.[key] || faqAnswers.pl[key];
 
       if (!faqSheet || !data) return;
+
+      closeSiteSettings();
+      closeAdminAccess();
 
       faqSheetTitle.textContent = data[0];
       faqSheetAnswer.textContent = data[1];
@@ -5144,12 +6260,14 @@
 
           const activePage = document.querySelector(`.page[data-page-view="${page}"]`);
           const scrollables = activePage?.querySelectorAll(
-            ".reviews-mobile-list, .faq-mobile-list"
+            ".mobile-home-body, .reviews-mobile-list, .faq-mobile-list, .services-list, .masters-mobile-list, .gallery-mobile-list, .bio-mobile-list"
           );
 
           scrollables?.forEach(item => {
             item.scrollTo({ top: 0, left: 0, behavior: "smooth" });
           });
+
+          activePage?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
 
           if (flash && window.innerWidth <= 900) {
             flash.classList.add("active");
@@ -5160,86 +6278,16 @@
     }
 
     function bindMobileSmartHeader() {
-      document.addEventListener("touchstart", event => {
-        const touch = event.touches[0];
-        touchStartX = touch.clientX;
-        touchStartY = touch.clientY;
-      }, { passive: true });
-
-      const verticalScrollers = document.querySelectorAll(".reviews-mobile-list, .faq-mobile-list");
-
-      verticalScrollers.forEach(scroller => {
-        scroller.addEventListener("scroll", () => {
-          if (!mobileVersion || window.innerWidth > 900) return;
-
-          const current = scroller.scrollTop;
-          const delta = current - lastMobileScrollTop;
-
-          if (delta > 8 && current > 40) {
-            mobileVersion.classList.add("mobile-header-hidden");
-          }
-
-          if (delta < -4 || current < 20) {
-            mobileVersion.classList.remove("mobile-header-hidden");
-          }
-
-          lastMobileScrollTop = Math.max(current, 0);
-        }, { passive: true });
-      });
-
-      document.addEventListener("touchmove", event => {
-        if (!mobileVersion || window.innerWidth > 900) return;
-
-        const touch = event.touches[0];
-        const dx = Math.abs(touch.clientX - touchStartX);
-        const dy = Math.abs(touch.clientY - touchStartY);
-
-        if (dx > dy) return;
-
-        if (touch.clientY < touchStartY - 18) {
-          mobileVersion.classList.add("mobile-header-hidden");
-        }
-
-        if (touch.clientY > touchStartY + 12) {
-          mobileVersion.classList.remove("mobile-header-hidden");
-        }
-      }, { passive: true });
+      /* Scroll lives on .page.active (see mobile CSS); header stays visible like DOGMA. */
     }
-
-    function handleDesktopScroll() {
-      if (window.innerWidth <= 900) return;
-
-      const currentY = window.scrollY;
-
-      if (siteHeader) {
-        const delta = currentY - lastScrollY;
-        const goingDown = delta > 4;
-        const goingUp = delta < -2;
-
-        if (goingDown && currentY > 120) {
-          siteHeader.classList.add("header-hidden");
-        }
-
-        if (goingUp || currentY < 70) {
-          siteHeader.classList.remove("header-hidden");
-        }
-      }
-
-      lastScrollY = Math.max(currentY, 0);
-      ticking = false;
-    }
-
-    window.addEventListener("scroll", () => {
-      if (!ticking) {
-        window.requestAnimationFrame(handleDesktopScroll);
-        ticking = true;
-      }
-    }, { passive: true });
 
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") {
         closeBooking();
         closeFaq();
+        closeSiteSettings();
+        closeProductInfo();
+        closeAdminAccess();
       }
     });
 
@@ -5249,8 +6297,10 @@
     bindMobileNavigation();
     bindMobileSmartHeader();
     bindFaq();
+    bindSiteSettings();
   </script>
 
   <script src="./script.js"></script>
+  <script src="./content-hydrate.js"></script>
 </body>
 </html>

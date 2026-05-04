@@ -1,14 +1,15 @@
-console.log("🚀 COPY1 SERVER STARTED");
+console.log("🚀 MONARCH booking server started");
 
+import "dotenv/config";
 import path from "path";
+import { mkdir, readFile, writeFile } from "fs/promises";
+import crypto from "crypto";
 import { fileURLToPath } from "url";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import multer from "multer";
 import { google } from "googleapis";
 import axios from "axios";
-
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,7 +18,7 @@ const app = express();
 
 const PORT = Number(process.env.PORT) || 3000;
 const TIMEZONE = process.env.TIMEZONE || "Europe/Warsaw";
-const CONTACT_PHONE = process.env.CONTACT_PHONE || "792897149";
+const CONTACT_PHONE = process.env.CONTACT_PHONE || "532377701";
 const OWNER_NOTIFICATION_PHONE = process.env.OWNER_NOTIFICATION_PHONE || "";
 const GOOGLE_CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID || "primary";
 
@@ -30,8 +31,194 @@ const requiredEnv = [
 
 const missingEnv = requiredEnv.filter((key) => !process.env[key]);
 
+const hasEnvAdminCredentials =
+  Boolean(process.env.ADMIN_LOGIN?.trim()) && Boolean(process.env.ADMIN_PASSWORD?.trim());
+if (!hasEnvAdminCredentials) {
+  console.warn(
+    "[MONARCH Admin] ADMIN_LOGIN / ADMIN_PASSWORD missing — using development defaults (admin / monarch)."
+  );
+}
+const ADMIN_LOGIN = process.env.ADMIN_LOGIN?.trim() || "admin";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD?.trim() || "monarch";
+
+const DATA_DIR = path.join(__dirname, "data");
+const CONTENT_FILE = path.join(DATA_DIR, "site-content.json");
+const ADMIN_UPLOADS_DIR = path.join(__dirname, "assets", "admin-uploads");
+const ADMIN_DIR = path.join(__dirname, "admin");
+
+const EMPTY_SITE_CONTENT = {
+  bioGallery: [],
+  bioDesktopPreview: [],
+  worksGallery: [],
+  effectPhotos: [],
+  effectVideos: [],
+  vibeGallery: [],
+  barbers: [],
+  landingServices: [],
+  bookingConfig: null,
+  contacts: {},
+  socials: {}
+};
+
+const adminSessions = new Map();
+const ADMIN_SESSION_MS = 8 * 60 * 60 * 1000;
+
+let siteContentCache = { data: null, loadedAt: 0 };
+const SITE_CONTENT_CACHE_MS = 1500;
+
+function invalidateSiteContentCache() {
+  siteContentCache = { data: null, loadedAt: 0 };
+}
+
+function requireAdminAuth(req, res, next) {
+  const auth = req.headers.authorization || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  const exp = adminSessions.get(token);
+  if (!token || !exp || exp < Date.now()) {
+    return res.status(401).json({ ok: false, error: "Unauthorized" });
+  }
+  next();
+}
+
+function safeUploadFilename(original) {
+  const ext = path.extname(original || "").toLowerCase();
+  const allowed = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".mp4", ".webm", ".mov"]);
+  if (!allowed.has(ext)) {
+    throw new Error(`Invalid file type: ${ext || "missing extension"}`);
+  }
+  return `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${ext}`;
+}
+
+async function ensureContentDirs() {
+  await mkdir(DATA_DIR, { recursive: true });
+  await mkdir(ADMIN_UPLOADS_DIR, { recursive: true });
+}
+
+async function readSiteContent() {
+  await ensureContentDirs();
+  try {
+    const raw = await readFile(CONTENT_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    return { ...EMPTY_SITE_CONTENT, ...parsed };
+  } catch (err) {
+    if (err && err.code === "ENOENT") {
+      await writeFile(CONTENT_FILE, `${JSON.stringify(EMPTY_SITE_CONTENT, null, 2)}\n`, "utf8");
+      return { ...EMPTY_SITE_CONTENT };
+    }
+    throw err;
+  }
+}
+
+async function loadSiteContentCached() {
+  const now = Date.now();
+  if (siteContentCache.data && now - siteContentCache.loadedAt < SITE_CONTENT_CACHE_MS) {
+    return siteContentCache.data;
+  }
+  const data = await readSiteContent();
+  siteContentCache = { data, loadedAt: now };
+  return data;
+}
+
+const adminUploadStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, ADMIN_UPLOADS_DIR);
+  },
+  filename: (_req, file, cb) => {
+    try {
+      cb(null, safeUploadFilename(file.originalname));
+    } catch (e) {
+      cb(e);
+    }
+  }
+});
+
+const adminUpload = multer({
+  storage: adminUploadStorage,
+  limits: { fileSize: 80 * 1024 * 1024 }
+});
+
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "12mb" }));
+
+app.use((req, res, next) => {
+  if ((req.method === "GET" || req.method === "HEAD") && req.path === "/admin") {
+    return res.redirect(301, "/admin/");
+  }
+  next();
+});
+
+app.use(
+  "/admin",
+  express.static(ADMIN_DIR, {
+    index: "index.html",
+    etag: false,
+    maxAge: 0,
+    setHeaders(res) {
+      res.setHeader("Cache-Control", "no-store");
+    }
+  })
+);
+
+app.post("/api/admin/login", (req, res) => {
+  const body = req.body || {};
+  if (body.login !== ADMIN_LOGIN || body.password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ ok: false, error: "Invalid credentials" });
+  }
+  const token = crypto.randomBytes(32).toString("hex");
+  adminSessions.set(token, Date.now() + ADMIN_SESSION_MS);
+  res.json({ ok: true, token });
+});
+
+app.get("/api/content", async (_req, res) => {
+  try {
+    const data = await readSiteContent();
+    res.json(data);
+  } catch (e) {
+    console.error("GET /api/content:", e);
+    res.status(500).json({ ok: false, error: "Failed to read content" });
+  }
+});
+
+app.get("/api/admin/content", async (_req, res) => {
+  try {
+    const data = await readSiteContent();
+    res.json(data);
+  } catch (e) {
+    console.error("GET /api/admin/content:", e);
+    res.status(500).json({ ok: false, error: "Failed to read content" });
+  }
+});
+
+app.post("/api/admin/content", requireAdminAuth, async (req, res) => {
+  try {
+    const body = req.body;
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return res.status(400).json({ ok: false, error: "Invalid JSON body" });
+    }
+    const merged = { ...EMPTY_SITE_CONTENT, ...body };
+    await ensureContentDirs();
+    await writeFile(CONTENT_FILE, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
+    invalidateSiteContentCache();
+    res.json({ ok: true });
+  } catch (e) {
+    console.error("POST /api/admin/content:", e);
+    res.status(500).json({ ok: false, error: e.message || "Save failed" });
+  }
+});
+
+app.post("/api/admin/upload", requireAdminAuth, (req, res) => {
+  adminUpload.single("file")(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ ok: false, error: err.message || "Upload failed" });
+    }
+    if (!req.file) {
+      return res.status(400).json({ ok: false, error: "No file" });
+    }
+    const publicPath = `/assets/admin-uploads/${req.file.filename}`;
+    res.json({ ok: true, path: publicPath, filename: req.file.filename });
+  });
+});
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
@@ -263,18 +450,42 @@ function getWeekday(dateStr) {
   return new Date(`${dateStr}T00:00:00`).getDay();
 }
 
-function getWorkingHoursForDate(dateStr) {
-  const day = getWeekday(dateStr);
-
+function defaultWorkingHoursForWeekday(day) {
   if (day === 0) {
-    return { openHour: 10, closeHour: 18 };
+    return { openHour: 10, closeHour: 18, closed: false };
   }
-
-  return { openHour: 10, closeHour: 20 };
+  return { openHour: 10, closeHour: 20, closed: false };
 }
 
-function validateBusinessRules(dateStr, timeStr, durationMinutes) {
-  const { openHour, closeHour } = getWorkingHoursForDate(dateStr);
+async function getWorkingHoursForDate(dateStr) {
+  const day = getWeekday(dateStr);
+  const dayKey = String(day);
+  try {
+    const data = await loadSiteContentCached();
+    const oh = data?.bookingConfig?.openingHours;
+    if (oh && typeof oh === "object") {
+      const rule = oh[dayKey];
+      if (rule && rule.closed) {
+        return { openHour: 0, closeHour: 0, closed: true };
+      }
+      if (rule && typeof rule.openHour === "number" && typeof rule.closeHour === "number") {
+        return { openHour: rule.openHour, closeHour: rule.closeHour, closed: false };
+      }
+    }
+  } catch (e) {
+    console.warn("[MONARCH] openingHours from site content unavailable, using defaults.", e.message);
+  }
+  return defaultWorkingHoursForWeekday(day);
+}
+
+async function validateBusinessRules(dateStr, timeStr, durationMinutes) {
+  const wh = await getWorkingHoursForDate(dateStr);
+  if (wh.closed) {
+    const error = new Error("W wybranym dniu rezerwacja online jest niedostępna");
+    error.statusCode = 400;
+    throw error;
+  }
+  const { openHour, closeHour } = wh;
   const { hour, minute } = parseTimeParts(timeStr);
 
   const startMinutes = hour * 60 + minute;
@@ -330,7 +541,7 @@ async function sendSMS({ phone, message }) {
         params: {
           to: normalizeSmsPhone(phone),
           message,
-          from: process.env.SMS_SENDER || "DOGMA",
+          from: process.env.SMS_SENDER || "MONARCH",
           format: "json"
         },
         headers: {
@@ -345,7 +556,7 @@ async function sendSMS({ phone, message }) {
 
 function buildBookingSms(payload) {
   return [
-    "DOGMA BARBERSHOP:",
+    "MONARCH BARBERSHOP:",
     "Twoja rezerwacja została potwierdzona.",
     `Data: ${formatSmsDate(payload.date)}`,
     `Godzina: ${payload.time}`,
@@ -357,7 +568,7 @@ function buildBookingSms(payload) {
 
 function buildOwnerBookingSms(payload) {
   return [
-    "DOGMA BARBERSHOP",
+    "MONARCH BARBERSHOP",
     "Nowa rezerwacja:",
     `Klient: ${payload.name}`,
     `Telefon: ${payload.phone}`,
@@ -417,8 +628,10 @@ function getBusyIntervalsForBarber(events, barberId) {
     }));
 }
 
-function generateBaseSlotsForDate(dateStr, durationMinutes) {
-  const { openHour, closeHour } = getWorkingHoursForDate(dateStr);
+async function generateBaseSlotsForDate(dateStr, durationMinutes) {
+  const wh = await getWorkingHoursForDate(dateStr);
+  if (wh.closed) return [];
+  const { openHour, closeHour } = wh;
   const slots = [];
   const lastStartMinutes = closeHour * 60 - durationMinutes;
 
@@ -452,7 +665,7 @@ function getRandomItem(items) {
 
 async function getAvailabilityForAuto(dateStr, durationMinutes) {
   const events = await getEventsForDay(dateStr);
-  const baseSlots = generateBaseSlotsForDate(dateStr, durationMinutes);
+  const baseSlots = await generateBaseSlotsForDate(dateStr, durationMinutes);
 
   const availableSlots = baseSlots.filter((time) => {
     const freeBarbers = getFreeBarbersForSlot(events, dateStr, time, durationMinutes);
@@ -461,7 +674,7 @@ async function getAvailabilityForAuto(dateStr, durationMinutes) {
 
   return {
     availableSlots,
-    workingHours: getWorkingHoursForDate(dateStr)
+    workingHours: await getWorkingHoursForDate(dateStr)
   };
 }
 
@@ -469,7 +682,7 @@ async function createEvent(payload) {
   const calendar = getCalendarClient();
 
   const durationMinutes = parseDuration(payload.serviceDuration);
-  validateBusinessRules(payload.date, payload.time, durationMinutes);
+  await validateBusinessRules(payload.date, payload.time, durationMinutes);
 
   const existingEvents = await getEventsForDay(payload.date);
 
@@ -548,7 +761,7 @@ app.get("/api/health", async (_req, res) => {
 
   res.json({
     ok: true,
-    service: "DOGMA booking backend",
+    service: "MONARCH booking backend",
     credentialsReady,
     missingEnv,
     timezone: TIMEZONE,
@@ -656,7 +869,7 @@ app.get("/api/availability", async (req, res) => {
       timeZone: TIMEZONE,
       calendarId: GOOGLE_CALENDAR_ID,
       busy,
-      workingHours: getWorkingHoursForDate(date)
+      workingHours: await getWorkingHoursForDate(date)
     });
   } catch (error) {
     console.error("Availability error message:", error.message);
@@ -800,7 +1013,7 @@ app.get("/api/test-calendar", async (_req, res) => {
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`DOGMA booking app running on port ${PORT}`);
+  console.log(`MONARCH booking app running on port ${PORT}`);
   console.log("PORT:", PORT);
   console.log("TIMEZONE:", TIMEZONE);
   console.log("GOOGLE_CALENDAR_ID:", GOOGLE_CALENDAR_ID);

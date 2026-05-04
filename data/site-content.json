@@ -1,0 +1,844 @@
+{
+  "bioGallery": [
+    {
+      "id": "15c5a87a-7cb3-4e72-a93e-8e6551aa627f",
+      "title": {
+        "pl": "ввв",
+        "ru": "ввв",
+        "en": "ввв"
+      },
+      "description": {
+        "pl": "ввв",
+        "ru": "ввв",
+        "en": "ввв"
+      },
+      "media": {
+        "type": "video",
+        "src": "/assets/admin-uploads/1777919862914-ab9c165909230ac7.mp4",
+        "alt": {
+          "pl": "",
+          "ru": "",
+          "en": ""
+        }
+      },
+      "visible": true,
+      "order": 1
+    }
+  ],
+  "bioDesktopPreview": [
+    {
+      "id": "e7d8d404-c6d8-4af9-b4ff-cf099f74a23d",
+      "title": {
+        "pl": "мм",
+        "ru": "ммм",
+        "en": "ммм"
+      },
+      "description": {
+        "pl": "ааа",
+        "ru": "аак",
+        "en": "ккк"
+      },
+      "media": {
+        "type": "video",
+        "src": "/assets/admin-uploads/1777919903007-fbd4f06816bc2bbf.mp4",
+        "alt": {
+          "pl": "",
+          "ru": "",
+          "en": ""
+        }
+      },
+      "visible": true,
+      "order": 1
+    }
+  ],
+  "worksGallery": [
+    {
+      "id": "wg-1",
+      "order": 1,
+      "visible": true,
+      "title": {
+        "pl": "MONARCH — strzyżenie",
+        "en": "MONARCH — haircut",
+        "ru": "MONARCH — стрижка"
+      },
+      "description": {
+        "pl": "Przykład pracy w MONARCH we Wrocławiu.",
+        "en": "A sample result from MONARCH in Wrocław.",
+        "ru": "Пример работы в MONARCH во Вроцлаве."
+      },
+      "media": {
+        "type": "image",
+        "src": "/clean-haircut.jpg",
+        "alt": {
+          "pl": "",
+          "ru": "",
+          "en": ""
+        }
+      },
+      "alt": {
+        "pl": "Strzyżenie",
+        "en": "Haircut",
+        "ru": "Стрижка"
+      }
+    },
+    {
+      "id": "wg-2",
+      "order": 2,
+      "visible": true,
+      "title": {
+        "pl": "Broda i kontur",
+        "en": "Beard and contour",
+        "ru": "Борода и контур"
+      },
+      "description": {
+        "pl": "Dopracowany kształt brody i czysta linia.",
+        "en": "Shaped beard with a clean line.",
+        "ru": "Аккуратная форма бороды и чистая линия."
+      },
+      "media": {
+        "type": "image",
+        "src": "/sharp-beard.jpg",
+        "alt": {
+          "pl": "",
+          "ru": "",
+          "en": ""
+        }
+      },
+      "alt": {
+        "pl": "Broda",
+        "en": "Beard",
+        "ru": "Борода"
+      }
+    },
+    {
+      "id": "wg-3",
+      "order": 3,
+      "visible": true,
+      "title": {
+        "pl": "Combo",
+        "en": "Combo",
+        "ru": "Комбо"
+      },
+      "description": {
+        "pl": "Włosy i broda w jednej wizycie.",
+        "en": "Hair and beard in one visit.",
+        "ru": "Волосы и борода за один визит."
+      },
+      "media": {
+        "type": "image",
+        "src": "/combo.jpg",
+        "alt": {
+          "pl": "",
+          "ru": "",
+          "en": ""
+        }
+      },
+      "alt": {
+        "pl": "Combo",
+        "en": "Combo",
+        "ru": "Комбо"
+      }
+    },
+    {
+      "id": "wg-4",
+      "order": 4,
+      "visible": true,
+      "title": {
+        "pl": "Klimat salonu",
+        "en": "Shop atmosphere",
+        "ru": "Атмосфера салона"
+      },
+      "description": {
+        "pl": "MONARCH BARBERSHOP — Wrocław.",
+        "en": "MONARCH BARBERSHOP — Wrocław.",
+        "ru": "MONARCH BARBERSHOP — Вроцлав."
+      },
+      "media": {
+        "type": "image",
+        "src": "/marble-bg.png",
+        "alt": {
+          "pl": "",
+          "ru": "",
+          "en": ""
+        }
+      },
+      "alt": {
+        "pl": "Wnętrze",
+        "en": "Interior",
+        "ru": "Интерьер"
+      }
+    }
+  ],
+  "effectPhotos": [],
+  "effectVideos": [],
+  "vibeGallery": [],
+  "barbers": [
+    {
+      "id": "barber-tymur",
+      "order": 1,
+      "visible": true,
+      "barberId": "tymur",
+      "title": {
+        "pl": "Tymur",
+        "en": "Tymur",
+        "ru": "Tymur"
+      },
+      "description": {
+        "pl": "Klasyka, czysta forma i spokojne prowadzenie wizyty.",
+        "en": "Classic cuts, clean shape and calm guidance during the visit.",
+        "ru": "Классика, чистая форма и спокойное ведение визита."
+      },
+      "tags": [
+        "classic cut",
+        "clean shape",
+        "🇷🇺 🇵🇱 🇬🇧"
+      ],
+      "bookCta": {
+        "pl": "Zarezerwuj u Tymura",
+        "en": "Book with Tymur",
+        "ru": "Записаться к Tymur"
+      },
+      "media": {
+        "type": "image",
+        "src": "/tymur.png",
+        "alt": {
+          "pl": "Tymur",
+          "en": "Tymur",
+          "ru": "Tymur"
+        }
+      },
+      "visibleInBooking": true,
+      "performedBookingServiceIds": []
+    },
+    {
+      "id": "barber-dima",
+      "order": 2,
+      "visible": true,
+      "barberId": "dima",
+      "title": {
+        "pl": "Dima",
+        "en": "Dima",
+        "ru": "Dima"
+      },
+      "description": {
+        "pl": "Włosy, broda i dopracowana proporcja bez zbędnego chaosu.",
+        "en": "Hair, beard and balanced proportions without unnecessary chaos.",
+        "ru": "Волосы, борода и выверенные пропорции без лишнего хаоса."
+      },
+      "tags": [
+        "combo",
+        "beard trim",
+        "🇷🇺 🇵🇱 🇬🇧"
+      ],
+      "bookCta": {
+        "pl": "Zarezerwuj u Dimy",
+        "en": "Book with Dima",
+        "ru": "Записаться к Dima"
+      },
+      "media": {
+        "type": "image",
+        "src": "/dima.png",
+        "alt": {
+          "pl": "Dima",
+          "en": "Dima",
+          "ru": "Dima"
+        }
+      },
+      "visibleInBooking": true,
+      "performedBookingServiceIds": []
+    },
+    {
+      "id": "barber-vlad",
+      "order": 3,
+      "visible": true,
+      "barberId": "vlad",
+      "title": {
+        "pl": "Vlad",
+        "en": "Vlad",
+        "ru": "Vlad"
+      },
+      "description": {
+        "pl": "Świeże cięcia, energia i mocniejsze wykończenie stylu.",
+        "en": "Fresh cuts, energy and a bolder finish.",
+        "ru": "Свежие стрижки, энергия и более выразительный финиш."
+      },
+      "tags": [
+        "fresh cut",
+        "modern style",
+        "🇷🇺 🇵🇱 🇬🇧"
+      ],
+      "bookCta": {
+        "pl": "Zarezerwuj u Vlada",
+        "en": "Book with Vlad",
+        "ru": "Записаться к Vlad"
+      },
+      "media": {
+        "type": "image",
+        "src": "/vlad.png",
+        "alt": {
+          "pl": "Vlad",
+          "en": "Vlad",
+          "ru": "Vlad"
+        }
+      },
+      "visibleInBooking": true,
+      "performedBookingServiceIds": []
+    }
+  ],
+  "landingServices": [
+    {
+      "id": "landing-haircut",
+      "order": 1,
+      "visible": true,
+      "title": {
+        "pl": "Strzyżenie / Haircut",
+        "en": "Haircut",
+        "ru": "Стрижка"
+      },
+      "description": {
+        "pl": "Klasyczne albo nowoczesne cięcie dopasowane do twarzy, włosa i codziennego stylu.",
+        "en": "Classic or modern cut matched to face, hair and everyday style.",
+        "ru": "Классическая или современная стрижка под лицо, волосы и повседневный стиль."
+      },
+      "priceDisplay": "90 zł",
+      "buttonLabel": {
+        "pl": "Wybierz usługę",
+        "en": "Choose service",
+        "ru": "Выбрать услугу"
+      },
+      "visualClass": "haircut",
+      "bookingServiceId": "haircut",
+      "tags": [
+        "1h",
+        "haircut",
+        "clean shape"
+      ],
+      "media": {
+        "type": "image",
+        "src": "/haircut.jpg"
+      }
+    },
+    {
+      "id": "landing-combo",
+      "order": 2,
+      "visible": true,
+      "title": {
+        "pl": "Combo włosy + broda",
+        "en": "Hair + beard combo",
+        "ru": "Комбо волосы + борода"
+      },
+      "description": {
+        "pl": "Pełna wizyta: włosy, broda, kontur i wykończenie w jednym rytmie.",
+        "en": "Full visit: hair, beard, contour and finish in one flow.",
+        "ru": "Полный визит: волосы, борода, контур и финиш в одном ритме."
+      },
+      "priceDisplay": "140 zł",
+      "buttonLabel": {
+        "pl": "Wybierz usługę",
+        "en": "Choose service",
+        "ru": "Выбрать услугу"
+      },
+      "visualClass": "combo",
+      "bookingServiceId": "combo",
+      "tags": [
+        "1h 30min",
+        "combo",
+        "premium"
+      ],
+      "media": {
+        "type": "image",
+        "src": "/combo.jpg"
+      }
+    },
+    {
+      "id": "landing-beard",
+      "order": 3,
+      "visible": true,
+      "title": {
+        "pl": "Broda + kontury",
+        "en": "Beard + contours",
+        "ru": "Борода + контури"
+      },
+      "description": {
+        "pl": "Opracowanie brody, linia policzka, szyja i czyste wykończenie bez przypadkowości.",
+        "en": "Beard shaping, cheek line, neck and clean finish.",
+        "ru": "Моделирование бороды, линия щёк, шея и чистое завершение."
+      },
+      "priceDisplay": "70 zł",
+      "buttonLabel": {
+        "pl": "Wybierz usługę",
+        "en": "Choose service",
+        "ru": "Выбрать услугу"
+      },
+      "visualClass": "beard",
+      "bookingServiceId": "beard-trim",
+      "tags": [
+        "40min",
+        "beard",
+        "kontur"
+      ],
+      "media": {
+        "type": "image",
+        "src": "/beard.jpg"
+      }
+    }
+  ],
+  "bookingConfig": {
+    "serviceCategories": [
+      {
+        "id": "popular",
+        "title": {
+          "pl": "Popularne usługi",
+          "en": "Popular services",
+          "ru": "Популярные услуги"
+        },
+        "description": {
+          "pl": "Najczęściej wybierane opcje.",
+          "en": "Most chosen options.",
+          "ru": "Самые востребованные варианты."
+        },
+        "visible": true,
+        "order": 1
+      },
+      {
+        "id": "premium",
+        "title": {
+          "pl": "Strzyżenie premium",
+          "en": "Premium haircuts",
+          "ru": "Премиум-стрижки"
+        },
+        "description": {
+          "pl": "Klasyczne i bardziej rozbudowane usługi włosów.",
+          "en": "Classic and advanced hair services.",
+          "ru": "Классические и расширенные услуги для волос."
+        },
+        "visible": true,
+        "order": 2
+      },
+      {
+        "id": "beard",
+        "title": {
+          "pl": "Broda i golenie",
+          "en": "Beard and shaving",
+          "ru": "Борода и бритьё"
+        },
+        "description": {
+          "pl": "Usługi brody i golenia.",
+          "en": "Beard and shaving services.",
+          "ru": "Услуги бороды и бритья."
+        },
+        "visible": true,
+        "order": 3
+      },
+      {
+        "id": "gray",
+        "title": {
+          "pl": "Koloryzacja i odsiwianie",
+          "en": "Colour and grey blending",
+          "ru": "Окрашивание и тонирование седины"
+        },
+        "description": {
+          "pl": "Usługi premium z odsiwianiem.",
+          "en": "Premium colour services.",
+          "ru": "Премиальные услуги с тонированием седины."
+        },
+        "visible": true,
+        "order": 4
+      },
+      {
+        "id": "extras",
+        "title": {
+          "pl": "Dodatki",
+          "en": "Extras",
+          "ru": "Дополнения"
+        },
+        "description": {
+          "pl": "Szybkie dodatkowe usługi.",
+          "en": "Quick add-on services.",
+          "ru": "Быстрые дополнительные услуги."
+        },
+        "visible": true,
+        "order": 5
+      }
+    ],
+    "services": [
+      {
+        "id": "haircut",
+        "category": "popular",
+        "name": {
+          "pl": "Strzyżenie / Haircut",
+          "en": "Haircut",
+          "ru": "Стрижка"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 90,
+        "duration": "1h",
+        "durationMinutes": 60,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "combo",
+        "category": "popular",
+        "name": {
+          "pl": "Combo (Strzyżenie + Broda)",
+          "en": "Combo (hair + beard)",
+          "ru": "Combo (стрижка + борода)"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 140,
+        "duration": "1h 30min",
+        "durationMinutes": 90,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "scissors",
+        "category": "premium",
+        "name": {
+          "pl": "Strzyżenie nożyczkami",
+          "en": "Scissor haircut",
+          "ru": "Стрижка ножницами"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 130,
+        "duration": "1h 30min",
+        "durationMinutes": 90,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "kids",
+        "category": "premium",
+        "name": {
+          "pl": "Fryzjer dla dzieci (4–12 lat)",
+          "en": "Kids haircut (4–12)",
+          "ru": "Детская стрижка (4–12)"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 80,
+        "duration": "1h",
+        "durationMinutes": 60,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "buzz",
+        "category": "premium",
+        "name": {
+          "pl": "Buzz cut / tylko boki",
+          "en": "Buzz cut / sides only",
+          "ru": "Buzz cut / только бока"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 80,
+        "duration": "1h",
+        "durationMinutes": 60,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "beard-zero",
+        "category": "beard",
+        "name": {
+          "pl": "Broda + Golenie głowy na zero",
+          "en": "Beard + head shave to zero",
+          "ru": "Борода + бритьё головы на ноль"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 90,
+        "duration": "50min",
+        "durationMinutes": 50,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "beard-trim",
+        "category": "beard",
+        "name": {
+          "pl": "Strzyżenie brody",
+          "en": "Beard trim",
+          "ru": "Стрижка бороди"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 70,
+        "duration": "40min",
+        "durationMinutes": 40,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "shaving",
+        "category": "beard",
+        "name": {
+          "pl": "Golenie głowy golarką",
+          "en": "Head shave with razor",
+          "ru": "Бритьё головы машинкой"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 50,
+        "duration": "30min",
+        "durationMinutes": 30,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "gray-beard",
+        "category": "gray",
+        "name": {
+          "pl": "Strzyżenie brody + Odsiwianie",
+          "en": "Beard trim + grey blending",
+          "ru": "Стрижка бороды + тонирование седины"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 150,
+        "duration": "1h 30min",
+        "durationMinutes": 90,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "gray-hair",
+        "category": "gray",
+        "name": {
+          "pl": "Strzyżenie + Odsiwianie włosów",
+          "en": "Haircut + grey blending",
+          "ru": "Стрижка + тонирование седины волос"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 150,
+        "duration": "1h 30min",
+        "durationMinutes": 90,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "gray-combo-beard",
+        "category": "gray",
+        "name": {
+          "pl": "Combo: włosy + broda + Odsiwianie brody",
+          "en": "Combo: hair + beard + beard grey blend",
+          "ru": "Комбо: волосы + борода + тонирование бороды"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 210,
+        "duration": "2h",
+        "durationMinutes": 120,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "gray-combo-full",
+        "category": "gray",
+        "name": {
+          "pl": "Combo Odsiwianie: włosy + broda + strzyżenie",
+          "en": "Full grey combo: hair + beard + cut",
+          "ru": "Полное комбо с тонированием седины"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 260,
+        "duration": "2h",
+        "durationMinutes": 120,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      },
+      {
+        "id": "wax",
+        "category": "extras",
+        "name": {
+          "pl": "Depilacja woskiem",
+          "en": "Waxing",
+          "ru": "Депиляция воском"
+        },
+        "description": {
+          "pl": "",
+          "en": "",
+          "ru": ""
+        },
+        "basePrice": 20,
+        "duration": "5min",
+        "durationMinutes": 5,
+        "visible": true,
+        "bookingEnabled": true,
+        "availableBarberIds": [],
+        "allowClientBarberChoice": true
+      }
+    ],
+    "barbers": [
+      {
+        "id": "tymur",
+        "name": "Tymur",
+        "photo": "/tymur.png",
+        "description": "Młody i ambitny barber z pasją do klasycznych strzyżeń.",
+        "languages": [
+          "🇷🇺 Русский",
+          "🇵🇱 Polski",
+          "🇬🇧 English"
+        ]
+      },
+      {
+        "id": "dima",
+        "name": "Dima",
+        "photo": "/dima.png",
+        "description": "Doświadczony barber z 3-letnim stażem. Mistrz klasyki i nowoczesnych stylów.",
+        "languages": [
+          "🇷🇺 Русский",
+          "🇵🇱 Polski",
+          "🇬🇧 English"
+        ]
+      },
+      {
+        "id": "vlad",
+        "name": "Vlad",
+        "photo": "/vlad.png",
+        "description": "Młody talent z energią i świeżym podejściem do strzyżeń.",
+        "languages": [
+          "🇷🇺 Русский",
+          "🇵🇱 Polski",
+          "🇬🇧 English"
+        ]
+      }
+    ],
+    "discount": {
+      "enabled": true,
+      "name": "Zniżka tygodniowa",
+      "clientMessage": "10% od poniedziałku do czwartku, 10:00–16:00.",
+      "percent": 10,
+      "weekdays": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "startMinutes": 600,
+      "endMinutes": 960
+    },
+    "openingHours": {
+      "0": {
+        "closed": false,
+        "openHour": 10,
+        "closeHour": 18
+      },
+      "1": {
+        "closed": false,
+        "openHour": 10,
+        "closeHour": 20
+      },
+      "2": {
+        "closed": false,
+        "openHour": 10,
+        "closeHour": 20
+      },
+      "3": {
+        "closed": false,
+        "openHour": 10,
+        "closeHour": 20
+      },
+      "4": {
+        "closed": false,
+        "openHour": 10,
+        "closeHour": 20
+      },
+      "5": {
+        "closed": false,
+        "openHour": 10,
+        "closeHour": 20
+      },
+      "6": {
+        "closed": false,
+        "openHour": 10,
+        "closeHour": 20
+      }
+    }
+  },
+  "contacts": {
+    "phoneDisplay": "+48 532 377 701",
+    "phoneE164": "+48532377701",
+    "hoursDisplay": "Pn–Sob 10:00–20:00, Nd 10:00–18:00",
+    "address": {
+      "pl": "ul. Przykładowa 12A, Wrocław",
+      "en": "12A Example Street, Wrocław",
+      "ru": "ул. Przykładowa 12A, Вроцлав"
+    },
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=ul.+Przyk%C5%82adowa+12A,+Wroc%C5%82aw",
+    "mapEmbedUrl": "https://www.google.com/maps?q=Wroc%C5%82aw&output=embed",
+    "googleReviewsUrl": ""
+  },
+  "socials": {
+    "instagram": "https://www.instagram.com/mrozowski.automation/",
+    "tiktok": "https://www.tiktok.com/@mrozowski.automation",
+    "googleReviewsUrl": ""
+  }
+}

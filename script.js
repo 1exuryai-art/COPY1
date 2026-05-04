@@ -1,79 +1,189 @@
 const API_BASE = "";
 const TOTAL_STEPS = 8;
 
-const DISCOUNT_PERCENT = 10;
-const DISCOUNT_WEEKDAYS = [1, 2, 3, 4]; // pn-czw
-const DISCOUNT_START_MINUTES = 10 * 60;
-const DISCOUNT_END_MINUTES = 16 * 60;
-
-const stepMeta = [
-  {
-    title: "Dane kontaktowe",
-    subtitle: "Wpisz swoje dane, aby rozpocząć rezerwację."
-  },
-  {
-    title: "Wybór usługi",
-    subtitle: "Wybierz usługę, która Cię interesuje."
-  },
-  {
-    title: "Wybrać barbera?",
-    subtitle: "Możesz wybrać konkretnego barbera lub przejść dalej."
-  },
-  {
-    title: "Wybór barbera",
-    subtitle: "Wybierz barbera, do którego chcesz się umówić."
-  },
-  {
-    title: "Wybór daty",
-    subtitle: "Wybierz dogodny dzień wizyty."
-  },
-  {
-    title: "Wybór godziny",
-    subtitle: "Wybierz dogodną godzinę wizyty."
-  },
-  {
-    title: "Potwierdzenie danych",
-    subtitle: "Sprawdź dane przed potwierdzeniem wizyty."
-  },
-  {
-    title: "Rezerwacja zapisana",
-    subtitle: "Twoja wizyta została zapisana."
+function getDogmaLang() {
+  try {
+    const monarch = localStorage.getItem("monarch_lang");
+    if (monarch === "en") return "en";
+    if (monarch === "ru") return "ru";
+    const legacy = localStorage.getItem("dogma_lang");
+    if (legacy === "en") return "en";
+    if (legacy === "ua") return "ru";
+    return "pl";
+  } catch {
+    return "pl";
   }
-];
+}
 
-const serviceCategories = [
+function tBook(key, vars) {
+  const lang = getDogmaLang();
+  const root = window.DOGMA_TRANSLATIONS;
+  if (!root) return key;
+  const dict = root[lang] || root.pl || {};
+  let s = dict[key] || root.pl[key] || key;
+  if (vars && typeof vars === "object") {
+    Object.keys(vars).forEach((k) => {
+      s = s.split(`{${k}}`).join(String(vars[k]));
+    });
+  }
+  return s;
+}
+
+function pickBookingLoc(value) {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  const lang = getDogmaLang();
+  return value[lang] || value.pl || value.ru || value.ua || value.en || "";
+}
+
+function getServiceDisplayName(service) {
+  if (!service) return "—";
+  if (service.name && typeof service.name === "object") {
+    const direct = pickBookingLoc(service.name);
+    if (direct) return direct;
+  }
+  const k = `booking.svc.${service.id}`;
+  const tr = tBook(k);
+  if (typeof service.name === "string") {
+    return tr === k ? service.name : tr;
+  }
+  return tr === k ? "—" : tr;
+}
+
+function getServiceDescriptionText(service) {
+  if (!service) return "";
+  const d = service.description;
+  if (d && typeof d === "object") return pickBookingLoc(d);
+  if (typeof d === "string") return d;
+  return "";
+}
+
+function isServicePromoWindow(service, dateStr, timeStr) {
+  if (!service || !dateStr || !timeStr) return false;
+  const p = service.promoDiscount;
+  if (!p || !p.enabled) return false;
+  const day = getWeekday(dateStr);
+  const weekdays = Array.isArray(p.weekdays) && p.weekdays.length ? p.weekdays : [];
+  if (!weekdays.includes(day)) return false;
+  const minutes = timeToMinutes(timeStr);
+  const startM = typeof p.startMinutes === "number" ? p.startMinutes : 0;
+  const endM = typeof p.endMinutes === "number" ? p.endMinutes : 24 * 60;
+  return minutes >= startM && minutes < endM;
+}
+
+function getCategoryTitle(cat) {
+  if (!cat) return "";
+  if (cat.title && typeof cat.title === "object") {
+    const direct = pickBookingLoc(cat.title);
+    if (direct) return direct;
+  }
+  if (typeof cat.title === "string") {
+    const k = `booking.cat.${cat.id}.title`;
+    const tr = tBook(k);
+    return tr === k ? cat.title : tr;
+  }
+  return "";
+}
+
+function getCategoryDesc(cat) {
+  if (!cat) return "";
+  if (cat.description && typeof cat.description === "object") {
+    const direct = pickBookingLoc(cat.description);
+    if (direct) return direct;
+  }
+  if (typeof cat.description === "string") {
+    const k = `booking.cat.${cat.id}.desc`;
+    const tr = tBook(k);
+    return tr === k ? cat.description : tr;
+  }
+  return "";
+}
+
+function serviceIsActiveForBooking(s) {
+  if (!s || typeof s !== "object") return false;
+  if (s.visible === false) return false;
+  if (s.bookingEnabled === false) return false;
+  return true;
+}
+
+function getServiceCategoriesWithItems() {
+  return serviceCategories
+    .filter(
+      (cat) =>
+        cat.visible !== false &&
+        services.some((s) => s.category === cat.id && serviceIsActiveForBooking(s))
+    )
+    .slice()
+    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+}
+
+function getBarberDescription(barber) {
+  if (!barber) return "";
+  const k = `booking.barber.${barber.id}.desc`;
+  const tr = tBook(k);
+  return tr === k ? barber.description : tr;
+}
+
+const DEFAULT_DISCOUNT_PERCENT = 10;
+const DEFAULT_DISCOUNT_WEEKDAYS = [1, 2, 3, 4]; // pn-czw
+const DEFAULT_DISCOUNT_START_MINUTES = 10 * 60;
+const DEFAULT_DISCOUNT_END_MINUTES = 16 * 60;
+
+let DISCOUNT_PERCENT = DEFAULT_DISCOUNT_PERCENT;
+let DISCOUNT_WEEKDAYS = [...DEFAULT_DISCOUNT_WEEKDAYS];
+let DISCOUNT_START_MINUTES = DEFAULT_DISCOUNT_START_MINUTES;
+let DISCOUNT_END_MINUTES = DEFAULT_DISCOUNT_END_MINUTES;
+
+let serviceCategories = [
   {
     id: "popular",
     title: "Popularne usługi",
-    description: "Najczęściej wybierane opcje."
-  },
-  {
-    id: "premium",
-    title: "Strzyżenie premium",
-    description: "Klasyczne i bardziej rozbudowane usługi włosów."
+    description: "Najczęściej wybierane opcje.",
+    visible: true,
+    order: 1
   },
   {
     id: "beard",
     title: "Broda i golenie",
-    description: "Usługi brody i golenia."
+    description: "Usługi brody i golenia.",
+    visible: true,
+    order: 2
+  },
+  {
+    id: "hair",
+    title: "Strzyżenie włosów",
+    description: "Nożyczki, dzieci, krótkie strzyżenia.",
+    visible: true,
+    order: 3
+  },
+  {
+    id: "color",
+    title: "Koloryzacja",
+    description: "Odsiwianie i koloryzacja.",
+    visible: true,
+    order: 4
   },
   {
     id: "gray",
     title: "Koloryzacja i odsiwianie",
-    description: "Usługi premium z odsiwianiem."
+    description: "Usługi premium z odsiwianiem.",
+    visible: true,
+    order: 5
   },
   {
     id: "extras",
     title: "Dodatki",
-    description: "Szybkie dodatkowe usługi."
+    description: "Szybkie dodatkowe usługi.",
+    visible: true,
+    order: 6
   }
 ];
 
-const services = [
+let services = [
   {
     id: "haircut",
     category: "popular",
-    name: "Strzyżenie / Haircut",
+    name: "Strzyżenie męskie",
     basePrice: 90,
     duration: "1h",
     durationMinutes: 60
@@ -81,14 +191,14 @@ const services = [
   {
     id: "combo",
     category: "popular",
-    name: "Combo (Strzyżenie + Broda)",
+    name: "Strzyżenie włosów i brody",
     basePrice: 140,
     duration: "1h 30min",
     durationMinutes: 90
   },
   {
     id: "scissors",
-    category: "premium",
+    category: "hair",
     name: "Strzyżenie nożyczkami",
     basePrice: 130,
     duration: "1h 30min",
@@ -96,16 +206,16 @@ const services = [
   },
   {
     id: "kids",
-    category: "premium",
-    name: "Fryzjer dla dzieci (4–12 lat)",
+    category: "hair",
+    name: "Strzyżenie dzieci 4–12 lat",
     basePrice: 80,
     duration: "1h",
     durationMinutes: 60
   },
   {
-    id: "buzz",
-    category: "premium",
-    name: "Buzz cut / tylko boki",
+    id: "short-sides",
+    category: "hair",
+    name: "Krótkie strzyżenie lub same boki",
     basePrice: 80,
     duration: "1h",
     durationMinutes: 60
@@ -113,7 +223,7 @@ const services = [
   {
     id: "beard-zero",
     category: "beard",
-    name: "Broda + Golenie głowy na zero",
+    name: "Broda i golenie głowy na zero",
     basePrice: 90,
     duration: "50min",
     durationMinutes: 50
@@ -136,32 +246,32 @@ const services = [
   },
   {
     id: "gray-beard",
-    category: "gray",
-    name: "Strzyżenie brody + Odsiwianie",
+    category: "color",
+    name: "Strzyżenie brody z odsiwianiem",
     basePrice: 150,
     duration: "1h 30min",
     durationMinutes: 90
   },
   {
     id: "gray-hair",
-    category: "gray",
-    name: "Strzyżenie + Odsiwianie włosów",
+    category: "color",
+    name: "Strzyżenie włosów z odsiwianiem",
     basePrice: 150,
     duration: "1h 30min",
     durationMinutes: 90
   },
   {
     id: "gray-combo-beard",
-    category: "gray",
-    name: "Combo: włosy + broda + Odsiwianie brody",
+    category: "color",
+    name: "Włosy, broda i odsiwianie brody",
     basePrice: 210,
     duration: "2h",
     durationMinutes: 120
   },
   {
     id: "gray-combo-full",
-    category: "gray",
-    name: "Combo Odsiwianie: włosy + broda + strzyżenie",
+    category: "color",
+    name: "Włosy, broda i pełne odsiwianie",
     basePrice: 260,
     duration: "2h",
     durationMinutes: 120
@@ -176,27 +286,20 @@ const services = [
   }
 ];
 
-const barbers = [
+let barbers = [
   {
     id: "tymur",
     name: "Tymur",
-    photo: "/tymur.png",
+    photo: "/assets/barbers/tymur.jpg",
     description: "Młody i ambitny barber z pasją do klasycznych strzyżeń.",
-    languages: ["🇺🇦 Ukraiński", "🇵🇱 Polski", "🇬🇧 English"]
+    languages: ["RU Русский", "PL Polski", "GB English"]
   },
   {
     id: "dima",
     name: "Dima",
-    photo: "/dima.png",
+    photo: "/assets/barbers/dima.jpg",
     description: "Doświadczony barber z 3-letnim stażem. Mistrz klasyki i nowoczesnych stylów.",
-    languages: ["🇺🇦 Ukraiński", "🇵🇱 Polski", "🇬🇧 English"]
-  },
-  {
-    id: "vlad",
-    name: "Vlad",
-    photo: "/vlad.png",
-    description: "Młody talent z energią i świeżym podejściem do strzyżeń.",
-    languages: ["🇺🇦 Ukraiński", "🇷🇺 Rosyjski", "🇵🇱 Polski"]
+    languages: ["RU Русский", "PL Polski", "GB English"]
   }
 ];
 
@@ -261,27 +364,60 @@ const timeError = document.getElementById("timeError");
 
 const submitError = document.getElementById("submitError");
 
-function formatPrice(value) {
-  return `${Number(value).toFixed(2).replace(".", ",")} zł`;
+function formatPrice(value, prefix = "") {
+  const price = `${Number(value).toFixed(2).replace(".", ",")} zł`;
+  const pfx =
+    prefix === "od"
+      ? tBook("booking.pricePrefix.from")
+      : prefix;
+  return pfx ? `${pfx} ${price}` : price;
 }
 
-function getSelectedService() {
-  return services.find((service) => service.id === state.selectedServiceId) || null;
+function getBookingBarbersForService(service) {
+  if (!service || !Array.isArray(service.availableBarberIds) || service.availableBarberIds.length === 0) {
+    return barbers;
+  }
+  const allowed = new Set(service.availableBarberIds.map((id) => String(id)));
+  const list = barbers.filter((b) => allowed.has(String(b.id)));
+  return list.length ? list : barbers;
+}
+
+function getBookingBarbersResolved() {
+  return getBookingBarbersForService(getSelectedService());
 }
 
 function getSelectedBarber() {
   return barbers.find((barber) => barber.id === state.selectedBarberId) || null;
 }
 
+function getSelectedService() {
+  if (!state.selectedServiceId) return null;
+  return services.find((s) => s.id === state.selectedServiceId) || null;
+}
+
+window.getSelectedService = getSelectedService;
+
 function formatDateText(dateStr) {
   if (!dateStr) return "—";
 
+  const lang = getDogmaLang();
+  const loc = lang === "en" ? "en-GB" : lang === "ru" ? "ru-RU" : "pl-PL";
   const date = new Date(`${dateStr}T00:00:00`);
-  return new Intl.DateTimeFormat("pl-PL", {
+  return new Intl.DateTimeFormat(loc, {
     day: "2-digit",
     month: "long",
     year: "numeric"
   }).format(date);
+}
+
+function syncContactFromInputs() {
+  if (nameInput) state.name = nameInput.value.trim();
+  if (phoneInput) {
+    let formatted = normalizePhone(phoneInput.value);
+    if (formatted === "+48") formatted = "+48 ";
+    phoneInput.value = formatted;
+    state.phone = formatted;
+  }
 }
 
 function normalizePhone(value) {
@@ -298,16 +434,17 @@ function normalizePhone(value) {
   if (digits.length > 3) result += ` ${digits.slice(3, 6)}`;
   if (digits.length > 6) result += ` ${digits.slice(6, 9)}`;
 
-  return result === "+48" ? "+48 " : result;
+  return result;
 }
 
 function isValidName(value) {
-  return String(value || "").trim().length >= 2;
+  return String(value ?? "").trim().length >= 2;
 }
 
 function isValidPhone(value) {
-  const digits = String(value || "").replace(/\D/g, "");
-  return digits.length === 11 && digits.startsWith("48");
+  let digits = String(value || "").replace(/\D/g, "");
+  if (digits.startsWith("48")) digits = digits.slice(2);
+  return digits.length === 9;
 }
 
 function timeToMinutes(timeStr) {
@@ -325,6 +462,16 @@ function getWeekday(dateStr) {
 
 function getWorkingHoursForDate(dateStr) {
   const day = getWeekday(dateStr);
+  const oh = typeof window !== "undefined" ? window.DOGMA_BOOKING_OPENING_HOURS : null;
+  if (oh && typeof oh === "object") {
+    const row = oh[String(day)];
+    if (row && row.closed) {
+      return { openHour: 10, closeHour: 10, closed: true };
+    }
+    if (row && typeof row.openHour === "number" && typeof row.closeHour === "number") {
+      return { openHour: row.openHour, closeHour: row.closeHour };
+    }
+  }
 
   if (day === 0) {
     return { openHour: 10, closeHour: 18 };
@@ -336,14 +483,21 @@ function getWorkingHoursForDate(dateStr) {
 function isDiscountWindow(dateStr, timeStr) {
   if (!dateStr || !timeStr) return false;
 
+  const cfg = typeof window !== "undefined" ? window.DOGMA_BOOKING_DISCOUNT : null;
+  if (cfg && cfg.enabled === false) return false;
+
   const day = getWeekday(dateStr);
-  if (!DISCOUNT_WEEKDAYS.includes(day)) return false;
+  const weekdays = Array.isArray(cfg?.weekdays) && cfg.weekdays.length ? cfg.weekdays : DISCOUNT_WEEKDAYS;
+  if (!weekdays.includes(day)) return false;
 
   const minutes = timeToMinutes(timeStr);
-  return minutes >= DISCOUNT_START_MINUTES && minutes < DISCOUNT_END_MINUTES;
+  const startM = typeof cfg?.startMinutes === "number" ? cfg.startMinutes : DISCOUNT_START_MINUTES;
+  const endM = typeof cfg?.endMinutes === "number" ? cfg.endMinutes : DISCOUNT_END_MINUTES;
+  return minutes >= startM && minutes < endM;
 }
 
 function getDiscountedPrice(basePrice) {
+  if (!DISCOUNT_PERCENT) return Number(basePrice);
   return Number((basePrice * (1 - DISCOUNT_PERCENT / 100)).toFixed(2));
 }
 
@@ -357,7 +511,26 @@ function getServicePriceDetails(service, dateStr = "", timeStr = "") {
     };
   }
 
-  const basePrice = service.basePrice;
+  const basePrice = Number(service.basePrice) || 0;
+
+  if (dateStr && timeStr && isServicePromoWindow(service, dateStr, timeStr)) {
+    const p = service.promoDiscount;
+    let finalPrice = basePrice;
+    if (p && p.usePercent === false && p.priceAfter != null && p.priceAfter !== "" && !Number.isNaN(Number(p.priceAfter))) {
+      finalPrice = Number(p.priceAfter);
+    } else {
+      const pct = Number(p?.percent) || 0;
+      finalPrice = Number((basePrice * (1 - pct / 100)).toFixed(2));
+    }
+    const hasDiscount = finalPrice < basePrice;
+    return {
+      basePrice,
+      finalPrice,
+      hasDiscount,
+      discountedPrice: finalPrice
+    };
+  }
+
   const discountedPrice = getDiscountedPrice(basePrice);
   const hasDiscount = isDiscountWindow(dateStr, timeStr);
   const finalPrice = hasDiscount ? discountedPrice : basePrice;
@@ -372,11 +545,13 @@ function getServicePriceDetails(service, dateStr = "", timeStr = "") {
 
 function getServicePriceText(service, dateStr = "", timeStr = "") {
   const details = getServicePriceDetails(service, dateStr, timeStr);
-  return formatPrice(details.finalPrice);
+  return formatPrice(details.finalPrice, service?.pricePrefix || "");
 }
 
 function generateBaseSlotsForDate(dateStr, serviceDurationMinutes = 0) {
-  const { openHour, closeHour } = getWorkingHoursForDate(dateStr);
+  const wh = getWorkingHoursForDate(dateStr);
+  if (wh.closed) return [];
+  const { openHour, closeHour } = wh;
   const slots = [];
   const lastStartMinutes = closeHour * 60 - serviceDurationMinutes;
 
@@ -418,8 +593,8 @@ async function loadAvailabilityForDate(dateStr) {
 
   if (!dateStr || !service) return;
 
-  slotsStatus.textContent = "Ładowanie godzin...";
-  slotsGrid.innerHTML = "";
+  if (slotsStatus) slotsStatus.textContent = tBook("booking.slots.loading");
+  if (slotsGrid) slotsGrid.innerHTML = "";
 
   const barberId = state.barberDecision === "no" ? "auto" : barber?.id || "";
   if (!barberId) return;
@@ -431,7 +606,7 @@ async function loadAvailabilityForDate(dateStr) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok || !data?.ok) {
-    throw new Error(data?.error || "Nie udało się pobrać dostępności.");
+    throw new Error(data?.error || tBook("booking.err.availability"));
   }
 
   if (state.barberDecision === "no") {
@@ -461,7 +636,7 @@ function updateBindings() {
   });
 
   document.querySelectorAll('[data-bind="serviceName"]').forEach((el) => {
-    el.textContent = service?.name || "—";
+    el.textContent = getServiceDisplayName(service) || "—";
   });
 
   document.querySelectorAll('[data-bind="servicePrice"]').forEach((el) => {
@@ -471,7 +646,7 @@ function updateBindings() {
     }
 
     if (priceDetails.hasDiscount) {
-      el.textContent = `${formatPrice(priceDetails.finalPrice)} • -${DISCOUNT_PERCENT}%`;
+      el.textContent = `${formatPrice(priceDetails.finalPrice)}  •  -${DISCOUNT_PERCENT}%`;
       return;
     }
 
@@ -484,7 +659,7 @@ function updateBindings() {
 
   document.querySelectorAll('[data-bind="barberName"]').forEach((el) => {
     if (state.barberDecision === "no") {
-      el.textContent = state.resolvedBarberName || "Dobierzemy barbera";
+      el.textContent = state.resolvedBarberName || tBook("booking.barber.auto");
       return;
     }
 
@@ -501,10 +676,10 @@ function updateBindings() {
 }
 
 function updateHeader() {
-  const meta = stepMeta[state.step - 1];
+  if (!stepTitle || !stepSubtitle || !stepPill || !progressFill || !progressText) return;
 
-  stepTitle.textContent = meta.title;
-  stepSubtitle.textContent = meta.subtitle;
+  stepTitle.textContent = tBook(`booking.meta.${state.step}.title`);
+  stepSubtitle.textContent = tBook(`booking.meta.${state.step}.sub`);
   stepPill.textContent = `${state.step} / ${TOTAL_STEPS}`;
 
   const percent = Math.round((state.step / TOTAL_STEPS) * 100);
@@ -513,6 +688,8 @@ function updateHeader() {
 }
 
 function updateNav() {
+  if (!backBtn || !nextBtn) return;
+
   if (state.step === 8) {
     backBtn.classList.add("hidden");
     nextBtn.classList.add("hidden");
@@ -520,12 +697,16 @@ function updateNav() {
   }
 
   backBtn.classList.remove("hidden");
-  nextBtn.classList.remove("hidden");
-
   backBtn.style.visibility = state.step === 1 ? "hidden" : "visible";
+  if (state.step > 1 && state.step < 8) {
+    backBtn.style.pointerEvents = "auto";
+    backBtn.style.opacity = "1";
+  }
+  backBtn.textContent = tBook("booking.nav.back");
 
   if (state.step === 2) {
     nextBtn.classList.add("hidden");
+    nextBtn.classList.remove("pulse");
     return;
   }
 
@@ -533,13 +714,16 @@ function updateNav() {
   nextBtn.classList.remove("pulse");
 
   if (state.step === 7) {
-    nextBtn.textContent = state.submitting ? "Zapisywanie..." : "Zarezerwuj termin";
+    nextBtn.textContent = state.submitting ? tBook("booking.nav.saving") : tBook("booking.nav.confirm");
   } else {
-    nextBtn.textContent = "Dalej";
+    nextBtn.textContent = tBook("booking.nav.next");
   }
 
+  const nameForNav = nameInput ? nameInput.value.trim() : state.name;
+  const phoneForNav = phoneInput ? phoneInput.value : state.phone;
+
   if (state.step === 1) {
-    nextBtn.disabled = !(isValidName(state.name) && isValidPhone(state.phone));
+    nextBtn.disabled = !(isValidName(nameForNav) && isValidPhone(phoneForNav));
   } else if (state.step === 3) {
     nextBtn.disabled = !state.barberDecision;
   } else if (state.step === 4) {
@@ -562,13 +746,21 @@ function updateNav() {
 function showStep(step) {
   state.step = step;
 
+  if (step >= 3) {
+    syncContactFromInputs();
+  }
+
   steps.forEach((section) => {
     section.classList.toggle("active", Number(section.dataset.step) === step);
   });
 
+  if (step === 2) {
+    renderServiceAccordion();
+  }
+
+  updateNav();
   updateHeader();
   updateBindings();
-  updateNav();
 
   window.scrollTo({
     top: 0,
@@ -577,19 +769,67 @@ function showStep(step) {
 }
 
 function getServicePriceMarkup(service) {
-  const discounted = getDiscountedPrice(service.basePrice);
+  const hasFieldPromo =
+    service &&
+    service.discountedPrice != null &&
+    service.discountedPrice !== "" &&
+    !Number.isNaN(Number(service.discountedPrice));
+  const discounted = hasFieldPromo ? Number(service.discountedPrice) : getDiscountedPrice(service.basePrice);
+  const orLine = tBook("booking.opt.discountOr", { price: formatPrice(discounted) });
   return `
     <div class="service-option-price-line">
       <span class="price-main">${formatPrice(service.basePrice)}</span>
-      <span class="price-discount">lub ${formatPrice(discounted)} z rabatem</span>
+      <span class="price-discount">${orLine}</span>
     </div>
   `;
 }
 
+function bindServiceInlineContinue(btn, serviceId) {
+  let swallowNextClick = false;
+  const proceed = () => {
+    if (state.step !== 2 || state.selectedServiceId !== serviceId) return;
+    syncContactFromInputs();
+    renderBarberDecision();
+    renderBarberSlider();
+    renderCalendar();
+    renderSlots();
+    showStep(3);
+  };
+  btn.style.touchAction = "manipulation";
+  btn.addEventListener(
+    "touchend",
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      swallowNextClick = true;
+      window.setTimeout(() => {
+        swallowNextClick = false;
+      }, 450);
+      proceed();
+    },
+    { passive: false, capture: true }
+  );
+  btn.addEventListener(
+    "click",
+    (event) => {
+      if (swallowNextClick) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      proceed();
+    },
+    true
+  );
+}
+
 function renderServiceAccordion() {
+  if (!categoryAccordion) return;
   categoryAccordion.innerHTML = "";
 
-  serviceCategories.forEach((category) => {
+  getServiceCategoriesWithItems().forEach((category) => {
     const item = document.createElement("div");
     const isOpen = state.selectedCategory === category.id;
 
@@ -600,8 +840,8 @@ function renderServiceAccordion() {
     trigger.className = "accordion-trigger";
     trigger.innerHTML = `
       <div class="accordion-trigger-main">
-        <strong>${category.title}</strong>
-        <span>${category.description}</span>
+        <strong>${getCategoryTitle(category)}</strong>
+        <span>${getCategoryDesc(category)}</span>
       </div>
       <div class="accordion-arrow">⌄</div>
     `;
@@ -620,35 +860,56 @@ function renderServiceAccordion() {
     const serviceList = document.createElement("div");
     serviceList.className = "service-option-list";
 
-    const categoryServices = services.filter((service) => service.category === category.id);
+    const categoryServices = services.filter(
+      (service) => service.category === category.id && serviceIsActiveForBooking(service)
+    );
 
     categoryServices.forEach((service) => {
       const card = document.createElement("div");
       card.className = `service-option ${state.selectedServiceId === service.id ? "selected" : ""}`;
 
+      const inlineNextHtml =
+        state.selectedServiceId === service.id
+          ? `<div class="service-inline-next">
+          <button class="nav-btn nav-btn-primary service-next-btn" type="button">
+            ${tBook("booking.opt.next")}
+          </button>
+        </div>`
+          : "";
+
+      const descText = getServiceDescriptionText(service);
       card.innerHTML = `
         <div class="service-option-top">
-          <strong class="service-option-title">${service.name}</strong>
+          <strong class="service-option-title">${getServiceDisplayName(service)}</strong>
           <span class="service-option-duration">${service.duration}</span>
         </div>
+        ${descText ? `<p class="service-option-desc"></p>` : ""}
 
         <div class="service-option-prices">
           ${getServicePriceMarkup(service)}
         </div>
 
         <div class="service-option-note">
-          Rabat ${DISCOUNT_PERCENT}% od poniedziałku do czwartku, 10:00–16:00
+          ${tBook("booking.opt.discountNote", { pct: DISCOUNT_PERCENT })}
         </div>
-
-        <div class="service-inline-next">
-          <button class="nav-btn nav-btn-primary service-next-btn" type="button">
-            Dalej
-          </button>
-        </div>
+        ${inlineNextHtml}
       `;
 
+      const nextInline = card.querySelector(".service-next-btn");
+      if (nextInline) {
+        bindServiceInlineContinue(nextInline, service.id);
+      }
+
+      const descEl = card.querySelector(".service-option-desc");
+      if (descEl) {
+        descEl.textContent = descText;
+      }
+
       card.addEventListener("click", (event) => {
-        const nextButton = event.target.closest(".service-next-btn");
+        const hit = event.target;
+        const hitEl = hit instanceof Element ? hit : hit.parentElement;
+        if (hitEl?.closest?.(".service-next-btn")) return;
+        event.preventDefault();
 
         state.selectedCategory = category.id;
         state.selectedServiceId = service.id;
@@ -661,16 +922,8 @@ function renderServiceAccordion() {
         state.slotsByDate = {};
 
         renderServiceAccordion();
-        renderBarberDecision();
-        renderBarberSlider();
-        renderCalendar();
-        renderSlots();
         updateBindings();
         updateNav();
-
-        if (nextButton) {
-          showStep(3);
-        }
       });
 
       serviceList.appendChild(card);
@@ -694,42 +947,47 @@ function renderBarberDecision() {
 }
 
 function renderBarberSlider() {
-  const barber = barbers[state.barberSlideIndex];
+  const list = getBookingBarbersResolved();
+  if (!list.length) return;
+  if (state.barberSlideIndex >= list.length) state.barberSlideIndex = 0;
+  const barber = list[state.barberSlideIndex];
   if (!barber) return;
 
-  barberSlidePhoto.innerHTML = `
-    <img src="${barber.photo}" alt="${barber.name}" class="barber-photo-img" />
-  `;
+  if (barberSlidePhoto) {
+    barberSlidePhoto.innerHTML = `
+      <img src="${barber.photo}" alt="${barber.name}" class="barber-photo-img" />
+    `;
+  }
 
-  barberSlideName.textContent = barber.name;
-  barberSlideDescription.textContent = barber.description;
+  if (barberSlideName) barberSlideName.textContent = barber.name;
+  if (barberSlideDescription) barberSlideDescription.textContent = getBarberDescription(barber);
 
-  barberSlideLangs.innerHTML = "";
-  barber.languages.forEach((lang) => {
-    const tag = document.createElement("span");
-    tag.textContent = lang;
-    barberSlideLangs.appendChild(tag);
-  });
+  if (barberSlideLangs) {
+    barberSlideLangs.innerHTML = "";
+    barber.languages.forEach((lang) => {
+      const tag = document.createElement("span");
+      tag.textContent = lang;
+      barberSlideLangs.appendChild(tag);
+    });
+  }
 
-  barberCounter.textContent = `${state.barberSlideIndex + 1} / ${barbers.length}`;
+  if (barberCounter) barberCounter.textContent = `${state.barberSlideIndex + 1} / ${list.length}`;
 
   const isSelected = state.selectedBarberId === barber.id;
-  selectBarberBtn.textContent = isSelected ? "Barber wybrany" : "Wybierz tego barbera";
-  selectBarberBtn.classList.toggle("selected", isSelected);
+  if (selectBarberBtn) {
+    selectBarberBtn.textContent = isSelected ? tBook("booking.barber.picked") : tBook("booking.barber.pick");
+    selectBarberBtn.classList.toggle("selected", isSelected);
+  }
 }
 
 function getMonthName(monthIndex) {
-  const months = [
-    "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
-    "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
-  ];
-
-  return months[monthIndex];
+  return tBook(`booking.month.${monthIndex}`);
 }
 
 function renderCalendar() {
+  if (!calendarGrid) return;
   calendarGrid.innerHTML = "";
-  dateError.textContent = "";
+  if (dateError) dateError.textContent = "";
 
   const today = new Date();
   const currentMonthDate = new Date(
@@ -741,7 +999,7 @@ function renderCalendar() {
   const currentYear = currentMonthDate.getFullYear();
   const currentMonth = currentMonthDate.getMonth();
 
-  monthLabel.textContent = `${getMonthName(currentMonth)} ${currentYear}`;
+  if (monthLabel) monthLabel.textContent = `${getMonthName(currentMonth)} ${currentYear}`;
 
   const todayString = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
     .toISOString()
@@ -788,7 +1046,7 @@ function renderCalendar() {
     });
   }
 
-  calendarStatus.textContent = "Godziny: pn-sob 10:00–20:00, nd 10:00–18:00";
+  if (calendarStatus) calendarStatus.textContent = tBook("booking.cal.hoursNote");
 
   cells.forEach((cell) => {
     const button = document.createElement("button");
@@ -824,9 +1082,9 @@ function renderCalendar() {
             updateBindings();
             updateNav();
           } catch (error) {
-            dateError.textContent = error.message || "Nie udało się pobrać godzin.";
-            slotsStatus.textContent = "Błąd ładowania godzin";
-            slotsGrid.innerHTML = "";
+            if (dateError) dateError.textContent = error.message || tBook("booking.err.availability");
+            if (slotsStatus) slotsStatus.textContent = tBook("booking.slots.errorLoad");
+            if (slotsGrid) slotsGrid.innerHTML = "";
           }
         });
       }
@@ -835,15 +1093,16 @@ function renderCalendar() {
     calendarGrid.appendChild(button);
   });
 
-  calendarPrevBtn.disabled = state.calendarMonthOffset <= 0;
+  if (calendarPrevBtn) calendarPrevBtn.disabled = state.calendarMonthOffset <= 0;
 }
 
 function renderSlots() {
+  if (!slotsGrid) return;
   slotsGrid.innerHTML = "";
-  timeError.textContent = "";
+  if (timeError) timeError.textContent = "";
 
   if (!state.selectedDate) {
-    slotsStatus.textContent = "Najpierw wybierz datę";
+    if (slotsStatus) slotsStatus.textContent = tBook("booking.slots.pickDate");
     return;
   }
 
@@ -851,21 +1110,23 @@ function renderSlots() {
   const { openHour, closeHour } = getWorkingHoursForDate(state.selectedDate);
 
   if (!slots) {
-    slotsStatus.textContent = "Wybierz dzień, aby pobrać godziny";
+    if (slotsStatus) slotsStatus.textContent = tBook("booking.slots.pickDay");
     return;
   }
 
   if (!slots.length) {
-    slotsStatus.textContent = "Brak wolnych godzin";
+    if (slotsStatus) slotsStatus.textContent = tBook("booking.slots.none");
     return;
   }
 
-  slotsStatus.textContent = `${slots.length} wolnych godzin · ${String(openHour).padStart(2, "0")}:00–${String(closeHour).padStart(2, "0")}:00`;
+  const hoursRange = `${String(openHour).padStart(2, "0")}:00–${String(closeHour).padStart(2, "0")}:00`;
+  if (slotsStatus) slotsStatus.textContent = tBook("booking.slots.free", { n: slots.length, hours: hoursRange });
 
   slots.forEach((slot) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "slot-btn";
+    btn.textContent = slot.time;
 
     const service = getSelectedService();
     const discountActive = service && isDiscountWindow(state.selectedDate, slot.time);
@@ -876,8 +1137,6 @@ function renderSlots() {
         <span class="slot-time">${slot.time}</span>
         <span class="slot-discount">-${DISCOUNT_PERCENT}%</span>
       `;
-    } else {
-      btn.textContent = slot.time;
     }
 
     if (state.selectedTime === slot.time) {
@@ -896,7 +1155,7 @@ function renderSlots() {
 }
 
 async function submitBooking() {
-  submitError.textContent = "";
+  if (submitError) submitError.textContent = "";
   state.submitting = true;
   updateNav();
 
@@ -904,9 +1163,9 @@ async function submitBooking() {
   const barber = getSelectedBarber();
 
   const payload = {
-    name: state.name.trim(),
-    phone: state.phone.trim(),
-    serviceName: service?.name || "",
+    name: state.name,
+    phone: state.phone,
+    serviceName: getServiceDisplayName(service) || "",
     serviceDuration: service?.duration || "",
     servicePrice: getServicePriceText(service, state.selectedDate, state.selectedTime),
     barberName: state.barberDecision === "no" ? "" : (barber?.name || ""),
@@ -927,17 +1186,17 @@ async function submitBooking() {
     const data = await response.json().catch(() => null);
 
     if (!response.ok || !data?.ok) {
-      throw new Error(data?.error || "Nie udało się zapisać wizyty.");
+      throw new Error(data?.error || tBook("booking.err.book"));
     }
 
     if (state.barberDecision === "no") {
-      state.resolvedBarberName = data?.resolvedBarberName || "Dobierzemy barbera";
+      state.resolvedBarberName = data?.resolvedBarberName || tBook("booking.barber.auto");
     }
 
     updateBindings();
     showStep(8);
   } catch (error) {
-    submitError.textContent = error.message || "Błąd serwera.";
+    if (submitError) submitError.textContent = error.message || tBook("booking.err.server");
   } finally {
     state.submitting = false;
     updateNav();
@@ -946,19 +1205,33 @@ async function submitBooking() {
 
 function nextStep() {
   if (state.step === 1) {
+    syncContactFromInputs();
+
     const validName = isValidName(state.name);
     const validPhone = isValidPhone(state.phone);
 
-    nameError.textContent = validName ? "" : "Wpisz poprawne imię";
-    phoneError.textContent = validPhone ? "" : "Podaj poprawny numer telefonu";
+    if (nameError) nameError.textContent = validName ? "" : tBook("booking.err.name");
+    if (phoneError) phoneError.textContent = validPhone ? "" : tBook("booking.err.phone");
 
     if (!validName || !validPhone) return;
+    const pre =
+      typeof window !== "undefined" && window.__DOGMA_BOOKING_PRESELECT_SERVICE
+        ? String(window.__DOGMA_BOOKING_PRESELECT_SERVICE).trim()
+        : "";
+    if (pre) {
+      const svc = services.find((s) => s.id === pre && serviceIsActiveForBooking(s));
+      if (svc) {
+        state.selectedServiceId = svc.id;
+        state.selectedCategory = svc.category;
+      }
+    }
     showStep(2);
     return;
   }
 
   if (state.step === 2) {
     if (!state.selectedServiceId) return;
+    syncContactFromInputs();
     showStep(3);
     return;
   }
@@ -992,7 +1265,7 @@ function nextStep() {
 
   if (state.step === 5) {
     if (!state.selectedDate) {
-      dateError.textContent = "Wybierz datę";
+      if (dateError) dateError.textContent = tBook("booking.err.date");
       return;
     }
     showStep(6);
@@ -1001,7 +1274,7 @@ function nextStep() {
 
   if (state.step === 6) {
     if (!state.selectedTime) {
-      timeError.textContent = "Wybierz godzinę";
+      if (timeError) timeError.textContent = tBook("booking.err.time");
       return;
     }
     showStep(7);
@@ -1024,7 +1297,7 @@ function prevStep() {
   showStep(state.step - 1);
 }
 
-function callDogma() {
+function callMonarchPhone() {
   const phone = "+48532377701";
 
   try {
@@ -1032,22 +1305,48 @@ function callDogma() {
   } catch (error) {
     console.error("Call error:", error);
     navigator.clipboard?.writeText("532 377 701");
-    alert("Nie udało się otworzyć połączenia. Numer został skopiowany: 532 377 701");
+    alert(tBook("booking.call.alert"));
   }
 }
 
-window.callDogma = callDogma;
+window.callMonarchPhone = callMonarchPhone;
+window.callDogma = callMonarchPhone;
 
-nameInput.addEventListener("input", (e) => {
+function onBookingNameFieldInput(e) {
   state.name = e.target.value;
-  nameError.textContent = "";
+  if (nameError) nameError.textContent = "";
+  updateBindings();
+  updateNav();
+}
+
+nameInput?.addEventListener("input", onBookingNameFieldInput);
+nameInput?.addEventListener("change", onBookingNameFieldInput);
+nameInput?.addEventListener("blur", () => {
+  syncContactFromInputs();
+  updateBindings();
+  updateNav();
+});
+nameInput?.addEventListener("compositionend", () => {
+  syncContactFromInputs();
   updateBindings();
   updateNav();
 });
 
-phoneInput.value = state.phone;
+function onBookingPhoneFieldInput(e) {
+  let formatted = normalizePhone(e.target.value);
+  if (formatted === "+48") formatted = "+48 ";
+  e.target.value = formatted;
+  state.phone = formatted;
+  if (phoneError) phoneError.textContent = "";
+  updateBindings();
+  updateNav();
+}
 
-phoneInput.addEventListener("keydown", (e) => {
+if (phoneInput) {
+  phoneInput.value = state.phone;
+}
+
+phoneInput?.addEventListener("keydown", (e) => {
   const pos = phoneInput.selectionStart || 0;
 
   if ((e.key === "Backspace" || e.key === "Delete") && pos <= 4) {
@@ -1055,19 +1354,23 @@ phoneInput.addEventListener("keydown", (e) => {
   }
 });
 
-phoneInput.addEventListener("input", (e) => {
-  const formatted = normalizePhone(e.target.value);
-  e.target.value = formatted;
-  state.phone = formatted;
-  phoneError.textContent = "";
+phoneInput?.addEventListener("input", onBookingPhoneFieldInput);
+phoneInput?.addEventListener("change", onBookingPhoneFieldInput);
+phoneInput?.addEventListener("blur", () => {
+  syncContactFromInputs();
+  updateBindings();
+  updateNav();
+});
+phoneInput?.addEventListener("compositionend", () => {
+  syncContactFromInputs();
   updateBindings();
   updateNav();
 });
 
-backBtn.addEventListener("click", prevStep);
-nextBtn.addEventListener("click", nextStep);
+backBtn?.addEventListener("click", prevStep);
+nextBtn?.addEventListener("click", nextStep);
 
-chooseBarberYes.addEventListener("click", () => {
+chooseBarberYes?.addEventListener("click", () => {
   state.barberDecision = "yes";
   state.selectedBarberId = "";
   state.resolvedBarberName = "";
@@ -1075,10 +1378,9 @@ chooseBarberYes.addEventListener("click", () => {
   renderBarberSlider();
   updateBindings();
   updateNav();
-  showStep(4);
 });
 
-chooseBarberNo.addEventListener("click", () => {
+chooseBarberNo?.addEventListener("click", () => {
   state.barberDecision = "no";
   state.selectedBarberId = "";
   state.resolvedBarberName = "";
@@ -1092,39 +1394,174 @@ chooseBarberNo.addEventListener("click", () => {
   updateNav();
 });
 
-barberPrevBtn.addEventListener("click", () => {
-  state.barberSlideIndex = (state.barberSlideIndex - 1 + barbers.length) % barbers.length;
+barberPrevBtn?.addEventListener("click", () => {
+  const list = getBookingBarbersResolved();
+  if (!list.length) return;
+  state.barberSlideIndex = (state.barberSlideIndex - 1 + list.length) % list.length;
   renderBarberSlider();
 });
 
-barberNextBtn.addEventListener("click", () => {
-  state.barberSlideIndex = (state.barberSlideIndex + 1) % barbers.length;
+barberNextBtn?.addEventListener("click", () => {
+  const list = getBookingBarbersResolved();
+  if (!list.length) return;
+  state.barberSlideIndex = (state.barberSlideIndex + 1) % list.length;
   renderBarberSlider();
 });
 
-selectBarberBtn.addEventListener("click", () => {
-  state.selectedBarberId = barbers[state.barberSlideIndex].id;
+selectBarberBtn?.addEventListener("click", () => {
+  const list = getBookingBarbersResolved();
+  const cur = list[state.barberSlideIndex];
+  if (!cur) return;
+  state.selectedBarberId = cur.id;
   renderBarberSlider();
   updateBindings();
   updateNav();
 });
 
-calendarPrevBtn.addEventListener("click", () => {
+calendarPrevBtn?.addEventListener("click", () => {
   if (state.calendarMonthOffset <= 0) return;
   state.calendarMonthOffset -= 1;
   renderCalendar();
 });
 
-calendarNextBtn.addEventListener("click", () => {
+calendarNextBtn?.addEventListener("click", () => {
   state.calendarMonthOffset += 1;
   renderCalendar();
 });
 
-renderServiceAccordion();
-renderBarberDecision();
-renderBarberSlider();
-renderCalendar();
-renderSlots();
-updateBindings();
-updateHeader();
-updateNav();
+function dogmaSyncBookingStep1Nav() {
+  if (state.step !== 1) return;
+  syncContactFromInputs();
+  updateBindings();
+  updateNav();
+}
+
+window.dogmaSyncBookingStep1Nav = dogmaSyncBookingStep1Nav;
+
+function refreshBookingWizardLanguage() {
+  if (!stepTitle) return;
+  if (state.step === 1) dogmaSyncBookingStep1Nav();
+  else if (state.step > 1) syncContactFromInputs();
+  updateHeader();
+  updateNav();
+  renderServiceAccordion();
+  renderBarberDecision();
+  renderBarberSlider();
+  renderCalendar();
+  renderSlots();
+  updateBindings();
+}
+
+window.refreshBookingWizardLanguage = refreshBookingWizardLanguage;
+
+function filterBookingBarbersBySiteVisibility() {
+  const sc = window.DOGMA_SITE_CONTENT;
+  if (!sc || !Array.isArray(sc.barbers)) return;
+  const hide = new Set();
+  sc.barbers.forEach((b) => {
+    if (b && b.barberId && b.visibleInBooking === false) {
+      hide.add(String(b.barberId).trim());
+    }
+  });
+  if (!hide.size) return;
+  const next = barbers.filter((barber) => !hide.has(String(barber.id)));
+  if (next.length) {
+    barbers.length = 0;
+    barbers.push(...next);
+  }
+}
+
+function cloneBookingValue(v) {
+  return v == null ? v : JSON.parse(JSON.stringify(v));
+}
+
+window.DOGMA_applyBookingConfigFromContent = function () {
+  const data = window.DOGMA_SITE_CONTENT;
+  if (!data || typeof data !== "object") return false;
+
+  const raw = data.bookingConfig;
+  if (!raw || typeof raw !== "object") {
+    window.DOGMA_BOOKING_OPENING_HOURS = null;
+    window.DOGMA_BOOKING_DISCOUNT = null;
+    DISCOUNT_PERCENT = DEFAULT_DISCOUNT_PERCENT;
+    DISCOUNT_WEEKDAYS = [...DEFAULT_DISCOUNT_WEEKDAYS];
+    DISCOUNT_START_MINUTES = DEFAULT_DISCOUNT_START_MINUTES;
+    DISCOUNT_END_MINUTES = DEFAULT_DISCOUNT_END_MINUTES;
+    filterBookingBarbersBySiteVisibility();
+    refreshBookingWizardLanguage();
+    mergeBookingCatalogSnapshot();
+    return false;
+  }
+
+  if (Array.isArray(raw.serviceCategories) && raw.serviceCategories.length) {
+    serviceCategories.length = 0;
+    serviceCategories.push(...raw.serviceCategories.map((c) => cloneBookingValue(c)));
+  }
+  if (Array.isArray(raw.services) && raw.services.length) {
+    services.length = 0;
+    services.push(
+      ...raw.services.map((s) => {
+        const x = cloneBookingValue(s);
+        if (x.bookingEnabled === undefined) x.bookingEnabled = true;
+        if (typeof x.name === "string") {
+          const t = x.name;
+          x.name = { pl: t, ua: "", en: "" };
+        }
+        if (typeof x.description === "string") {
+          const t = x.description;
+          x.description = { pl: t, ua: "", en: "" };
+        }
+        return x;
+      })
+    );
+  }
+  if (Array.isArray(raw.barbers) && raw.barbers.length) {
+    barbers.length = 0;
+    barbers.push(...raw.barbers.map((b) => cloneBookingValue(b)));
+  }
+
+  if (raw.discount && typeof raw.discount === "object") {
+    window.DOGMA_BOOKING_DISCOUNT = cloneBookingValue(raw.discount);
+    if (typeof raw.discount.percent === "number") DISCOUNT_PERCENT = raw.discount.percent;
+    if (Array.isArray(raw.discount.weekdays)) DISCOUNT_WEEKDAYS = [...raw.discount.weekdays];
+    if (typeof raw.discount.startMinutes === "number") DISCOUNT_START_MINUTES = raw.discount.startMinutes;
+    if (typeof raw.discount.endMinutes === "number") DISCOUNT_END_MINUTES = raw.discount.endMinutes;
+  } else {
+    window.DOGMA_BOOKING_DISCOUNT = null;
+    DISCOUNT_PERCENT = DEFAULT_DISCOUNT_PERCENT;
+    DISCOUNT_WEEKDAYS = [...DEFAULT_DISCOUNT_WEEKDAYS];
+    DISCOUNT_START_MINUTES = DEFAULT_DISCOUNT_START_MINUTES;
+    DISCOUNT_END_MINUTES = DEFAULT_DISCOUNT_END_MINUTES;
+  }
+
+  if (raw.openingHours && typeof raw.openingHours === "object") {
+    window.DOGMA_BOOKING_OPENING_HOURS = cloneBookingValue(raw.openingHours);
+  } else {
+    window.DOGMA_BOOKING_OPENING_HOURS = null;
+  }
+
+  filterBookingBarbersBySiteVisibility();
+  refreshBookingWizardLanguage();
+  mergeBookingCatalogSnapshot();
+  return true;
+};
+
+function mergeBookingCatalogSnapshot() {
+  try {
+    const admin = window.DOGMA_ADMIN_DATA;
+    if (!admin || typeof admin !== "object") return;
+    admin.bookingCatalog = {
+      serviceCategories: serviceCategories.map((c) => ({ ...c })),
+      services: services.map((s) => ({ ...s, bookingEnabled: true, visible: true })),
+      barbers: barbers.map((b) => ({ ...b, bookingEnabled: true, visible: true }))
+    };
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+(function mergeBookingCatalog() {
+  mergeBookingCatalogSnapshot();
+})();
+
+refreshBookingWizardLanguage();
