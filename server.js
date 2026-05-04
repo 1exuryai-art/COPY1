@@ -56,7 +56,7 @@ const EMPTY_SITE_CONTENT = {
   barbers: [],
   landingServices: [],
   bookingConfig: null,
-  contacts: {},
+  contacts: { mapImage: "" },
   socials: {}
 };
 

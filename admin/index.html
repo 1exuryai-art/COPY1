@@ -6,22 +6,25 @@
   <title>MONARCH — Panel treści</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
   <link rel="stylesheet" href="/admin/admin.css" />
 </head>
-<body class="dogma-admin-shell">
-  <div id="loginView" class="dogma-login">
-    <h2>MONARCH</h2>
-    <p class="dogma-hint" style="margin:0 0 8px">Zaloguj się, żeby zmieniać treści na stronie.</p>
-    <label for="loginUser">Login</label>
-    <input id="loginUser" type="text" autocomplete="username" />
-    <label for="loginPass">Hasło</label>
-    <input id="loginPass" type="password" autocomplete="current-password" />
-    <button type="button" class="dogma-btn dogma-btn--primary" id="loginBtn">Zaloguj</button>
-    <p class="dogma-status" id="loginStatus" aria-live="polite"></p>
-  </div>
+<body class="dogma-admin-shell monarch-admin-body">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("dogma_admin_token");
+        if (!t || !String(t).trim()) window.location.replace("/");
+      } catch (_e) {
+        window.location.replace("/");
+      }
+    })();
+  </script>
 
-  <div id="appView" class="dogma-admin admin-app hidden">
+  <div id="appView" class="dogma-admin admin-app">
     <header class="dogma-admin__head">
       <div>
         <h1>Panel treści — MONARCH</h1>
@@ -38,8 +41,6 @@
     <nav class="dogma-tabs" id="tabNav" aria-label="Sekcje"></nav>
 
     <section class="dogma-panel" data-panel="works" id="panel-works"></section>
-    <section class="dogma-panel" data-panel="effect" id="panel-effect"></section>
-    <section class="dogma-panel" data-panel="salon" id="panel-salon"></section>
     <section class="dogma-panel" data-panel="barbers" id="panel-barbers"></section>
     <section class="dogma-panel" data-panel="services" id="panel-services"></section>
     <section class="dogma-panel" data-panel="booking" id="panel-booking"></section>

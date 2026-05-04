@@ -6,6 +6,7 @@
       const monarch = localStorage.getItem("monarch_lang");
       if (monarch === "en") return "en";
       if (monarch === "ru") return "ru";
+      if (monarch === "ua") return "ru";
       const legacy = localStorage.getItem("dogma_lang");
       if (legacy === "en") return "en";
       if (legacy === "ru") return "ru";
@@ -18,8 +19,13 @@
 
   function pickLoc(obj, lang) {
     if (!obj || typeof obj !== "object") return "";
-    if (lang === "ru") return obj.ru || obj.ua || obj.pl || obj.en || "";
-    return obj[lang] || obj.pl || obj.en || obj.ua || obj.ru || "";
+    const order =
+      lang === "ru" ? ["ru", "pl", "en"] : lang === "en" ? ["en", "pl", "ru"] : ["pl", "en", "ru"];
+    for (let i = 0; i < order.length; i++) {
+      const v = obj[order[i]];
+      if (v != null && String(v).trim()) return String(v).trim();
+    }
+    return "";
   }
 
   function normSrc(src) {
@@ -39,8 +45,9 @@
   }
 
   function pickAlt(item, lang) {
-    const alt = item && item.media && item.media.alt;
-    return pickLoc(alt, lang) || "";
+    const altM = item && item.media && item.media.alt;
+    const altT = item && item.alt;
+    return pickLoc(altM, lang) || pickLoc(altT, lang) || "";
   }
 
   function prepareItems(list) {
@@ -63,36 +70,6 @@
       .replace(/</g, "&lt;");
   }
 
-  function renderMobileBio(items, lang) {
-    return items
-      .map((it) => {
-        const src = mediaSrc(it);
-        const url = src ? escapeAttr(src) : "";
-        const title = escapeAttr(pickLoc(it.title, lang));
-        const desc = escapeAttr(pickLoc(it.description, lang));
-        return `<article class="mobile-bio-card">
-    <div class="mobile-bio-photo" style="--photo-url: url('${url}')"></div>
-    <strong>${title}</strong>
-    <p>${desc}</p>
-    <button class="mobile-card-btn" type="button" data-open-booking data-i18n="common.book">Umów</button>
-  </article>`;
-      })
-      .join("\n");
-  }
-
-  function renderDesktopBioPreview(items, lang) {
-    return items
-      .map((it) => {
-        const src = mediaSrc(it);
-        const url = src ? escapeAttr(src) : "";
-        const title = escapeAttr(pickLoc(it.title, lang));
-        return `<div class="bio-preview-item" style="--bio-img: url('${url}')">
-    <strong>${title}</strong>
-  </div>`;
-      })
-      .join("\n");
-  }
-
   function resolveGalleryCardType(it, mediaMode) {
     if (mediaMode === "auto") return mediaType(it);
     if (mediaMode === "video") return "video";
@@ -104,7 +81,8 @@
       .map((it, idx) => {
         const type = resolveGalleryCardType(it, mediaMode);
         const src = mediaSrc(it);
-        const url = src ? escapeAttr(src) : "";
+        if (!src) return "";
+        const url = escapeAttr(src);
         const title = escapeAttr(pickLoc(it.title, lang));
         const desc = escapeAttr(pickLoc(it.description, lang));
         const alt = escapeAttr(pickAlt(it, lang));
@@ -133,7 +111,8 @@
       .map((it, i) => {
         const type = resolveGalleryCardType(it, mediaMode);
         const src = mediaSrc(it);
-        const url = src ? escapeAttr(src) : "";
+        if (!src) return "";
+        const url = escapeAttr(src);
         const title = escapeAttr(pickLoc(it.title, lang));
         const desc = escapeAttr(pickLoc(it.description, lang));
         const alt = escapeAttr(pickAlt(it, lang));
@@ -245,55 +224,6 @@
 
   const ZONE_RENDERERS = [
     {
-      key: "bioGallery",
-      jobs: [
-        { sel: '[data-admin-zone="mobile-bio-gallery"]', fn: (el, items, lang) => {
-          el.innerHTML = renderMobileBio(items, lang);
-        } }
-      ]
-    },
-    {
-      key: "bioDesktopPreview",
-      jobs: [
-        { sel: '[data-admin-zone="desktop-bio-preview"]', fn: (el, items, lang) => {
-          el.innerHTML = renderDesktopBioPreview(items, lang);
-        } }
-      ]
-    },
-    {
-      key: "effectPhotos",
-      jobs: [
-        { sel: '[data-admin-zone="mobile-effect-photos"]', fn: (el, items, lang) => {
-          el.innerHTML = renderMobileGalleryCard(items, lang, "image");
-        } },
-        { sel: '[data-admin-zone="desktop-effect-photos"]', fn: (el, items, lang) => {
-          setPanelStickerHtml(el, renderStickerFigure(items, lang, "image"));
-        } }
-      ]
-    },
-    {
-      key: "effectVideos",
-      jobs: [
-        { sel: '[data-admin-zone="mobile-effect-videos"]', fn: (el, items, lang) => {
-          el.innerHTML = renderMobileGalleryCard(items, lang, "video");
-        } },
-        { sel: '[data-admin-zone="desktop-effect-videos"]', fn: (el, items, lang) => {
-          setPanelStickerHtml(el, renderStickerFigure(items, lang, "video"));
-        } }
-      ]
-    },
-    {
-      key: "vibeGallery",
-      jobs: [
-        { sel: '[data-admin-zone="mobile-vibe-gallery"]', fn: (el, items, lang) => {
-          el.innerHTML = renderMobileGalleryCard(items, lang, "auto");
-        } },
-        { sel: '[data-admin-zone="desktop-vibe-gallery"]', fn: (el, items, lang) => {
-          setStickerWallHtml(el, renderStickerFigure(items, lang, "auto"));
-        } }
-      ]
-    },
-    {
       key: "barbers",
       jobs: [
         { sel: '[data-admin-zone="mobile-barbers"]', fn: (el, items, lang) => {
@@ -378,11 +308,35 @@
       .join("\n");
   }
 
+  function clearWorksGalleryZones() {
+    const zones = [
+      '[data-admin-zone="mobile-works-photos"]',
+      '[data-admin-zone="mobile-works-videos"]',
+      '[data-admin-zone="mobile-works-gallery"]',
+      '[data-admin-zone="desktop-works-photos"]',
+      '[data-admin-zone="desktop-works-videos"]',
+      '[data-admin-zone="desktop-works-gallery"]',
+      '[data-admin-zone="mobile-gallery"]'
+    ];
+    zones.forEach((sel) => {
+      const el = document.querySelector(sel);
+      if (el) el.innerHTML = "";
+    });
+    const desk = document.querySelector('[data-admin-zone="desktop-gallery-works"]');
+    if (desk) setStickerWallHtml(desk, "");
+  }
+
   function applyWorksGallery(data, lang) {
     const raw = data.worksGallery;
-    if (!Array.isArray(raw) || raw.length === 0) return;
+    if (!Array.isArray(raw) || raw.length === 0) {
+      clearWorksGalleryZones();
+      return;
+    }
     const items = prepareItems(raw).filter((it) => mediaSrc(it));
-    if (items.length === 0) return;
+    if (items.length === 0) {
+      clearWorksGalleryZones();
+      return;
+    }
 
     const photoItems = items.filter((it) => mediaType(it) !== "video");
     const videoItems = items.filter((it) => mediaType(it) === "video");
@@ -492,6 +446,32 @@
     if (c.mapEmbedUrl && typeof c.mapEmbedUrl === "string") {
       document.querySelectorAll("[data-dogma-map-embed]").forEach((iframe) => {
         iframe.setAttribute("src", c.mapEmbedUrl.trim());
+      });
+    }
+
+    const mapImgRaw = c.mapImage && String(c.mapImage).trim();
+    if (mapImgRaw) {
+      const mapSrc = normSrc(mapImgRaw);
+      document.querySelectorAll("[data-dogma-location-map-img]").forEach((img) => {
+        img.setAttribute("src", mapSrc);
+        img.removeAttribute("hidden");
+        const wrap = img.closest("[data-dogma-map-wrap]");
+        if (wrap) wrap.classList.add("map-wrap--static-image");
+      });
+      document.querySelectorAll("[data-dogma-map-embed]").forEach((iframe) => {
+        iframe.setAttribute("hidden", "");
+        iframe.classList.add("map-embed--hidden");
+      });
+    } else {
+      document.querySelectorAll("[data-dogma-location-map-img]").forEach((img) => {
+        img.removeAttribute("src");
+        img.setAttribute("hidden", "");
+        const wrap = img.closest("[data-dogma-map-wrap]");
+        if (wrap) wrap.classList.remove("map-wrap--static-image");
+      });
+      document.querySelectorAll("[data-dogma-map-embed]").forEach((iframe) => {
+        iframe.removeAttribute("hidden");
+        iframe.classList.remove("map-embed--hidden");
       });
     }
 

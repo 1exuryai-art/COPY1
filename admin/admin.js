@@ -15,9 +15,7 @@ const EMPTY = {
 };
 
 const TABS = [
-  { id: "works", label: "Prace" },
-  { id: "effect", label: "Efekty" },
-  { id: "salon", label: "Salon" },
+  { id: "works", label: "Prace / galeria" },
   { id: "barbers", label: "Barberzy" },
   { id: "services", label: "Usługi na stronie" },
   { id: "booking", label: "Rezerwacja online" },
@@ -416,6 +414,7 @@ function normalizeState(raw) {
   });
   if (!o.contacts || typeof o.contacts !== "object") o.contacts = {};
   if (o.contacts.hoursDisplay === undefined) o.contacts.hoursDisplay = "";
+  if (o.contacts.mapImage === undefined) o.contacts.mapImage = "";
   if (!o.socials || typeof o.socials !== "object") o.socials = {};
   if (o.bookingConfig !== null && typeof o.bookingConfig !== "object") o.bookingConfig = null;
   if (o.bookingConfig == null) {
@@ -478,13 +477,6 @@ function bindDirtyTracking() {
     },
     true
   );
-}
-
-function showLogin(msg, isErr) {
-  const el = document.getElementById("loginStatus");
-  if (!el) return;
-  el.textContent = msg || "";
-  el.className = `dogma-status${isErr ? " dogma-status--err" : ""}`;
 }
 
 function showSave(msg, kind) {
@@ -2104,6 +2096,11 @@ function renderContactsEditor(container) {
           <label>Mapa osadzona (iframe — opcjonalnie)</label>
           <input type="text" id="c-embed" value="${esc(c.mapEmbedUrl || "")}" />
         </div>
+        <div class="dogma-field">
+          <label>Obrazek mapy (ścieżka pliku)</label>
+          <input type="text" id="c-map-image" value="${esc(c.mapImage || "")}" placeholder="/assets/ui/map.jpg" />
+          <p class="dogma-field-hint">Jeśli ustawisz plik (np. <code>/assets/ui/map.jpg</code>), strona pokaże go zamiast iframe.</p>
+        </div>
       </details>
     </div>
     <div class="dogma-item dogma-subcard">
@@ -2149,6 +2146,10 @@ function renderContactsEditor(container) {
     c.mapEmbedUrl = e.target.value.trim();
     updateDirtyBanner();
   });
+  container.querySelector("#c-map-image")?.addEventListener("input", (e) => {
+    c.mapImage = e.target.value.trim();
+    updateDirtyBanner();
+  });
   container.querySelector("#s-booksy")?.addEventListener("input", (e) => {
     s.booksy = e.target.value.trim();
     updateDirtyBanner();
@@ -2167,28 +2168,7 @@ function renderAllPanels() {
   renderGalleryEditor(document.getElementById("panel-works"), "worksGallery", {
     allowVideoToggle: true,
     addButtonLabel: "+ Dodaj pracę",
-    headHint: "Zdjęcia i filmy w galerii „Prace”."
-  });
-  const effectEl = document.getElementById("panel-effect");
-  effectEl.innerHTML = `
-    <h3 class="dogma-subhead">Zdjęcia efektu</h3>
-    <div id="fx-ph"></div>
-    <h3 class="dogma-subhead">Filmy efektu</h3>
-    <div id="fx-vid"></div>
-  `;
-  renderGalleryEditor(effectEl.querySelector("#fx-ph"), "effectPhotos", {
-    mediaTypeDefault: "image",
-    addButtonLabel: "+ Dodaj zdjęcie efektu",
-    headHint: "Zdjęcia przy przełączniku efektu na stronie."
-  });
-  renderGalleryEditor(effectEl.querySelector("#fx-vid"), "effectVideos", {
-    mediaTypeDefault: "video",
-    addButtonLabel: "+ Dodaj video efektu",
-    headHint: "Krótkie filmy — dobrze pokazują ruch."
-  });
-  renderGalleryEditor(document.getElementById("panel-salon"), "vibeGallery", {
-    addButtonLabel: "+ Dodaj zdjęcie salonu",
-    headHint: "Klimat salonu — to, co klient czuje zanim przyjdzie."
+    headHint: "Zdjęcia i filmy w galerii na stronie (desktop „sticker wall” i mobile)."
   });
   renderBarbersEditor(document.getElementById("panel-barbers"));
   renderLandingServicesEditor(document.getElementById("panel-services"));
@@ -2252,14 +2232,18 @@ async function apiSave() {
   if (!res.ok) throw new Error(data.error || "Zapis nieudany");
 }
 
+function redirectToStorefront() {
+  window.location.replace("/");
+}
+
 function showApp(show) {
-  document.getElementById("loginView").classList.toggle("hidden", show);
-  document.getElementById("appView").classList.toggle("hidden", !show);
+  const app = document.getElementById("appView");
+  if (app) app.classList.toggle("hidden", !show);
 }
 
 async function tryBoot() {
   if (!getToken()) {
-    showApp(false);
+    redirectToStorefront();
     return;
   }
   try {
@@ -2275,40 +2259,13 @@ async function tryBoot() {
     showSave("Wczytano", "ok");
   } catch {
     setToken("");
-    showApp(false);
-    showLogin("Zaloguj się ponownie", true);
+    redirectToStorefront();
   }
 }
 
-document.getElementById("loginBtn")?.addEventListener("click", async () => {
-  showLogin("", false);
-  const login = document.getElementById("loginUser").value.trim();
-  const password = document.getElementById("loginPass").value;
-  try {
-    const res = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ login, password })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.ok || !data.token) {
-      console.log("[MONARCH Admin login]", "HTTP", res.status, "response:", data);
-      showLogin("Błąd logowania", true);
-      return;
-    }
-    setToken(data.token);
-    await tryBoot();
-    showLogin("", false);
-  } catch (e) {
-    console.log("[MONARCH Admin login]", "network or parse error:", e);
-    showLogin("Błąd logowania", true);
-  }
-});
-
 document.getElementById("logoutBtn")?.addEventListener("click", () => {
   setToken("");
-  showApp(false);
-  showLogin("", false);
+  redirectToStorefront();
 });
 
 async function doSave() {
@@ -2319,6 +2276,12 @@ async function doSave() {
     updateDirtyBanner();
     showSave("Zapisano", "ok");
   } catch (e) {
+    const msg = e && e.message ? String(e.message) : "";
+    if (msg.includes("Sesja wygasła") || msg.includes("zaloguj")) {
+      setToken("");
+      redirectToStorefront();
+      return;
+    }
     showSave(e.message || "Nie udało się zapisać. Sprawdź serwer albo internet.", "err");
   }
 }

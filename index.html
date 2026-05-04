@@ -126,7 +126,8 @@
     }
 
     body.booking-open,
-    body.faq-open {
+    body.faq-open,
+    body.admin-login-open {
       overflow: hidden;
     }
 
@@ -476,6 +477,130 @@
       line-height: 1.4;
     }
 
+    .admin-access-form .btn-primary {
+      margin-top: 4px;
+      min-height: 48px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+    }
+
+    .admin-access-form .btn-primary:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    #adminAccessSheet.product-info-sheet {
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    #adminAccessSheet .product-info-sheet__panel {
+      position: relative;
+      width: min(440px, 100%);
+      max-height: min(88vh, 520px);
+      padding: 26px 22px 24px;
+      border-radius: 28px;
+      border: 1px solid rgba(239, 186, 115, 0.22);
+      background:
+        linear-gradient(165deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)),
+        rgba(10, 10, 12, 0.78);
+      backdrop-filter: blur(22px) saturate(140%);
+      -webkit-backdrop-filter: blur(22px) saturate(140%);
+      box-shadow:
+        0 28px 90px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    #adminAccessSheet .product-info-sheet__close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      margin: 0;
+      z-index: 3;
+    }
+
+    #adminAccessSheet .product-info-sheet__panel h2 {
+      padding-right: 40px;
+      font-size: clamp(20px, 4vw, 26px);
+    }
+
+    .map-embed--hidden {
+      display: none !important;
+    }
+
+    .hero-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .hero-cta-row .btn-primary {
+      flex: 0 1 auto;
+    }
+
+    .hero-icon-group {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-icon-btn {
+      width: 46px;
+      height: 46px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--accent-2);
+      text-decoration: none;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .hero-icon-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(239, 186, 115, 0.35);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .hero-icon-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .hero-route-btn {
+      min-height: 46px;
+      padding: 0 14px;
+      max-width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-soft);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hero-route-btn:hover {
+      border-color: rgba(239, 186, 115, 0.3);
+      color: var(--text-strong);
+    }
+
+    @media (max-width: 520px) {
+      .hero-route-btn {
+        flex: 1 1 100%;
+        text-align: center;
+      }
+    }
 
     @media (prefers-reduced-motion: reduce) {
       .site-header {
@@ -493,15 +618,11 @@
       position: sticky;
       top: 0;
       z-index: 180;
-      transform: translateY(0);
-      opacity: 1;
-      background: linear-gradient(180deg, rgba(6, 6, 6, .95), rgba(6, 6, 6, .82));
+      background: linear-gradient(180deg, rgba(6, 6, 6, .96), rgba(6, 6, 6, .86));
       backdrop-filter: var(--glass);
       -webkit-backdrop-filter: var(--glass);
       border-bottom: 1px solid rgba(255, 255, 255, 0.07);
       box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
-      transition: transform 360ms var(--ease-spring), opacity 240ms ease, box-shadow 260ms ease, background 260ms ease;
-      will-change: transform;
     }
 
     .desktop-header {
@@ -1199,51 +1320,104 @@
     }
 
     .sticker-wall {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      align-items: start;
+      position: relative;
+      z-index: 1;
+      column-count: 3;
+      column-gap: 16px;
+      width: 100%;
+    }
+
+    @media (max-width: 1100px) {
+      .sticker-wall {
+        column-count: 2;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .sticker-wall {
+        column-count: 1;
+      }
     }
 
     .sticker-card {
-      margin: 0;
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.085);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
-      box-shadow: var(--shadow-xs), var(--glass-highlight);
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      margin: 0 0 16px;
+      padding: 10px;
+      break-inside: avoid;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03)),
+        rgba(12, 12, 12, 0.66);
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.36),
+        0 10px 0 rgba(255, 255, 255, 0.015),
+        var(--glass-highlight);
+      transform: rotate(var(--tilt, -1deg));
+      transition: transform 190ms ease, box-shadow 190ms ease, border-color 190ms ease;
       overflow: hidden;
-      transform: none;
     }
 
-    .sticker-card .media-frame,
+    .sticker-card:hover {
+      transform: rotate(0deg) translateY(-4px);
+    }
+
+    .sticker-card .media-frame {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.075);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(239, 186, 115, 0.08), transparent 42%),
+        rgba(0, 0, 0, 0.22);
+      box-shadow: var(--shadow-xs);
+    }
+
+    .sticker-card .media-frame img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: inherit;
+      object-fit: contain;
+      background: rgba(0, 0, 0, 0.22);
+    }
+
     .sticker-card .dogma-video {
       width: 100%;
-      min-height: 220px;
-      max-height: 320px;
+      aspect-ratio: 9 / 16;
+      max-height: min(72vh, 520px);
       display: block;
-      object-fit: cover;
-      border-radius: 0;
+      border: 0;
+      border-radius: 22px;
+      background: #050505;
+      box-shadow: var(--shadow-xs);
     }
 
     .sticker-card figcaption {
-      padding: 10px 12px 12px;
       display: grid;
-      gap: 4px;
-      background: linear-gradient(180deg, rgba(9,9,9,.14), rgba(9,9,9,.92));
+      gap: 6px;
+      padding: 12px 6px 4px;
+      position: relative;
+      z-index: 1;
     }
 
     .sticker-card figcaption strong {
       color: var(--text-strong);
-      font-size: 14px;
-      letter-spacing: -.02em;
+      font-family: "Sora", sans-serif;
+      font-size: 18px;
       line-height: 1.15;
+      letter-spacing: -0.04em;
     }
 
     .sticker-card figcaption p {
       margin: 0;
       color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
+      font-size: 13px;
+      line-height: 1.48;
     }
 
     .sticker-card figcaption:empty {
@@ -1918,14 +2092,36 @@
       background: radial-gradient(circle at 50% 0%, rgba(239,186,115,.12), transparent 34%), linear-gradient(160deg, #0f0b08, #17110c);
     }
 
-    .location-map iframe {
+    .location-map .location-map-frame {
+      position: absolute;
+      inset: 0;
+      min-height: 540px;
+      border-radius: inherit;
+    }
+
+    .location-map .location-map-frame iframe,
+    .location-map .location-map-frame img[data-dogma-location-map-img] {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
-      min-height: 540px;
       border: 0;
       display: block;
+      object-fit: cover;
+    }
+
+    .location-map .location-map-frame iframe {
       filter: grayscale(1) invert(.92) contrast(1.06) brightness(.74) saturate(.55);
-      opacity: .92;
+      opacity: 0.92;
+    }
+
+    .location-map .location-map-frame img[data-dogma-location-map-img] {
+      filter: none;
+      opacity: 1;
+    }
+
+    .location-map .location-map-frame img[data-dogma-location-map-img][hidden] {
+      display: none !important;
     }
 
     .location-map::after {
@@ -4108,7 +4304,8 @@
     height: 220px;
   }
 
-  .location-map iframe {
+  .location-map .location-map-frame iframe,
+  .location-map .location-map-frame img[data-dogma-location-map-img] {
     width: 100%;
     height: 100%;
     border-radius: 16px;
@@ -4131,29 +4328,30 @@
     }
   </style>
   <script src="/booking-i18n.js"></script>
+  <script src="/monarch-site-i18n.js"></script>
 </head>
 
 <body>
   <div id="siteSettingsPop" class="site-settings-pop" role="menu" aria-label="Menu ustawień">
-    <a href="https://mrozowski-automation-production.up.railway.app/?page=demos#demos" id="demoBackLink" target="_blank" rel="noopener">Powrót do demo</a>
-    <button type="button" id="openAdminAccessBtn" role="menuitem">Panel administratora</button>
-    <button type="button" id="openProductInfoBtn" role="menuitem">Więcej informacji</button>
+    <a href="https://mrozowski-automation-production.up.railway.app/?page=demos#demos" id="demoBackLink" target="_blank" rel="noopener" data-i18n="settings.demo">Powrót do demo</a>
+    <button type="button" id="openAdminAccessBtn" role="menuitem" data-i18n="settings.admin">Panel administratora</button>
+    <button type="button" id="openProductInfoBtn" role="menuitem" data-i18n="settings.more">Więcej informacji</button>
   </div>
 
   <section class="product-info-sheet" id="adminAccessSheet" aria-hidden="true">
     <div class="product-info-sheet__backdrop" data-close-admin-access tabindex="-1"></div>
     <div class="product-info-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="adminAccessTitle">
-      <button type="button" class="product-info-sheet__close" data-close-admin-access aria-label="Zamknij">×</button>
-      <h2 id="adminAccessTitle">Panel administratora</h2>
+      <button type="button" class="product-info-sheet__close" data-close-admin-access data-i18n-aria="admin.close" aria-label="Zamknij">×</button>
+      <h2 id="adminAccessTitle" data-i18n="admin.title">Panel administratora</h2>
       <div class="product-info-lead">
-        <p>Zaloguj się, żeby zmieniać treści na stronie.</p>
+        <p data-i18n="admin.lead">Zaloguj się, żeby zmieniać treści na stronie.</p>
       </div>
       <form id="adminAccessForm" class="admin-access-form">
-        <label for="adminAccessLogin">LOGIN</label>
+        <label for="adminAccessLogin" data-i18n="admin.login">LOGIN</label>
         <input id="adminAccessLogin" name="login" type="text" autocomplete="username" required>
-        <label for="adminAccessPassword">HASŁO</label>
+        <label for="adminAccessPassword" data-i18n="admin.password">HASŁO</label>
         <input id="adminAccessPassword" name="password" type="password" autocomplete="current-password" required>
-        <button id="adminAccessSubmit" class="btn btn-primary section-button-full" type="submit">Zaloguj</button>
+        <button id="adminAccessSubmit" class="btn btn-primary section-button-full" type="submit" data-i18n="admin.submit">ZALOGUJ</button>
         <small id="adminAccessStatus" class="admin-access-status" aria-live="polite"></small>
       </form>
     </div>
@@ -4163,26 +4361,25 @@
     <div class="product-info-sheet__backdrop" data-close-product-info tabindex="-1"></div>
     <div class="product-info-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="productInfoTitle">
       <button type="button" class="product-info-sheet__close" data-close-product-info aria-label="Zamknij">×</button>
-      <h2 id="productInfoTitle">Więcej informacji o produkcie</h2>
+      <h2 id="productInfoTitle" data-i18n="productInfo.title">Więcej informacji o produkcie</h2>
       <div class="product-info-lead" id="productInfoBody">
-        <p>
-          Ten demo-site pokazuje, jak może wyglądać indywidualna strona internetowa dla salonu lub usługodawcy.
-          Wszystkie teksty, zdjęcia, usługi, ceny, specjaliści i sekcje są przygotowywane indywidualnie pod klienta.
+        <p data-i18n="productInfo.p1">
+          Ta strona pokazuje, jak może wyglądać indywidualna witryna dla salonu lub usługodawcy. Wszystkie teksty, zdjęcia, usługi, ceny, specjaliści i sekcje są przygotowywane pod klienta.
         </p>
-        <p>
-          System zawiera własny panel administratora, w którym można edytować treści, zdjęcia, usługi, specjalistów,
-          linki oraz ustawienia rezerwacji online.
+        <p data-i18n="productInfo.p2">
+          System zawiera panel administratora do edycji treści, zdjęć, usług, specjalistów, linków oraz ustawień rezerwacji online.
         </p>
-        <p>Rezerwacja online może być połączona z Google Calendar. Klient może otrzymywać SMS z potwierdzeniem wizyty,
-          a właściciel — powiadomienia o nowej rezerwacji.</p>
-        <p><strong>W rozszerzonych wersjach mogą pojawić się m.in.:</strong></p>
+        <p data-i18n="productInfo.p3">
+          Rezerwacja online może być połączona z Google Calendar. Klient może otrzymać SMS z potwierdzeniem wizyty, a właściciel — powiadomienie o nowej rezerwacji.
+        </p>
+        <p><strong data-i18n="productInfo.listIntro">W rozszerzonych wersjach mogą pojawić się m.in.:</strong></p>
         <ul>
-          <li>indywidualne kolory i styl marki,</li>
-          <li>automatyzacja Instagrama,</li>
-          <li>powiadomienia Telegram o nowej rezerwacji,</li>
-          <li>SMS do klienta,</li>
-          <li>rozbudowana automatyzacja lejka,</li>
-          <li>dodatkowe sekcje i integracje.</li>
+          <li data-i18n="productInfo.li1">indywidualne kolory i styl marki,</li>
+          <li data-i18n="productInfo.li2">automatyzacja Instagrama,</li>
+          <li data-i18n="productInfo.li3">powiadomienia Telegram o nowej rezerwacji,</li>
+          <li data-i18n="productInfo.li4">SMS do klienta,</li>
+          <li data-i18n="productInfo.li5">rozbudowana automatyzacja lejka,</li>
+          <li data-i18n="productInfo.li6">dodatkowe sekcje i integracje.</li>
         </ul>
       </div>
     </div>
@@ -4203,7 +4400,7 @@
             <a href="#hero" data-i18n="nav.start">Start</a>
             <a href="#pricing" data-i18n="nav.services">Usługi</a>
             <a href="#masters" data-i18n="nav.masters">Barberzy</a>
-            <a href="#gallery" data-i18n="nav.effect">Efekt</a>
+            <a href="#gallery" data-i18n="nav.gallery">Galeria</a>
           </nav>
         </div>
 
@@ -4250,19 +4447,30 @@
                   barbera, dzień i godzinę — bez dzwonienia, bez czekania, bez chaosu w wiadomościach.
                 </p>
 
-                <div class="hero-actions">
+                <div class="hero-cta-row">
                   <button class="btn btn-primary" type="button" data-open-booking data-i18n="common.book">
                     Zarezerwuj termin
                   </button>
-                  <button class="btn btn-ghost" type="button" onclick="openMapsRoute()" data-i18n="common.route">
-                    Sprawdź dojazd
-                  </button>
-                </div>
-
-                <div class="hero-trust-row">
-                  <div class="trust-pill" data-i18n="hero.pill1">Strzyżenie męskie</div>
-                  <div class="trust-pill" data-i18n="hero.pill2">Broda i kontury</div>
-                  <div class="trust-pill" data-i18n="hero.pill3">Combo włosy + broda</div>
+                  <div class="hero-icon-group">
+                    <a class="hero-icon-btn" href="tel:+48532377701" data-dogma-contact="phone" data-i18n-aria="hero.phoneAria" aria-label="Telefon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.34 1.77.68 2.6a2 2 0 0 1-.45 2.11L8.1 9.91a16 16 0 0 0 6 6l1.48-1.24a2 2 0 0 1 2.11-.45c.83.34 1.7.56 2.6.68A2 2 0 0 1 22 16.92z"></path>
+                      </svg>
+                    </a>
+                    <a class="hero-icon-btn" href="https://www.instagram.com/mrozowski.automation/" target="_blank" rel="noopener" data-dogma-contact="instagram" data-i18n-aria="hero.instaAria" aria-label="Instagram">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"></circle>
+                      </svg>
+                    </a>
+                    <a class="hero-icon-btn" href="https://www.tiktok.com/@mrozowski.automation" target="_blank" rel="noopener" data-dogma-contact="tiktok" data-i18n-aria="hero.tiktokAria" aria-label="TikTok">
+                      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M15.7 3c.2 1.6 1.1 3 2.4 3.8.8.5 1.7.8 2.7.8v3.1c-1.4 0-2.9-.4-4.1-1.2v6.4c0 3.1-2.5 5.6-5.6 5.6S5.5 19 5.5 15.9s2.5-5.6 5.6-5.6c.3 0 .7 0 1 .1v3.2a2.7 2.7 0 0 0-1-.2 2.5 2.5 0 0 0 0 5 2.5 2.5 0 0 0 2.5-2.5V3h2.1Z"></path>
+                      </svg>
+                    </a>
+                    <button class="hero-route-btn" type="button" onclick="openMapsRoute()" data-i18n="common.route">Dojazd</button>
+                  </div>
                 </div>
               </div>
 
@@ -4559,7 +4767,7 @@
                   <div class="master-tags">
                     <span>classic cut</span>
                     <span>clean shape</span>
-                    <span>🇷🇺 🇵🇱 🇬🇧</span>
+                    <span>RU · PL · EN</span>
                   </div>
                   <button class="master-book-btn" type="button" data-open-booking data-i18n="masters.bookTymur">
                     Zarezerwuj u Tymura
@@ -4577,7 +4785,7 @@
                   <div class="master-tags">
                     <span>combo</span>
                     <span>beard trim</span>
-                    <span>🇷🇺 🇵🇱 🇬🇧</span>
+                    <span>RU · PL · EN</span>
                   </div>
                   <button class="master-book-btn" type="button" data-open-booking data-i18n="masters.bookDima">
                     Zarezerwuj u Dimy
@@ -4595,7 +4803,7 @@
                   <div class="master-tags">
                     <span>fresh cut</span>
                     <span>modern style</span>
-                    <span>🇺🇦 🇷🇺 🇵🇱</span>
+                    <span>RU · PL · EN</span>
                   </div>
                   <button class="master-book-btn" type="button" data-open-booking data-i18n="masters.bookVlad">
                     Zarezerwuj u Vlada
@@ -4612,7 +4820,7 @@
           <div class="section-card reveal">
             <div class="section-wrap">
               <div class="section-head center">
-                <div class="section-chip" data-i18n="gallery.chip">EFEKT</div>
+                <div class="section-chip" data-i18n="gallery.chip">GALERIA</div>
                 <h2>
                   <span data-i18n="gallery.titleA">Cięcie, które wygląda dobrze</span>
                   <span data-i18n="gallery.titleB">z każdej strony.</span>
@@ -4687,12 +4895,15 @@
             <div class="section-wrap">
               <div class="location-grid">
                 <article class="glass-card location-map">
-                  <iframe
-                    data-dogma-map-embed
-                    title="Mapa Wrocław"
-                    loading="lazy"
-                    src="https://www.google.com/maps?q=Wroc%C5%82aw&output=embed">
-                  </iframe>
+                  <div class="location-map-frame" data-dogma-map-wrap>
+                    <iframe
+                      data-dogma-map-embed
+                      title="Mapa"
+                      loading="lazy"
+                      src="https://www.google.com/maps?q=Wroc%C5%82aw&output=embed">
+                    </iframe>
+                    <img data-dogma-location-map-img alt="" hidden loading="lazy" width="1200" height="800" onerror="this.hidden=true;this.classList.add('map-img--missing');" />
+                  </div>
 
                   <div class="location-map-card">
                     <span data-i18n="location.mapChip">LOKALIZACJA</span>
@@ -4878,7 +5089,7 @@
       <button class="nav-chip active" type="button" data-page="home" data-i18n="nav.start">Start</button>
       <button class="nav-chip" type="button" data-page="services" data-i18n="nav.services">Usługi</button>
       <button class="nav-chip" type="button" data-page="masters" data-i18n="nav.masters">Barberzy</button>
-      <button class="nav-chip" type="button" data-page="gallery" data-i18n="nav.effect">Efekt</button>
+      <button class="nav-chip" type="button" data-page="gallery" data-i18n="nav.gallery">Galeria</button>
       <button class="nav-chip" type="button" data-page="reviews" data-i18n="nav.reviews">Opinie</button>
       <button class="nav-chip" type="button" data-page="where" data-i18n="nav.location">Lokalizacja</button>
       <button class="nav-chip" type="button" data-page="faq">FAQ</button>
@@ -5043,7 +5254,7 @@
             <div class="tags">
               <span>classic cut</span>
               <span>clean</span>
-              <span>🇺🇦 🇵🇱 🇬🇧</span>
+              <span>RU · PL · EN</span>
             </div>
             <button class="mobile-card-btn" type="button" data-open-booking data-i18n="masters.bookTymur">
               Zarezerwuj u Tymura
@@ -5057,7 +5268,7 @@
             <div class="tags">
               <span>combo</span>
               <span>beard trim</span>
-              <span>🇺🇦 🇵🇱 🇬🇧</span>
+              <span>RU · PL · EN</span>
             </div>
             <button class="mobile-card-btn" type="button" data-open-booking data-i18n="masters.bookDima">
               Zarezerwuj u Dimy
@@ -5071,7 +5282,7 @@
             <div class="tags">
               <span>fresh cut</span>
               <span>modern</span>
-              <span>🇺🇦 🇷🇺 🇵🇱</span>
+              <span>RU · PL · EN</span>
             </div>
             <button class="mobile-card-btn" type="button" data-open-booking data-i18n="masters.bookVlad">
               Zarezerwuj u Vlada
@@ -5082,7 +5293,7 @@
 
       <section class="page" data-page-view="gallery">
         <div class="page-head">
-          <div class="kicker" data-i18n="gallery.chip">EFEKT</div>
+          <div class="kicker" data-i18n="gallery.chip">GALERIA</div>
           <h2 class="page-title">
             <span data-i18n="mobile.gallery.titleA">Detal robi</span>
             <span class="gold" data-i18n="mobile.gallery.titleB">całość.</span>
@@ -5092,37 +5303,7 @@
           </p>
         </div>
 
-        <div class="gallery-mobile-list" data-admin-zone="mobile-gallery">
-          <article class="mobile-gallery-card">
-            <div class="mobile-gallery-photo cut"></div>
-            <strong>Clean haircut</strong>
-            <p data-i18n="mobile.gallery.card1">Czysta forma, równa linia i fryzura, która trzyma kształt.</p>
-          </article>
-
-          <article class="mobile-gallery-card">
-            <div class="mobile-gallery-photo beard"></div>
-            <strong>Sharp beard</strong>
-            <p data-i18n="mobile.gallery.card2">Broda z proporcją, konturem i wykończeniem bez przypadkowości.</p>
-          </article>
-
-          <article class="mobile-gallery-card">
-            <div class="mobile-gallery-photo combo"></div>
-            <strong>Combo service</strong>
-            <p data-i18n="mobile.gallery.card3">Włosy i broda w jednym rytmie — spójny efekt po całej wizycie.</p>
-          </article>
-
-          <article class="mobile-gallery-card">
-            <div class="mobile-gallery-photo shop"></div>
-            <strong>MONARCH atmosphere</strong>
-            <p data-i18n="mobile.gallery.card4">Ciemny salon, marmur, złoto i spokojny barbershopowy rytuał.</p>
-          </article>
-
-          <article class="mobile-gallery-card">
-            <div class="mobile-gallery-photo detail"></div>
-            <strong>Royal detail</strong>
-            <p data-i18n="mobile.gallery.card5">Detal przy wykończeniu robi różnicę, którą widać od razu.</p>
-          </article>
-        </div>
+        <div class="gallery-mobile-list" data-admin-zone="mobile-gallery"></div>
       </section>
 
       <section class="page" data-page-view="reviews">
@@ -5643,7 +5824,7 @@
         "nav.start": "Start",
         "nav.services": "Usługi",
         "nav.masters": "Barberzy",
-        "nav.effect": "Efekt",
+        "nav.gallery": "Galeria",
         "nav.reviews": "Opinie",
         "nav.location": "Lokalizacja",
         "nav.faq": "FAQ",
@@ -5711,7 +5892,7 @@
         "masters.bookDima": "Zarezerwuj u Dimy",
         "masters.bookVlad": "Zarezerwuj u Vlada",
 
-        "gallery.chip": "EFEKT",
+        "gallery.chip": "GALERIA",
         "gallery.titleA": "Cięcie, które wygląda dobrze",
         "gallery.titleB": "z każdej strony.",
         "gallery.sub": "Klimat barbershopu, detale usługi i wizualna pewność marki — wszystko przed kliknięciem w booking.",
@@ -5732,7 +5913,7 @@
         "location.chip": "LOKALIZACJA",
         "location.mapChip": "LOKALIZACJA",
         "location.title": "Wrocław, prosty dojazd i konkretny termin.",
-        "location.sub": "Dokładny adres możesz później podmienić w kodzie.",
+        "location.sub": "Adres i mapa w jednym miejscu — rezerwacja bez dzwonienia.",
         "location.openMap": "Otwórz mapę",
 
         "faq.titleA": "Przed wizytą",
@@ -5796,92 +5977,41 @@
         "mobile.faq.titleB": "Bez chaosu.",
         "mobile.contact.titleA": "Zadzwoń albo",
         "mobile.contact.titleB": "zarezerwuj.",
-        "mobile.contact.sub": "Online jest najszybciej."
+        "mobile.contact.sub": "Online jest najszybciej.",
+
+        "settings.demo": "Powrót do demo",
+        "settings.admin": "Panel administratora",
+        "settings.more": "Więcej informacji",
+        "admin.title": "Panel administratora",
+        "admin.lead": "Zaloguj się, żeby zmieniać treści na stronie.",
+        "admin.login": "LOGIN",
+        "admin.password": "HASŁO",
+        "admin.submit": "ZALOGUJ",
+        "admin.close": "Zamknij",
+        "admin.loading": "Logowanie…",
+        "admin.err.credentials": "Błędny login lub hasło.",
+        "admin.err.network": "Błąd połączenia. Spróbuj ponownie.",
+        "admin.err.required": "Wpisz login i hasło.",
+        "hero.phoneAria": "Zadzwoń do MONARCH",
+        "hero.instaAria": "Instagram",
+        "hero.tiktokAria": "TikTok",
+
+        "productInfo.title": "Więcej informacji o produkcie",
+        "productInfo.p1": "Ta strona pokazuje, jak może wyglądać indywidualna witryna dla salonu lub usługodawcy. Wszystkie teksty, zdjęcia, usługi, ceny, specjaliści i sekcje są przygotowywane pod klienta.",
+        "productInfo.p2": "System zawiera panel administratora do edycji treści, zdjęć, usług, specjalistów, linków oraz ustawień rezerwacji online.",
+        "productInfo.p3": "Rezerwacja online może być połączona z Google Calendar. Klient może otrzymać SMS z potwierdzeniem wizyty, a właściciel — powiadomienie o nowej rezerwacji.",
+        "productInfo.listIntro": "W rozszerzonych wersjach mogą pojawić się m.in.:",
+        "productInfo.li1": "indywidualne kolory i styl marki,",
+        "productInfo.li2": "automatyzacja Instagrama,",
+        "productInfo.li3": "powiadomienia Telegram o nowej rezerwacji,",
+        "productInfo.li4": "SMS do klienta,",
+        "productInfo.li5": "rozbudowana automatyzacja lejka,",
+        "productInfo.li6": "dodatkowe sekcje i integracje."
       }
     };
 
-    translations.ru = {
-      ...translations.pl,
-      "nav.start": "Старт",
-      "nav.services": "Услуги",
-      "nav.masters": "Барберы",
-      "nav.effect": "Работы",
-      "nav.reviews": "Отзывы",
-      "nav.location": "Локация",
-      "nav.contact": "Контакт",
-      "common.call": "Позвонить",
-      "common.book": "ЗАПИСАТЬСЯ",
-      "common.route": "Маршрут",
-      "mobile.home.bookCta": "ЗАПИСАТЬСЯ",
-      "mobile.home.routeShort": "Карта",
-      "nav.faq": "FAQ",
-      "hero.titleA": "Стрижка начинается",
-      "hero.titleB": "с нормальной записи.",
-      "hero.sub": "Барбершоп во Вроцлаве с удобной онлайн-записью. Выбери услугу, барбера, день и время — без звонков, ожидания и хаоса в сообщениях.",
-      "mobile.home.titleA": "Стрижка",
-      "mobile.home.titleB": "без хаоса.",
-      "mobile.home.sub": "Выбери услугу, барбера и время онлайн — быстро, конкретно, удобно.",
-      "mobile.home.card": "Барбершоп во Вроцлаве с онлайн-записью",
-      "mobile.home.socialTitle": "Начни здесь",
-      "mobile.home.socialSub": "Контакты и запись под рукой.",
-      "mobile.home.addrLabel": "Адрес",
-      "mobile.home.hoursLabel": "Часы",
-      "mobile.services.sub": "Листай вниз. Карточки услуг вертикальные, на всю ширину.",
-      "mobile.masters.sub": "Листай вниз — у каждого барбера своя карточка.",
-      "mobile.gallery.sub": "Листай вниз и смотри атмосферу MONARCH.",
-      "mobile.services.titleA": "Выбери",
-      "mobile.services.titleB": "услугу.",
-      "mobile.services.choose": "Выбрать услугу",
-      "mobile.contact.titleA": "Позвони или",
-      "mobile.contact.titleB": "запишись.",
-      "mobile.contact.sub": "Онлайн быстрее всего.",
-      "reviews.google": "Смотреть отзывы в Google",
-      "reviews.more": "Больше отзывов",
-      "reviews.moreText": "Ссылку позже можно заменить на реальный профиль Google барбершопа.",
-      "mobile.location.book": "ЗАПИСАТЬСЯ",
-      "mobile.location.map": "КАРТА"
-    };
-
-    translations.en = {
-      ...translations.pl,
-      "nav.start": "Start",
-      "nav.services": "Services",
-      "nav.masters": "Barbers",
-      "nav.effect": "Results",
-      "nav.reviews": "Reviews",
-      "nav.location": "Location",
-      "nav.contact": "Contact",
-      "common.call": "Call",
-      "common.book": "BOOK NOW",
-      "common.route": "Map",
-      "mobile.home.bookCta": "BOOK NOW",
-      "mobile.home.routeShort": "Map",
-      "hero.titleA": "A haircut starts",
-      "hero.titleB": "with the right time.",
-      "hero.sub": "A barbershop in Wrocław with easy online booking. Choose a service, barber, date and time — no calls, no waiting, no message chaos.",
-      "mobile.home.titleA": "Haircut",
-      "mobile.home.titleB": "without chaos.",
-      "mobile.home.sub": "Choose a service, barber and time online — fast, clear, convenient.",
-      "mobile.home.card": "Barbershop in Wrocław with online booking",
-      "mobile.home.socialTitle": "Start here",
-      "mobile.home.socialSub": "Key contacts and booking in one place.",
-      "mobile.home.addrLabel": "Address",
-      "mobile.home.hoursLabel": "Hours",
-      "mobile.services.sub": "Scroll down. Service cards are vertical and full width.",
-      "mobile.masters.sub": "Scroll down — each barber has their own card.",
-      "mobile.gallery.sub": "Scroll down to see the MONARCH vibe — cards are stacked vertically.",
-      "mobile.services.titleA": "Choose",
-      "mobile.services.titleB": "a service.",
-      "mobile.services.choose": "Choose service",
-      "mobile.contact.titleA": "Call or",
-      "mobile.contact.titleB": "book.",
-      "mobile.contact.sub": "Online is fastest.",
-      "reviews.google": "See Google reviews",
-      "reviews.more": "See more reviews",
-      "reviews.moreText": "You can later replace this with the real Google profile link.",
-      "mobile.location.book": "BOOK",
-      "mobile.location.map": "MAP"
-    };
+    translations.en = { ...translations.pl };
+    translations.ru = { ...translations.pl };
 
     (function mergeMonarchBookingI18n() {
       const bk = window.MONARCH_BOOKING_KEYS;
@@ -5889,6 +6019,16 @@
       Object.assign(translations.pl, bk.pl || {});
       Object.assign(translations.en, bk.en || {});
       Object.assign(translations.ru, bk.ru || bk.en || {});
+    })();
+
+    (function mergeMonarchSiteUiLocales() {
+      const pack = window.MONARCH_SITE_LOCALES;
+      if (pack) {
+        if (pack.en && typeof pack.en === "object") Object.assign(translations.en, pack.en);
+        if (pack.ru && typeof pack.ru === "object") Object.assign(translations.ru, pack.ru);
+      }
+      translations.ua = { ...translations.ru };
+      if (pack && pack.ua && typeof pack.ua === "object") Object.assign(translations.ua, pack.ua);
     })();
 
     window.DOGMA_TRANSLATIONS = translations;
@@ -5945,6 +6085,16 @@
         early: ["Should I come earlier?", "A few minutes before the visit is enough."],
         cancel: ["Can I cancel a visit?", "Yes. It is best to do it as early as possible by phone, Instagram or another contact channel."],
         weekend: ["Is the barbershop open on weekends?", "In this version, Saturday and Sunday are available. Hours can be replaced with the real schedule." ]
+      },
+      ua: {
+        message: ["Чи потрібно писати повідомлення?", "Ні. Натисни кнопку запису, обери послугу, барбера, дату й час — система проведе через усі кроки."],
+        barber: ["Чи можу я обрати барбера?", "Так. Можна обрати барбера на сторінці або в системі бронювання."],
+        duration: ["Скільки триває візит?", "Стрижка — близько 60 хв, комбо волосся + борода — близько 90 хв, борода — близько 40 хв."],
+        combo: ["Чи можна волосся й бороду разом?", "Так. Обери combo, якщо хочеш стрижку, бороду, контур і фініш за один візит."],
+        prices: ["Чи ціни остаточні?", "У цій версії ціни прикладні. У реальному запуску барбершоп додасть свій прайс."],
+        early: ["Чи треба приходити раніше?", "Достатньо прийти за кілька хвилин до візиту."],
+        cancel: ["Чи можна скасувати візит?", "Так. Краще зробити це якомога раніше телефоном, через Instagram або іншим каналом."],
+        weekend: ["Чи працюєте у вихідні?", "У цій версії субота й неділя доступні. Години можна підлаштувати під реальний графік." ]
       }
     };
 
@@ -5952,6 +6102,7 @@
       try {
         const m = localStorage.getItem("monarch_lang");
         if (m === "pl" || m === "en" || m === "ru") return m;
+        if (m === "ua") return "ru";
         const d = localStorage.getItem("dogma_lang");
         if (d === "en") return "en";
         if (d === "ru") return "ru";
@@ -6031,6 +6182,7 @@
     function closeAdminAccess() {
       document.getElementById("adminAccessSheet")?.classList.remove("open");
       document.getElementById("adminAccessSheet")?.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("admin-login-open");
     }
 
     function openAdminAccess() {
@@ -6039,6 +6191,8 @@
       const m = document.getElementById("adminAccessSheet");
       m?.classList.add("open");
       m?.setAttribute("aria-hidden", "false");
+      document.body.classList.add("admin-login-open");
+      applyI18nStrings();
     }
 
     function openProductInfo() {
@@ -6046,6 +6200,7 @@
       closeAdminAccess();
       productInfoSheet?.classList.add("open");
       productInfoSheet?.setAttribute("aria-hidden", "false");
+      applyI18nStrings();
     }
 
     function bindSiteSettings() {
@@ -6103,15 +6258,17 @@
       const adminSubmit = document.getElementById("adminAccessSubmit");
       adminForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
+        const lang = getCurrentLang();
+        const dict = translations[lang] || translations.pl;
         const login = document.getElementById("adminAccessLogin")?.value?.trim() || "";
         const password = document.getElementById("adminAccessPassword")?.value || "";
         if (!login || !password) {
-          if (adminStatus) adminStatus.textContent = "Wpisz login i hasło.";
+          if (adminStatus) adminStatus.textContent = dict["admin.err.required"] || "";
           return;
         }
         if (adminSubmit) {
           adminSubmit.disabled = true;
-          adminSubmit.textContent = "Logowanie...";
+          adminSubmit.textContent = dict["admin.loading"] || "…";
         }
         if (adminStatus) adminStatus.textContent = "";
         try {
@@ -6122,17 +6279,17 @@
           });
           const data = await res.json().catch(() => ({}));
           if (!res.ok || !data?.token) {
-            if (adminStatus) adminStatus.textContent = "Błędny login lub hasło.";
+            if (adminStatus) adminStatus.textContent = dict["admin.err.credentials"] || "";
             return;
           }
           localStorage.setItem(ADMIN_TOKEN_KEY, String(data.token));
           window.location.href = "/admin/";
         } catch (_e) {
-          if (adminStatus) adminStatus.textContent = "Błąd połączenia. Spróbuj ponownie.";
+          if (adminStatus) adminStatus.textContent = dict["admin.err.network"] || "";
         } finally {
           if (adminSubmit) {
             adminSubmit.disabled = false;
-            adminSubmit.textContent = "Zaloguj";
+            applyI18nStrings();
           }
         }
       });

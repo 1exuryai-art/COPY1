@@ -6,8 +6,10 @@ function getDogmaLang() {
     const monarch = localStorage.getItem("monarch_lang");
     if (monarch === "en") return "en";
     if (monarch === "ru") return "ru";
+    if (monarch === "ua") return "ru";
     const legacy = localStorage.getItem("dogma_lang");
     if (legacy === "en") return "en";
+    if (legacy === "ru") return "ru";
     if (legacy === "ua") return "ru";
     return "pl";
   } catch {
@@ -33,7 +35,7 @@ function pickBookingLoc(value) {
   if (value == null) return "";
   if (typeof value === "string") return value;
   const lang = getDogmaLang();
-  return value[lang] || value.pl || value.ru || value.ua || value.en || "";
+  return value[lang] || value.pl || value.en || value.ru || "";
 }
 
 function getServiceDisplayName(service) {

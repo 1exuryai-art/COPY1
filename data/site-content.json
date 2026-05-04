@@ -1,56 +1,6 @@
 {
-  "bioGallery": [
-    {
-      "id": "15c5a87a-7cb3-4e72-a93e-8e6551aa627f",
-      "title": {
-        "pl": "ввв",
-        "ru": "ввв",
-        "en": "ввв"
-      },
-      "description": {
-        "pl": "ввв",
-        "ru": "ввв",
-        "en": "ввв"
-      },
-      "media": {
-        "type": "video",
-        "src": "/assets/admin-uploads/1777919862914-ab9c165909230ac7.mp4",
-        "alt": {
-          "pl": "",
-          "ru": "",
-          "en": ""
-        }
-      },
-      "visible": true,
-      "order": 1
-    }
-  ],
-  "bioDesktopPreview": [
-    {
-      "id": "e7d8d404-c6d8-4af9-b4ff-cf099f74a23d",
-      "title": {
-        "pl": "мм",
-        "ru": "ммм",
-        "en": "ммм"
-      },
-      "description": {
-        "pl": "ааа",
-        "ru": "аак",
-        "en": "ккк"
-      },
-      "media": {
-        "type": "video",
-        "src": "/assets/admin-uploads/1777919903007-fbd4f06816bc2bbf.mp4",
-        "alt": {
-          "pl": "",
-          "ru": "",
-          "en": ""
-        }
-      },
-      "visible": true,
-      "order": 1
-    }
-  ],
+  "bioGallery": [],
+  "bioDesktopPreview": [],
   "worksGallery": [
     {
       "id": "wg-1",
@@ -191,7 +141,7 @@
       "tags": [
         "classic cut",
         "clean shape",
-        "🇷🇺 🇵🇱 🇬🇧"
+        "RU · PL · EN"
       ],
       "bookCta": {
         "pl": "Zarezerwuj u Tymura",
@@ -265,7 +215,7 @@
       "tags": [
         "fresh cut",
         "modern style",
-        "🇷🇺 🇵🇱 🇬🇧"
+        "RU · PL · EN"
       ],
       "bookCta": {
         "pl": "Zarezerwuj u Vlada",
@@ -834,6 +784,7 @@
     },
     "mapsUrl": "https://www.google.com/maps/search/?api=1&query=ul.+Przyk%C5%82adowa+12A,+Wroc%C5%82aw",
     "mapEmbedUrl": "https://www.google.com/maps?q=Wroc%C5%82aw&output=embed",
+    "mapImage": "",
     "googleReviewsUrl": ""
   },
   "socials": {
