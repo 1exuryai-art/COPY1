@@ -593,7 +593,9 @@ video.dogma-preview {
 }
 
 .dogma-card-edit-toggle {
-  display: none;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   margin-top: 4px;
   margin-bottom: 2px;
@@ -601,30 +603,12 @@ video.dogma-preview {
   font-weight: 600;
 }
 
-@media (max-width: 768px) {
-  .dogma-card-edit-toggle {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .dogma-card:not(.is-expanded) .dogma-card-edit-panel {
-    display: none;
-  }
-
-  .dogma-card.is-expanded .dogma-card-edit-panel {
-    display: block;
-  }
+.dogma-card:not(.is-expanded) .dogma-card-edit-panel {
+  display: none;
 }
 
-@media (min-width: 769px) {
-  .dogma-card-edit-panel {
-    display: contents;
-  }
-
-  .dogma-card-edit-toggle {
-    display: none !important;
-  }
+.dogma-card.is-expanded .dogma-card-edit-panel {
+  display: block;
 }
 
 .dogma-card-hero {
