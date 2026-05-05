@@ -1,6 +1,9 @@
 const API_BASE = "";
 const TOTAL_STEPS = 8;
 
+/** Stable calendar/API ids for the first chairs; matches server BARBERS and COPY3 booking. */
+const BOOKING_BARBER_API_IDS = ["tymur", "dima", "vlad"];
+
 function getDogmaLang() {
   try {
     const monarch = localStorage.getItem("monarch_lang");
@@ -121,9 +124,26 @@ function getServiceCategoriesWithItems() {
 
 function getBarberDescription(barber) {
   if (!barber) return "";
+  const d = barber.description;
+  if (d && typeof d === "object") {
+    const direct = pickBookingLoc(d);
+    if (direct) return direct;
+  }
+  if (typeof d === "string" && d.trim()) return d.trim();
   const k = `booking.barber.${barber.id}.desc`;
   const tr = tBook(k);
-  return tr === k ? barber.description : tr;
+  return tr === k ? (typeof d === "string" ? d : "") : tr;
+}
+
+function getBarberDisplayName(barber) {
+  if (!barber) return "";
+  const n = barber.name;
+  if (n && typeof n === "object") {
+    const direct = pickBookingLoc(n);
+    if (direct) return direct;
+  }
+  if (typeof n === "string") return n;
+  return "";
 }
 
 const DEFAULT_DISCOUNT_PERCENT = 10;
@@ -305,6 +325,10 @@ let barbers = [
   }
 ];
 
+const DEFAULT_SERVICE_CATEGORIES = JSON.parse(JSON.stringify(serviceCategories));
+const DEFAULT_SERVICES = JSON.parse(JSON.stringify(services));
+const DEFAULT_BARBERS = JSON.parse(JSON.stringify(barbers));
+
 const state = {
   step: 1,
   name: "",
@@ -373,19 +397,6 @@ function formatPrice(value, prefix = "") {
       ? tBook("booking.pricePrefix.from")
       : prefix;
   return pfx ? `${pfx} ${price}` : price;
-}
-
-function getBookingBarbersForService(service) {
-  if (!service || !Array.isArray(service.availableBarberIds) || service.availableBarberIds.length === 0) {
-    return barbers;
-  }
-  const allowed = new Set(service.availableBarberIds.map((id) => String(id)));
-  const list = barbers.filter((b) => allowed.has(String(b.id)));
-  return list.length ? list : barbers;
-}
-
-function getBookingBarbersResolved() {
-  return getBookingBarbersForService(getSelectedService());
 }
 
 function getSelectedBarber() {
@@ -665,7 +676,7 @@ function updateBindings() {
       return;
     }
 
-    el.textContent = barber?.name || "—";
+    el.textContent = getBarberDisplayName(barber) || "—";
   });
 
   document.querySelectorAll('[data-bind="dateText"]').forEach((el) => {
@@ -949,19 +960,20 @@ function renderBarberDecision() {
 }
 
 function renderBarberSlider() {
-  const list = getBookingBarbersResolved();
-  if (!list.length) return;
-  if (state.barberSlideIndex >= list.length) state.barberSlideIndex = 0;
-  const barber = list[state.barberSlideIndex];
+  if (!barbers.length) return;
+  if (state.barberSlideIndex >= barbers.length) state.barberSlideIndex = 0;
+  const barber = barbers[state.barberSlideIndex];
   if (!barber) return;
+
+  const barberLabel = getBarberDisplayName(barber);
 
   if (barberSlidePhoto) {
     barberSlidePhoto.innerHTML = `
-      <img src="${barber.photo}" alt="${barber.name}" class="barber-photo-img" />
+      <img src="${barber.photo}" alt="${barberLabel}" class="barber-photo-img" />
     `;
   }
 
-  if (barberSlideName) barberSlideName.textContent = barber.name;
+  if (barberSlideName) barberSlideName.textContent = barberLabel;
   if (barberSlideDescription) barberSlideDescription.textContent = getBarberDescription(barber);
 
   if (barberSlideLangs) {
@@ -973,7 +985,7 @@ function renderBarberSlider() {
     });
   }
 
-  if (barberCounter) barberCounter.textContent = `${state.barberSlideIndex + 1} / ${list.length}`;
+  if (barberCounter) barberCounter.textContent = `${state.barberSlideIndex + 1} / ${barbers.length}`;
 
   const isSelected = state.selectedBarberId === barber.id;
   if (selectBarberBtn) {
@@ -1170,7 +1182,7 @@ async function submitBooking() {
     serviceName: getServiceDisplayName(service) || "",
     serviceDuration: service?.duration || "",
     servicePrice: getServicePriceText(service, state.selectedDate, state.selectedTime),
-    barberName: state.barberDecision === "no" ? "" : (barber?.name || ""),
+    barberName: state.barberDecision === "no" ? "" : getBarberDisplayName(barber) || "",
     barberId: state.barberDecision === "no" ? "auto" : (barber?.id || ""),
     date: state.selectedDate,
     time: state.selectedTime
@@ -1397,22 +1409,19 @@ chooseBarberNo?.addEventListener("click", () => {
 });
 
 barberPrevBtn?.addEventListener("click", () => {
-  const list = getBookingBarbersResolved();
-  if (!list.length) return;
-  state.barberSlideIndex = (state.barberSlideIndex - 1 + list.length) % list.length;
+  if (!barbers.length) return;
+  state.barberSlideIndex = (state.barberSlideIndex - 1 + barbers.length) % barbers.length;
   renderBarberSlider();
 });
 
 barberNextBtn?.addEventListener("click", () => {
-  const list = getBookingBarbersResolved();
-  if (!list.length) return;
-  state.barberSlideIndex = (state.barberSlideIndex + 1) % list.length;
+  if (!barbers.length) return;
+  state.barberSlideIndex = (state.barberSlideIndex + 1) % barbers.length;
   renderBarberSlider();
 });
 
 selectBarberBtn?.addEventListener("click", () => {
-  const list = getBookingBarbersResolved();
-  const cur = list[state.barberSlideIndex];
+  const cur = barbers[state.barberSlideIndex];
   if (!cur) return;
   state.selectedBarberId = cur.id;
   renderBarberSlider();
@@ -1456,32 +1465,143 @@ function refreshBookingWizardLanguage() {
 
 window.refreshBookingWizardLanguage = refreshBookingWizardLanguage;
 
-function filterBookingBarbersBySiteVisibility() {
-  const sc = window.DOGMA_SITE_CONTENT;
-  if (!sc || !Array.isArray(sc.barbers)) return;
-  const hide = new Set();
-  sc.barbers.forEach((b) => {
-    if (b && b.barberId && b.visibleInBooking === false) {
-      hide.add(String(b.barberId).trim());
-    }
-  });
-  if (!hide.size) return;
-  const next = barbers.filter((barber) => !hide.has(String(barber.id)));
-  if (next.length) {
-    barbers.length = 0;
-    barbers.push(...next);
-  }
-}
-
 function cloneBookingValue(v) {
   return v == null ? v : JSON.parse(JSON.stringify(v));
 }
 
-window.DOGMA_applyBookingConfigFromContent = function () {
-  const data = window.DOGMA_SITE_CONTENT;
-  if (!data || typeof data !== "object") return false;
+function normalizeBookingMediaPath(p) {
+  const s = String(p || "").trim();
+  if (!s) return "";
+  if (s.startsWith("/")) return s;
+  if (s.startsWith("./")) return s.slice(1);
+  return `/${s}`;
+}
 
-  const raw = data.bookingConfig;
+function coerceLocaleText(value, fallback = "") {
+  const fb = String(fallback || "").trim();
+  if (value == null) return { pl: fb, ru: fb, en: fb };
+  if (typeof value === "string") {
+    const t = value.trim();
+    const base = t || fb;
+    return { pl: base, ru: base, en: base };
+  }
+  if (typeof value === "object") {
+    const pl = String(value.pl ?? "").trim();
+    const ru = String(value.ru ?? "").trim();
+    const en = String(value.en ?? "").trim();
+    const ua = String(value.ua ?? "").trim();
+    const p = pl || ua || fb;
+    const r = ru || ua || p;
+    const e = en || p;
+    return { pl: p, ru: r, en: e };
+  }
+  return { pl: fb, ru: fb, en: fb };
+}
+
+function bookingConfigBarbersToRuntime(rawBarbers) {
+  if (!Array.isArray(rawBarbers) || rawBarbers.length === 0) return null;
+  const mapped = rawBarbers
+    .map((b, i) => {
+      if (!b) return null;
+      const id =
+        String(b.id || "").trim() ||
+        BOOKING_BARBER_API_IDS[i] ||
+        "";
+      if (!id) return null;
+      const photo = normalizeBookingMediaPath((b.media && b.media.src) || b.photo || b.avatar || "");
+      const fallback = DEFAULT_BARBERS.find((d) => d.id === id) || {};
+      const fbPhoto = typeof fallback.photo === "string" ? fallback.photo : "";
+      return {
+        id,
+        name: coerceLocaleText(b.name, id),
+        description: coerceLocaleText(b.description, ""),
+        photo: photo || fbPhoto,
+        languages: Array.isArray(b.languages) ? b.languages.map((x) => String(x)) : []
+      };
+    })
+    .filter(Boolean);
+  return mapped.length ? mapped : null;
+}
+
+function buildBookingBarbersFromSiteBarberCards(root) {
+  const cards = root && Array.isArray(root.barbers) ? root.barbers : [];
+  const sorted = cards
+    .filter((b) => b && b.visible !== false && b.visibleInBooking !== false)
+    .slice()
+    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+  return sorted
+    .map((b, idx) => {
+      const apiId =
+        String(b.barberId || "").trim() ||
+        BOOKING_BARBER_API_IDS[idx] ||
+        String(b.id || "").trim();
+      if (!apiId) return null;
+      const nameSrc = b.title != null ? b.title : b.name;
+      const descSrc = b.description != null ? b.description : "";
+      let photo = normalizeBookingMediaPath((b.media && b.media.src) || b.photo || b.avatar || "");
+      const fallback = DEFAULT_BARBERS.find((d) => d.id === apiId) || {};
+      const fbPhoto = typeof fallback.photo === "string" ? fallback.photo : "";
+      if (!photo) photo = fbPhoto;
+      const languages = Array.isArray(b.languages) && b.languages.length
+        ? b.languages.map((x) => String(x))
+        : Array.isArray(b.tags)
+          ? b.tags.map((x) => String(x))
+          : Array.isArray(fallback.languages)
+            ? fallback.languages.map((x) => String(x))
+            : [];
+      return {
+        id: apiId,
+        name: coerceLocaleText(nameSrc, apiId),
+        description: coerceLocaleText(descSrc, ""),
+        photo: photo || fbPhoto,
+        languages
+      };
+    })
+    .filter(Boolean);
+}
+
+function normalizeBookingServiceFromAdmin(svc, prev) {
+  const x = cloneBookingValue(svc);
+  if (x.bookingEnabled === undefined) x.bookingEnabled = true;
+  if (x.visible === undefined) x.visible = true;
+  const prevName =
+    prev && typeof prev.name === "object"
+      ? pickBookingLoc(prev.name)
+      : prev && typeof prev.name === "string"
+        ? prev.name
+        : "";
+  if (typeof x.name === "string") {
+    x.name = coerceLocaleText(x.name, prevName);
+  } else if (x.name && typeof x.name === "object") {
+    x.name = coerceLocaleText(x.name, prevName);
+  } else {
+    x.name = coerceLocaleText("", prevName);
+  }
+  if (typeof x.description === "string") {
+    x.description = coerceLocaleText(x.description);
+  } else if (x.description && typeof x.description === "object") {
+    x.description = coerceLocaleText(x.description);
+  } else {
+    x.description = coerceLocaleText("");
+  }
+  if (!Array.isArray(x.availableBarberIds)) x.availableBarberIds = [];
+  if (x.allowClientBarberChoice === undefined) x.allowClientBarberChoice = true;
+  return x;
+}
+
+window.DOGMA_applyBookingConfigFromContent = function (contentParam) {
+  const root =
+    contentParam && typeof contentParam === "object"
+      ? contentParam
+      : typeof window !== "undefined"
+        ? window.DOGMA_SITE_CONTENT
+        : null;
+
+  if (!root || typeof root !== "object") {
+    return false;
+  }
+
+  const raw = root.bookingConfig;
   if (!raw || typeof raw !== "object") {
     window.DOGMA_BOOKING_OPENING_HOURS = null;
     window.DOGMA_BOOKING_DISCOUNT = null;
@@ -1489,7 +1609,12 @@ window.DOGMA_applyBookingConfigFromContent = function () {
     DISCOUNT_WEEKDAYS = [...DEFAULT_DISCOUNT_WEEKDAYS];
     DISCOUNT_START_MINUTES = DEFAULT_DISCOUNT_START_MINUTES;
     DISCOUNT_END_MINUTES = DEFAULT_DISCOUNT_END_MINUTES;
-    filterBookingBarbersBySiteVisibility();
+    serviceCategories.length = 0;
+    serviceCategories.push(...cloneBookingValue(DEFAULT_SERVICE_CATEGORIES));
+    services.length = 0;
+    services.push(...cloneBookingValue(DEFAULT_SERVICES));
+    barbers.length = 0;
+    barbers.push(...cloneBookingValue(DEFAULT_BARBERS));
     refreshBookingWizardLanguage();
     mergeBookingCatalogSnapshot();
     return false;
@@ -1497,30 +1622,36 @@ window.DOGMA_applyBookingConfigFromContent = function () {
 
   if (Array.isArray(raw.serviceCategories) && raw.serviceCategories.length) {
     serviceCategories.length = 0;
-    serviceCategories.push(...raw.serviceCategories.map((c) => cloneBookingValue(c)));
-  }
-  if (Array.isArray(raw.services) && raw.services.length) {
-    services.length = 0;
-    services.push(
-      ...raw.services.map((s) => {
-        const x = cloneBookingValue(s);
-        if (x.bookingEnabled === undefined) x.bookingEnabled = true;
-        if (typeof x.name === "string") {
-          const t = x.name;
-          x.name = { pl: t, ua: "", en: "" };
-        }
-        if (typeof x.description === "string") {
-          const t = x.description;
-          x.description = { pl: t, ua: "", en: "" };
-        }
-        return x;
-      })
+    serviceCategories.push(
+      ...raw.serviceCategories
+        .filter((c) => c && c.visible !== false)
+        .slice()
+        .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+        .map((c) => cloneBookingValue(c))
     );
   }
-  if (Array.isArray(raw.barbers) && raw.barbers.length) {
-    barbers.length = 0;
-    barbers.push(...raw.barbers.map((b) => cloneBookingValue(b)));
+
+  if (Array.isArray(raw.services) && raw.services.length) {
+    const prevById = Object.fromEntries(services.map((s) => [s.id, s]));
+    const ordered = raw.services
+      .filter((s) => s && s.visible !== false && s.bookingEnabled !== false)
+      .slice()
+      .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+    services.length = 0;
+    services.push(...ordered.map((s) => normalizeBookingServiceFromAdmin(s, prevById[s.id])));
   }
+
+  let nextBarbers = buildBookingBarbersFromSiteBarberCards(root);
+  if (!nextBarbers.length) {
+    const legacy = bookingConfigBarbersToRuntime(raw.barbers);
+    if (legacy && legacy.length) nextBarbers = legacy;
+  }
+  if (!nextBarbers.length) {
+    nextBarbers = cloneBookingValue(DEFAULT_BARBERS);
+  }
+
+  barbers.length = 0;
+  barbers.push(...nextBarbers);
 
   if (raw.discount && typeof raw.discount === "object") {
     window.DOGMA_BOOKING_DISCOUNT = cloneBookingValue(raw.discount);
@@ -1542,7 +1673,19 @@ window.DOGMA_applyBookingConfigFromContent = function () {
     window.DOGMA_BOOKING_OPENING_HOURS = null;
   }
 
-  filterBookingBarbersBySiteVisibility();
+  if (!services.some((s) => s.id === state.selectedServiceId)) {
+    state.selectedServiceId = "";
+    state.selectedCategory = "";
+  }
+  if (state.barberDecision === "yes" && !barbers.some((b) => b.id === state.selectedBarberId)) {
+    state.selectedBarberId = "";
+  }
+  if (barbers.length) {
+    state.barberSlideIndex = Math.min(state.barberSlideIndex, barbers.length - 1);
+  } else {
+    state.barberSlideIndex = 0;
+  }
+
   refreshBookingWizardLanguage();
   mergeBookingCatalogSnapshot();
   return true;

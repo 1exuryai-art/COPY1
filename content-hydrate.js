@@ -36,10 +36,17 @@
   }
 
   function mediaSrc(item) {
-    return normSrc(item && item.media && item.media.src);
+    if (!item) return "";
+    const m = item.media;
+    if (m && typeof m.src === "string" && m.src.trim()) return normSrc(m.src);
+    if (typeof item.image === "string" && item.image.trim()) return normSrc(item.image);
+    if (typeof item.photo === "string" && item.photo.trim()) return normSrc(item.photo);
+    if (typeof item.src === "string" && item.src.trim()) return normSrc(item.src);
+    return "";
   }
 
   function mediaType(item) {
+    if (item && item.type === "video") return "video";
     const t = item && item.media && item.media.type;
     return t === "video" ? "video" : "image";
   }
@@ -76,6 +83,12 @@
     return "image";
   }
 
+  function galleryPosterAttr(item) {
+    const p = item && item.media && typeof item.media.poster === "string" ? item.media.poster.trim() : "";
+    if (!p) return "";
+    return ` poster="${escapeAttr(normSrc(p))}"`;
+  }
+
   function renderMobileGalleryCard(items, lang, mediaMode) {
     return items
       .map((it, idx) => {
@@ -107,6 +120,7 @@
   }
 
   function renderStickerFigure(items, lang, mediaMode) {
+    const heightsPx = [250, 288, 234, 268, 242, 276];
     return items
       .map((it, i) => {
         const type = resolveGalleryCardType(it, mediaMode);
@@ -117,24 +131,30 @@
         const desc = escapeAttr(pickLoc(it.description, lang));
         const alt = escapeAttr(pickAlt(it, lang));
         const tilt = tiltDeg(i);
+        const minH = heightsPx[i % heightsPx.length];
+        const frameVars = `--tilt:${tilt}deg;--sticker-media-min:${minH}px`;
+        const wideClass = i % 6 === 0 ? " sticker-card--wide" : "";
         if (type === "video") {
-          return `<figure class="sticker-card" style="--tilt: ${tilt}deg">
-      <video class="dogma-video" data-dogma-video src="${url}" autoplay muted loop playsinline preload="metadata"></video>
-      <figcaption>
-        <strong>${title}</strong>
-        <p>${desc}</p>
-      </figcaption>
-    </figure>`;
+          const posterAttr = galleryPosterAttr(it);
+          return `<figure class="sticker-card sticker-card--video${wideClass}" style="${frameVars}">
+  <div class="media-frame media-frame--portrait media-frame--video">
+    <video class="dogma-video" data-dogma-video src="${url}"${posterAttr} autoplay muted loop playsinline preload="metadata" aria-label="${alt}"></video>
+  </div>
+  <figcaption>
+    <strong>${title}</strong>
+    <p>${desc}</p>
+  </figcaption>
+</figure>`;
         }
-        return `<figure class="sticker-card" style="--tilt: ${tilt}deg">
-      <div class="media-frame media-frame--portrait" style="--media-url: url('${url}')">
-        <img src="${url}" alt="${alt}">
-      </div>
-      <figcaption>
-        <strong>${title}</strong>
-        <p>${desc}</p>
-      </figcaption>
-    </figure>`;
+        return `<figure class="sticker-card${wideClass}" style="${frameVars}">
+  <div class="media-frame media-frame--portrait" style="--media-url:url('${url}')">
+    <img src="${url}" alt="${alt}" loading="lazy" decoding="async">
+  </div>
+  <figcaption>
+    <strong>${title}</strong>
+    <p>${desc}</p>
+  </figcaption>
+</figure>`;
       })
       .join("\n");
   }
@@ -207,8 +227,11 @@
   function setStickerWallHtml(zone, html) {
     if (!zone) return;
     const wall = zone.querySelector(":scope > .sticker-wall");
-    if (wall) wall.innerHTML = html;
-    else zone.innerHTML = html;
+    if (wall) {
+      wall.innerHTML = html;
+      return;
+    }
+    zone.innerHTML = `<div class="sticker-wall">${html}</div>`;
   }
 
   function setPanelStickerHtml(panel, html) {
@@ -246,7 +269,7 @@
         const visual = escapeAttr(String(it.visualClass || "haircut").trim() || "haircut");
         const tags = Array.isArray(it.tags) ? it.tags : [];
         const tagHtml = tags.map((t) => `<span>${escapeAttr(String(t))}</span>`).join("\n      ");
-        const src = normSrc(it.media && it.media.src);
+        const src = mediaSrc(it);
         const bg = src ? escapeAttr(src) : "";
         const style = bg && it.media?.type !== "video" ? ` style="background-image:url('${bg}');background-size:cover;background-position:center"` : "";
         const bid = it.bookingServiceId ? String(it.bookingServiceId).trim() : "";
@@ -283,7 +306,7 @@
         const tags = Array.isArray(it.tags) ? it.tags : [];
         const tagHtml = tags.map((t) => `<span>${escapeAttr(String(t))}</span>`).join("\n            ");
         const price = escapeAttr(it.priceDisplay || "");
-        const src = normSrc(it.media && it.media.src);
+        const src = mediaSrc(it);
         const bg = src ? escapeAttr(src) : "";
         const style = bg && it.media?.type !== "video" ? ` style="background-image:url('${bg}');background-size:cover;background-position:center"` : "";
         const bid = it.bookingServiceId ? String(it.bookingServiceId).trim() : "";
@@ -512,6 +535,18 @@
     }
   }
 
+  function tryApplyBookingFromContent(data, attemptsLeft) {
+    var left = attemptsLeft === undefined ? 12 : attemptsLeft;
+    if (typeof window.DOGMA_applyBookingConfigFromContent === "function") {
+      window.DOGMA_applyBookingConfigFromContent(data);
+      return;
+    }
+    if (left <= 0) return;
+    window.setTimeout(function () {
+      tryApplyBookingFromContent(data, left - 1);
+    }, 150);
+  }
+
   function applyDogmaSiteContent(data) {
     if (!data || typeof data !== "object") return;
 
@@ -545,9 +580,7 @@
 
     applyContactsPhoneDisplay(data);
 
-    if (typeof window.DOGMA_applyBookingConfigFromContent === "function") {
-      window.DOGMA_applyBookingConfigFromContent();
-    }
+    tryApplyBookingFromContent(data);
   }
 
   window.dogmaReapplySiteContent = function () {

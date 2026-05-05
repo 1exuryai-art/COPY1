@@ -117,6 +117,30 @@
         "en": "Interior",
         "ru": "Интерьер"
       }
+    },
+    {
+      "id": "c8264548-57dc-47bd-8ef2-cdffb8e128d2",
+      "title": {
+        "pl": "",
+        "ru": "",
+        "en": ""
+      },
+      "description": {
+        "pl": "",
+        "ru": "",
+        "en": ""
+      },
+      "media": {
+        "type": "video",
+        "src": "/assets/admin-uploads/1778017888555-ff73cbd56bd7543b.mp4",
+        "alt": {
+          "pl": "",
+          "ru": "",
+          "en": ""
+        }
+      },
+      "visible": true,
+      "order": 4
     }
   ],
   "effectPhotos": [],
@@ -233,6 +257,47 @@
       },
       "visibleInBooking": true,
       "performedBookingServiceIds": []
+    },
+    {
+      "id": "0537cc61-e4ba-4808-a084-cb8d9eb05d4f",
+      "title": {
+        "pl": "fff",
+        "ru": "fff",
+        "en": "fff"
+      },
+      "description": {
+        "pl": "fff",
+        "ru": "fff",
+        "en": "fff"
+      },
+      "media": {
+        "type": "image",
+        "src": "/assets/admin-uploads/1778016645974-a7df4808e214c4a0.jpg",
+        "alt": {
+          "pl": "",
+          "ru": "",
+          "en": ""
+        }
+      },
+      "tags": [
+        "fff",
+        "fff"
+      ],
+      "bookCta": {
+        "pl": "fff",
+        "ru": "fff",
+        "en": "fff"
+      },
+      "barberId": "",
+      "visible": true,
+      "visibleInBooking": true,
+      "performedBookingServiceIds": [
+        "haircut",
+        "combo",
+        "__other",
+        "beard-trim"
+      ],
+      "order": 4
     }
   ],
   "landingServices": [
@@ -348,7 +413,12 @@
           "ru": "Самые востребованные варианты."
         },
         "visible": true,
-        "order": 1
+        "order": 1,
+        "name": {
+          "pl": "Strzyżenie / Haircut",
+          "ru": "Стрижка",
+          "en": "Haircut"
+        }
       },
       {
         "id": "premium",
@@ -358,9 +428,9 @@
           "ru": "Премиум-стрижки"
         },
         "description": {
-          "pl": "Klasyczne i bardziej rozbudowane usługi włosów.",
-          "en": "Classic and advanced hair services.",
-          "ru": "Классические и расширенные услуги для волос."
+          "pl": "PO POLSKU",
+          "en": "PO ANGIELSKU ",
+          "ru": "PO ROSYJSKU"
         },
         "visible": true,
         "order": 2
@@ -431,7 +501,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "combo",
@@ -452,7 +536,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "scissors",
@@ -463,9 +561,9 @@
           "ru": "Стрижка ножницами"
         },
         "description": {
-          "pl": "",
-          "en": "",
-          "ru": ""
+          "pl": "PO POLSKU",
+          "en": "PO ANGIELSKU ",
+          "ru": "PO ROSYJSKU"
         },
         "basePrice": 130,
         "duration": "1h 30min",
@@ -473,7 +571,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "kids",
@@ -494,7 +606,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "buzz",
@@ -515,7 +641,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "beard-zero",
@@ -536,7 +676,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "beard-trim",
@@ -557,7 +711,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "shaving",
@@ -578,7 +746,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "gray-beard",
@@ -599,7 +781,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "gray-hair",
@@ -620,7 +816,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "gray-combo-beard",
@@ -641,7 +851,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "gray-combo-full",
@@ -662,7 +886,21 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       },
       {
         "id": "wax",
@@ -683,42 +921,39 @@
         "visible": true,
         "bookingEnabled": true,
         "availableBarberIds": [],
-        "allowClientBarberChoice": true
+        "allowClientBarberChoice": true,
+        "promoDiscount": {
+          "enabled": false,
+          "usePercent": true,
+          "percent": 10,
+          "priceAfter": "",
+          "weekdays": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "startMinutes": 600,
+          "endMinutes": 960
+        }
       }
     ],
     "barbers": [
       {
         "id": "tymur",
-        "name": "Tymur",
-        "photo": "/tymur.png",
-        "description": "Młody i ambitny barber z pasją do klasycznych strzyżeń.",
-        "languages": [
-          "🇷🇺 Русский",
-          "🇵🇱 Polski",
-          "🇬🇧 English"
-        ]
+        "name": "Tymur"
       },
       {
         "id": "dima",
-        "name": "Dima",
-        "photo": "/dima.png",
-        "description": "Doświadczony barber z 3-letnim stażem. Mistrz klasyki i nowoczesnych stylów.",
-        "languages": [
-          "🇷🇺 Русский",
-          "🇵🇱 Polski",
-          "🇬🇧 English"
-        ]
+        "name": "Dima"
       },
       {
         "id": "vlad",
-        "name": "Vlad",
-        "photo": "/vlad.png",
-        "description": "Młody talent z energią i świeżym podejściem do strzyżeń.",
-        "languages": [
-          "🇷🇺 Русский",
-          "🇵🇱 Polski",
-          "🇬🇧 English"
-        ]
+        "name": "Vlad"
+      },
+      {
+        "id": "0537cc61-e4ba-4808-a084-cb8d9eb05d4f",
+        "name": "fff"
       }
     ],
     "discount": {

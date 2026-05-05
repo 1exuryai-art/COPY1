@@ -215,11 +215,12 @@ app.post("/api/admin/upload", requireAdminAuth, (req, res) => {
       return res.status(400).json({ ok: false, error: "No file" });
     }
     const publicPath = `/assets/admin-uploads/${req.file.filename}`;
-    res.json({ ok: true, path: publicPath, filename: req.file.filename });
+    res.json({ ok: true, path: publicPath, url: publicPath, filename: req.file.filename });
   });
 });
 
 app.use(express.urlencoded({ extended: true }));
+app.use("/assets/admin-uploads", express.static(ADMIN_UPLOADS_DIR));
 app.use(express.static(__dirname));
 
 const BARBERS = {

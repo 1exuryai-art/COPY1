@@ -1314,110 +1314,117 @@
       grid-column: span 2;
     }
 
+    /* Desktop Prace / Galeria — sticker wall (layout + rhythm from COPY3, MONARCH palette) */
     .works-sticker-wall {
       position: relative;
       z-index: 1;
     }
 
     .sticker-wall {
-      position: relative;
-      z-index: 1;
-      column-count: 3;
-      column-gap: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      align-items: start;
       width: 100%;
     }
 
-    @media (max-width: 1100px) {
+    @media (max-width: 1240px) {
       .sticker-wall {
-        column-count: 2;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 900px) {
       .sticker-wall {
-        column-count: 1;
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (min-width: 901px) {
+      .sticker-wall .sticker-card--wide {
+        grid-column: span 2;
       }
     }
 
     .sticker-card {
       position: relative;
-      display: inline-block;
-      width: 100%;
-      margin: 0 0 16px;
-      padding: 10px;
-      break-inside: avoid;
-      border-radius: 28px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03)),
-        rgba(12, 12, 12, 0.66);
-      box-shadow:
-        0 20px 50px rgba(0, 0, 0, 0.36),
-        0 10px 0 rgba(255, 255, 255, 0.015),
-        var(--glass-highlight);
-      transform: rotate(var(--tilt, -1deg));
-      transition: transform 190ms ease, box-shadow 190ms ease, border-color 190ms ease;
+      margin: 0;
+      padding: 0;
       overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 28% 12%, rgba(239, 186, 115, 0.1), transparent 30%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(12, 12, 12, 0.72));
+      box-shadow: var(--shadow-sm), var(--glass-highlight);
+      transform: rotate(var(--tilt, 0deg));
+      transition:
+        transform 190ms ease,
+        border-color 190ms ease,
+        box-shadow 190ms ease;
     }
 
     .sticker-card:hover {
-      transform: rotate(0deg) translateY(-4px);
+      transform: translateY(-4px) rotate(var(--tilt, 0deg));
+      border-color: var(--accent-line-strong);
+      box-shadow:
+        var(--shadow-md),
+        0 0 0 5px rgba(217, 167, 93, 0.08),
+        var(--glass-highlight);
     }
 
     .sticker-card .media-frame {
+      margin: 0;
       position: relative;
-      z-index: 1;
-      width: 100%;
+      border-radius: 0;
+      border: 0;
       overflow: hidden;
-      border-radius: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.075);
-      background:
-        radial-gradient(circle at 50% 0%, rgba(239, 186, 115, 0.08), transparent 42%),
-        rgba(0, 0, 0, 0.22);
-      box-shadow: var(--shadow-xs);
+      min-height: var(--sticker-media-min, 250px);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: rgba(0, 0, 0, 0.35);
     }
 
-    .sticker-card .media-frame img {
+    .sticker-card .media-frame img,
+    .sticker-card .media-frame--video video {
       width: 100%;
-      height: auto;
-      display: block;
-      border-radius: inherit;
-      object-fit: contain;
-      background: rgba(0, 0, 0, 0.22);
-    }
-
-    .sticker-card .dogma-video {
-      width: 100%;
-      aspect-ratio: 9 / 16;
-      max-height: min(72vh, 520px);
+      height: 100%;
+      min-height: var(--sticker-media-min, 250px);
+      object-fit: cover;
+      object-position: center;
       display: block;
       border: 0;
-      border-radius: 22px;
+      border-radius: 0;
+    }
+
+    .sticker-card .media-frame--video,
+    .mobile-gallery-card .media-frame--video {
       background: #050505;
-      box-shadow: var(--shadow-xs);
     }
 
     .sticker-card figcaption {
       display: grid;
       gap: 6px;
-      padding: 12px 6px 4px;
-      position: relative;
-      z-index: 1;
+      padding: 14px 16px 16px;
+      margin: 0;
+      background: linear-gradient(180deg, rgba(22, 20, 18, 0.96), rgba(8, 8, 8, 0.9));
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .sticker-card figcaption strong {
       color: var(--text-strong);
-      font-family: "Sora", sans-serif;
-      font-size: 18px;
-      line-height: 1.15;
-      letter-spacing: -0.04em;
+      font-size: 14px;
+      line-height: 1.35;
+      font-weight: 800;
+      letter-spacing: -0.02em;
     }
 
     .sticker-card figcaption p {
       margin: 0;
       color: var(--muted);
       font-size: 13px;
-      line-height: 1.48;
+      line-height: 1.6;
     }
 
     .sticker-card figcaption:empty {

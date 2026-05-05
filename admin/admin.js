@@ -22,6 +22,9 @@ const TABS = [
   { id: "contacts", label: "Kontakt i linki" }
 ];
 
+/** Default API/calendar ids for ordered chairs (must match public booking script). */
+const BOOKING_BARBER_API_IDS = ["tymur", "dima", "vlad"];
+
 /** @type {typeof EMPTY} */
 let state = JSON.parse(JSON.stringify(EMPTY));
 
@@ -444,6 +447,8 @@ function normalizeState(raw) {
   }
   ensureRuFromUa(o);
 
+  syncBookingBarbersIntoConfig(o);
+
   return o;
 }
 
@@ -775,6 +780,27 @@ function pickLocAdmin(o, lang) {
   return String(o[lang] || o.pl || o.ru || o.ua || o.en || "").trim();
 }
 
+function syncBookingBarbersIntoConfig(payload) {
+  const cfg = payload && payload.bookingConfig;
+  if (!cfg || typeof cfg !== "object") return;
+  const list = Array.isArray(payload.barbers) ? payload.barbers : [];
+  cfg.barbers = list
+    .filter((b) => b && b.visible !== false && b.visibleInBooking !== false)
+    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+    .map((b, idx) => {
+      const id =
+        String(b.barberId || "").trim() ||
+        BOOKING_BARBER_API_IDS[idx] ||
+        String(b.id || "").trim();
+      if (!id) return null;
+      return {
+        id,
+        name: pickLocAdmin(b.title, "pl") || id
+      };
+    })
+    .filter(Boolean);
+}
+
 function cardTitleLine(item, lang) {
   return pickLocAdmin(item.title, lang) || "—";
 }
@@ -1049,7 +1075,9 @@ async function uploadFile(file) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "Nie udało się wgrać pliku.");
-  return data.path;
+  const uploaded = (data.url != null && String(data.url).trim()) || (data.path != null && String(data.path).trim());
+  if (!uploaded) throw new Error("Serwer nie zwrócił adresu pliku.");
+  return uploaded.startsWith("/") ? uploaded : `/${uploaded.replace(/^\.?\//, "")}`;
 }
 
 function updateBarberCardPreviews(wrap, item) {
@@ -1708,6 +1736,9 @@ function buildBookingServiceCardHtml(svc, svcIdx, cfg) {
           <p class="dogma-field-hint">Wewnętrzny zapis w systemie.</p>
           <div class="dogma-field"><label>Wewnętrzny identyfikator</label><input type="text" readonly value="${esc(svc.id)}" /></div>
         </details>
+        <div class="dogma-field dogma-field--tight">
+          <button type="button" class="dogma-btn dogma-btn--danger dogma-btn--block-sm" data-svc-del="${svcIdx}">Usuń usługę z rezerwacji</button>
+        </div>
       </div>`;
 }
 
@@ -1715,6 +1746,7 @@ function renderBookingEditor(container) {
   if (state.bookingConfig == null) {
     state.bookingConfig = deepClone(getDefaultBookingConfig());
   }
+  syncBookingBarbersIntoConfig(state);
   const cfg = state.bookingConfig;
   (cfg.services || []).forEach((s) => ensureBookingServiceLocales(s));
 
@@ -1770,6 +1802,9 @@ function renderBookingEditor(container) {
           <p class="dogma-field-hint">Wewnętrzny zapis kategorii.</p>
           <div class="dogma-field"><label>Wewnętrzny identyfikator</label><input type="text" readonly value="${esc(cat.id)}" /></div>
         </details>
+        <div class="dogma-field dogma-field--tight">
+          <button type="button" class="dogma-btn dogma-btn--danger dogma-btn--block-sm" data-cat-del="${idx}">Usuń kategorię z rezerwacji</button>
+        </div>
         <div class="dogma-booking-cat-services">
           <h5 class="dogma-panel-subtitle dogma-panel-subtitle--nest">Usługi w tej kategorii</h5>
           <div class="dogma-stack dogma-stack--nest">${svcInner || `<p class="dogma-hint">Brak usług — dodaj nową poniżej lub przenieś tu istniejącą zmianą kategorii.</p>`}</div>
@@ -1893,6 +1928,20 @@ function renderBookingEditor(container) {
           if (h) h.textContent = `Kategoria: ${pickLocAdmin(cat.title, "pl") || "—"}`;
         });
       });
+      el.querySelector("[data-cat-del]")?.addEventListener("click", () => {
+        if (!cfg.serviceCategories[idx]) return;
+        const hasServices = (cfg.services || []).some((s) => s && s.category === cat.id);
+        if (hasServices) {
+          window.alert(
+            "Nie można usunąć kategorii, ponieważ ma przypisane usługi. Najpierw przenieś albo usuń usługi w tej kategorii."
+          );
+          return;
+        }
+        if (!window.confirm("Usunąć tę kategorię z rezerwacji?")) return;
+        cfg.serviceCategories.splice(idx, 1);
+        renderBookingEditor(container);
+        updateDirtyBanner();
+      });
     });
 
     container.querySelectorAll("[data-b-svc]").forEach((el) => {
@@ -1961,6 +2010,19 @@ function renderBookingEditor(container) {
       el.querySelectorAll("[data-svc-promo-day]").forEach((c) => c.addEventListener("change", promoRefresh));
       el.querySelector("[data-svc-promo-start]")?.addEventListener("change", promoRefresh);
       el.querySelector("[data-svc-promo-end]")?.addEventListener("change", promoRefresh);
+    });
+
+    container.querySelectorAll("[data-svc-del]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.getAttribute("data-svc-del"));
+        if (!Number.isFinite(idx)) return;
+        if (!confirm("Usunąć tę usługę z kreatora rezerwacji?")) return;
+        const svc = cfg.services[idx];
+        if (!svc) return;
+        cfg.services.splice(idx, 1);
+        renderBookingEditor(container);
+        updateDirtyBanner();
+      });
     });
 
     ["#disc-enabled", "#disc-name", "#disc-msg", "#disc-pct", "#disc-start-time", "#disc-end-time"].forEach((sel) => {
@@ -2270,6 +2332,7 @@ document.getElementById("logoutBtn")?.addEventListener("click", () => {
 
 async function doSave() {
   showSave("Zapisywanie…", "");
+  syncBookingBarbersIntoConfig(state);
   try {
     await apiSave();
     lastSavedFingerprint = fingerprintState();
