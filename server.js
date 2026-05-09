@@ -3,6 +3,7 @@ console.log("🚀 MONARCH booking server started");
 import "dotenv/config";
 import path from "path";
 import { mkdirSync } from "fs";
+import { readFile } from "fs/promises";
 import crypto from "crypto";
 import { fileURLToPath } from "url";
 import express from "express";
@@ -12,6 +13,7 @@ import multer from "multer";
 import { google } from "googleapis";
 import axios from "axios";
 import { initContentStore, getContentStore } from "./contentStore.js";
+import { mergeFileFallbackForPostgres, isDestructiveContentSave } from "./contentMerge.js";
 import * as dbAuth from "./postgresAuth.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -134,9 +136,26 @@ function ensureUploadDirSync() {
   mkdirSync(ADMIN_UPLOADS_DIR, { recursive: true });
 }
 
+async function readSiteContentJsonSnapshot() {
+  try {
+    const raw = await readFile(CONTENT_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (e) {
+    if (e && e.code === "ENOENT") return null;
+    console.warn("[content] template file read failed:", CONTENT_FILE, e.message);
+    return null;
+  }
+}
+
 async function readSiteContent() {
-  const data = await getContentStore().read();
-  return { ...EMPTY_SITE_CONTENT, ...data };
+  const store = getContentStore();
+  const raw = await store.read();
+  if (store.mode === "postgres") {
+    const fileSnap = await readSiteContentJsonSnapshot();
+    return mergeFileFallbackForPostgres(EMPTY_SITE_CONTENT, fileSnap, raw);
+  }
+  return { ...EMPTY_SITE_CONTENT, ...raw };
 }
 
 async function writeSiteContent(merged) {
@@ -208,15 +227,26 @@ function timingSafeEqualStr(a, b) {
 
 app.get("/api/admin/bootstrap", async (_req, res) => {
   try {
+    let projectKey = process.env.PROJECT_KEY?.trim() || "default";
+    let contentMode = "json";
+    try {
+      const st = getContentStore();
+      if (st.projectKey) projectKey = st.projectKey;
+      if (st.mode) contentMode = st.mode;
+    } catch {
+      /* store not ready yet */
+    }
     if (!useDatabaseAuth()) {
-      return res.json({ ok: true, needsSetup: false, authMode: "env" });
+      return res.json({ ok: true, needsSetup: false, authMode: "env", projectKey, contentMode });
     }
     const n = await dbAuth.countAdmins();
     return res.json({
       ok: true,
       needsSetup: n === 0,
       authMode: "database",
-      hasSetupCode: Boolean(process.env.ADMIN_SETUP_CODE?.trim())
+      hasSetupCode: Boolean(process.env.ADMIN_SETUP_CODE?.trim()),
+      projectKey,
+      contentMode
     });
   } catch (e) {
     console.error("GET /api/admin/bootstrap:", e);
@@ -327,6 +357,17 @@ async function saveContentHandler(req, res) {
       return res.status(400).json({ ok: false, error: "Invalid JSON body" });
     }
     const merged = { ...EMPTY_SITE_CONTENT, ...body };
+    const store = getContentStore();
+    if (store.mode === "postgres" && process.env.ALLOW_DESTRUCTIVE_SAVE !== "1") {
+      const baseline = await readSiteContent();
+      if (isDestructiveContentSave(merged, baseline)) {
+        return res.status(409).json({
+          ok: false,
+          error: "save_blocked_would_wipe_multiple_sections",
+          hint: "Odśwież panel administracyjny (F5). Jeśli sekcje nadal są puste, na serwerze uruchom: npm run import-content"
+        });
+      }
+    }
     await writeSiteContent(merged);
     invalidateSiteContentCache();
     res.json({ ok: true });

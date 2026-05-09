@@ -2653,6 +2653,10 @@ async function apiSave() {
     setToken("");
     throw new Error("Sesja wygasła — zaloguj ponownie");
   }
+  if (res.status === 409) {
+    const hint = data.hint ? ` ${data.hint}` : "";
+    throw new Error(`Zapis zablokowany (ochrona przed wyczyszczeniem treści).${hint}`);
+  }
   if (!res.ok) throw new Error(data.error || "Zapis nieudany");
 }
 
