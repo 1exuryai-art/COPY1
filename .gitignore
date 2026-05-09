@@ -1,0 +1,7 @@
+﻿node_modules/
+.env
+npm-debug.log*
+.DS_Store
+
+assets/admin-uploads/*
+!assets/admin-uploads/.gitkeep

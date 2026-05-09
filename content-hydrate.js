@@ -1,0 +1,634 @@
+(function () {
+  "use strict";
+
+  function getSalonLang() {
+    try {
+      const monarch = localStorage.getItem("monarch_lang");
+      if (monarch === "en") return "en";
+      if (monarch === "ru") return "ru";
+      if (monarch === "ua") return "ru";
+      const legacy = localStorage.getItem("salon_lang");
+      if (legacy === "en") return "en";
+      if (legacy === "ru") return "ru";
+      if (legacy === "ua") return "ru";
+      return "pl";
+    } catch {
+      return "pl";
+    }
+  }
+
+  function pickLoc(obj, lang) {
+    if (!obj || typeof obj !== "object") return "";
+    const order =
+      lang === "ru" ? ["ru", "pl", "en"] : lang === "en" ? ["en", "pl", "ru"] : ["pl", "en", "ru"];
+    for (let i = 0; i < order.length; i++) {
+      const v = obj[order[i]];
+      if (v != null && String(v).trim()) return String(v).trim();
+    }
+    return "";
+  }
+
+  function normSrc(src) {
+    if (!src || typeof src !== "string") return "";
+    const t = src.trim();
+    if (!t) return "";
+    return t.startsWith("/") ? t : `/${t}`;
+  }
+
+  function mediaSrc(item) {
+    if (!item) return "";
+    const m = item.media;
+    if (m && typeof m.src === "string" && m.src.trim()) return normSrc(m.src);
+    if (typeof item.image === "string" && item.image.trim()) return normSrc(item.image);
+    if (typeof item.photo === "string" && item.photo.trim()) return normSrc(item.photo);
+    if (typeof item.src === "string" && item.src.trim()) return normSrc(item.src);
+    return "";
+  }
+
+  function mediaType(item) {
+    if (item && item.type === "video") return "video";
+    const t = item && item.media && item.media.type;
+    return t === "video" ? "video" : "image";
+  }
+
+  function pickAlt(item, lang) {
+    const altM = item && item.media && item.media.alt;
+    const altT = item && item.alt;
+    return pickLoc(altM, lang) || pickLoc(altT, lang) || "";
+  }
+
+  function prepareItems(list) {
+    if (!Array.isArray(list) || list.length === 0) return [];
+    return list
+      .filter((it) => it && it.visible !== false)
+      .slice()
+      .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+  }
+
+  function tiltDeg(i) {
+    const x = (i * 0.73) % 3.4;
+    return (Math.round((x - 1.7) * 10) / 10).toFixed(1);
+  }
+
+  function escapeAttr(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;");
+  }
+
+  function resolveGalleryCardType(it, mediaMode) {
+    if (mediaMode === "auto") return mediaType(it);
+    if (mediaMode === "video") return "video";
+    return "image";
+  }
+
+  function galleryPosterAttr(item) {
+    const p = item && item.media && typeof item.media.poster === "string" ? item.media.poster.trim() : "";
+    if (!p) return "";
+    return ` poster="${escapeAttr(normSrc(p))}"`;
+  }
+
+  function renderMobileGalleryCard(items, lang, mediaMode) {
+    return items
+      .map((it, idx) => {
+        const type = resolveGalleryCardType(it, mediaMode);
+        const src = mediaSrc(it);
+        if (!src) return "";
+        const url = escapeAttr(src);
+        const title = escapeAttr(pickLoc(it.title, lang));
+        const desc = escapeAttr(pickLoc(it.description, lang));
+        const alt = escapeAttr(pickAlt(it, lang));
+        if (type === "video") {
+          return `<article class="mobile-gallery-card">
+    <div class="mobile-gallery-photo">
+      <video class="salon-video" data-salon-video src="${url}" autoplay muted loop playsinline preload="metadata"></video>
+    </div>
+    <strong>${title}</strong>
+    <p>${desc}</p>
+  </article>`;
+        }
+        return `<article class="mobile-gallery-card">
+    <div class="media-frame media-frame--portrait" style="--media-url: url('${url}')">
+      <img src="${url}" alt="${alt}">
+    </div>
+    <strong>${title}</strong>
+    <p>${desc}</p>
+  </article>`;
+      })
+      .join("\n");
+  }
+
+  function renderStickerFigure(items, lang, mediaMode) {
+    const heightsPx = [250, 288, 234, 268, 242, 276];
+    return items
+      .map((it, i) => {
+        const type = resolveGalleryCardType(it, mediaMode);
+        const src = mediaSrc(it);
+        if (!src) return "";
+        const url = escapeAttr(src);
+        const title = escapeAttr(pickLoc(it.title, lang));
+        const desc = escapeAttr(pickLoc(it.description, lang));
+        const alt = escapeAttr(pickAlt(it, lang));
+        const tilt = tiltDeg(i);
+        const minH = heightsPx[i % heightsPx.length];
+        const frameVars = `--tilt:${tilt}deg;--sticker-media-min:${minH}px`;
+        const wideClass = i % 6 === 0 ? " sticker-card--wide" : "";
+        if (type === "video") {
+          const posterAttr = galleryPosterAttr(it);
+          return `<figure class="sticker-card sticker-card--video${wideClass}" style="${frameVars}">
+  <div class="media-frame media-frame--portrait media-frame--video">
+    <video class="salon-video" data-salon-video src="${url}"${posterAttr} autoplay muted loop playsinline preload="metadata" aria-label="${alt}"></video>
+  </div>
+  <figcaption>
+    <strong>${title}</strong>
+    <p>${desc}</p>
+  </figcaption>
+</figure>`;
+        }
+        return `<figure class="sticker-card${wideClass}" style="${frameVars}">
+  <div class="media-frame media-frame--portrait" style="--media-url:url('${url}')">
+    <img src="${url}" alt="${alt}" loading="lazy" decoding="async">
+  </div>
+  <figcaption>
+    <strong>${title}</strong>
+    <p>${desc}</p>
+  </figcaption>
+</figure>`;
+      })
+      .join("\n");
+  }
+
+  function renderMobileBarbers(items, lang) {
+    return items
+      .map((it) => {
+        const src = mediaSrc(it);
+        const url = src ? escapeAttr(src) : "";
+        const name = escapeAttr(pickLoc(it.title, lang));
+        const desc = escapeAttr(pickLoc(it.description, lang));
+        const alt = escapeAttr(pickAlt(it, lang) || pickLoc(it.title, lang));
+        const tags = Array.isArray(it.tags) ? it.tags : [];
+        const tagHtml = tags
+          .map((t) => `<span>${escapeAttr(String(t))}</span>`)
+          .join("\n      ");
+        const cta = escapeAttr(pickLoc(it.bookCta, lang) || "Umów");
+        const bid = it.barberId ? String(it.barberId).trim() : "";
+        const dataBarber = bid ? ` data-barber-id="${escapeAttr(bid)}"` : "";
+        return `<article class="barber-profile-card"${dataBarber}>
+            <div class="barber-profile-photo">
+              <img src="${url}" alt="${alt}">
+            </div>
+            <div class="barber-profile-copy">
+              <h3>${name}</h3>
+              <p>${desc}</p>
+            </div>
+            <div class="barber-profile-tags">
+              ${tagHtml}
+            </div>
+            <button class="mobile-card-btn barber-profile-btn" type="button" data-open-booking>${cta}</button>
+          </article>`;
+      })
+      .join("\n");
+  }
+
+  function renderDesktopBarbers(items, lang) {
+    return items
+      .map((it) => {
+        const src = mediaSrc(it);
+        const url = src ? escapeAttr(src) : "";
+        const name = escapeAttr(pickLoc(it.title, lang));
+        const desc = escapeAttr(pickLoc(it.description, lang));
+        const alt = escapeAttr(pickAlt(it, lang) || pickLoc(it.title, lang));
+        const tags = Array.isArray(it.tags) ? it.tags : [];
+        const tagHtml = tags
+          .map((t) => `<span>${escapeAttr(String(t))}</span>`)
+          .join("\n                    ");
+        const cta = escapeAttr(pickLoc(it.bookCta, lang) || "Umów");
+        const bid = it.barberId ? String(it.barberId).trim() : "";
+        const dataBarber = bid ? ` data-barber-id="${escapeAttr(bid)}"` : "";
+        const photoStyle = url
+          ? ` style="background-image:url('${url}');background-size:cover;background-position:center 32%;"`
+          : "";
+        return `<article class="glass-card master-card master-card--hydrated">
+                  <div class="master-photo master-photo--img"${photoStyle} role="img" aria-label="${alt}"></div>
+                  <div class="master-card__body">
+                    <h3>${name}</h3>
+                    <p>${desc}</p>
+                  </div>
+                  <div class="master-tags">
+                    ${tagHtml}
+                  </div>
+                  <button class="master-book-btn" type="button" data-open-booking${dataBarber}>${cta}</button>
+                </article>`;
+      })
+      .join("\n");
+  }
+
+  function setStickerWallHtml(zone, html) {
+    if (!zone) return;
+    const wall = zone.querySelector(":scope > .sticker-wall");
+    if (wall) {
+      wall.innerHTML = html;
+      return;
+    }
+    zone.innerHTML = `<div class="sticker-wall">${html}</div>`;
+  }
+
+  function setPanelStickerHtml(panel, html) {
+    if (!panel) return;
+    let wall = panel.querySelector(":scope > .sticker-wall");
+    if (!wall) {
+      wall = document.createElement("div");
+      wall.className = "sticker-wall";
+      panel.appendChild(wall);
+    }
+    wall.innerHTML = html;
+  }
+
+  const ZONE_RENDERERS = [
+    {
+      key: "barbers",
+      jobs: [
+        { sel: '[data-admin-zone="mobile-barbers"]', fn: (el, items, lang) => {
+          el.innerHTML = renderMobileBarbers(items, lang);
+        } },
+        { sel: '[data-admin-zone="desktop-barbers"]', fn: (el, items, lang) => {
+          el.innerHTML = renderDesktopBarbers(items, lang);
+        } }
+      ]
+    }
+  ];
+
+  function renderLandingDesktop(items, lang) {
+    return items
+      .map((it) => {
+        const title = escapeAttr(pickLoc(it.title, lang));
+        const desc = escapeAttr(pickLoc(it.description, lang));
+        const price = escapeAttr(it.priceDisplay || "");
+        const btn = escapeAttr(pickLoc(it.buttonLabel, lang) || "Wybierz usługę");
+        const visual = escapeAttr(String(it.visualClass || "haircut").trim() || "haircut");
+        const tags = Array.isArray(it.tags) ? it.tags : [];
+        const tagHtml = tags.map((t) => `<span>${escapeAttr(String(t))}</span>`).join("\n      ");
+        const src = mediaSrc(it);
+        const bg = src ? escapeAttr(src) : "";
+        const style = bg && it.media?.type !== "video" ? ` style="background-image:url('${bg}');background-size:cover;background-position:center"` : "";
+        const bid = it.bookingServiceId ? String(it.bookingServiceId).trim() : "";
+        const dataBooking = bid ? ` data-booking-service="${escapeAttr(bid)}"` : "";
+        const visualInner =
+          src && it.media?.type === "video"
+            ? `<div class="service-visual ${visual} service-visual--video"><video class="salon-video" data-salon-video src="${bg}" autoplay muted loop playsinline preload="metadata"></video></div>`
+            : `<div class="service-visual ${visual}"${style}></div>`;
+        return `<article class="glass-card pricing-card">
+                ${visualInner}
+                <div class="pricing-card__content">
+                  <div class="pricing-card__top">
+                    <strong>${title}</strong>
+                    <span class="pricing-card__price">${price}</span>
+                  </div>
+                  <p>${desc}</p>
+                </div>
+                <div class="service-tags">
+                  ${tagHtml}
+                </div>
+                <button class="master-book-btn" type="button" data-open-booking${dataBooking}>${btn}</button>
+              </article>`;
+      })
+      .join("\n");
+  }
+
+  function renderLandingMobile(items, lang) {
+    return items
+      .map((it) => {
+        const title = escapeAttr(pickLoc(it.title, lang));
+        const desc = escapeAttr(pickLoc(it.description, lang));
+        const btn = escapeAttr(pickLoc(it.buttonLabel, lang) || "Wybierz usługę");
+        const visual = escapeAttr(String(it.visualClass || "haircut").trim() || "haircut");
+        const tags = Array.isArray(it.tags) ? it.tags : [];
+        const tagHtml = tags.map((t) => `<span>${escapeAttr(String(t))}</span>`).join("\n            ");
+        const price = escapeAttr(it.priceDisplay || "");
+        const src = mediaSrc(it);
+        const bg = src ? escapeAttr(src) : "";
+        const style = bg && it.media?.type !== "video" ? ` style="background-image:url('${bg}');background-size:cover;background-position:center"` : "";
+        const bid = it.bookingServiceId ? String(it.bookingServiceId).trim() : "";
+        const dataBooking = bid ? ` data-booking-service="${escapeAttr(bid)}"` : "";
+        const imgInner =
+          src && it.media?.type === "video"
+            ? `<div class="service-img ${visual} service-img--video"><video class="salon-video" data-salon-video src="${bg}" autoplay muted loop playsinline preload="metadata"></video></div>`
+            : `<div class="service-img ${visual}"${style}></div>`;
+        return `<article class="service-card">
+            ${imgInner}
+            <div class="service-card-header">
+              <strong>${title}</strong>
+              <span class="price">${price}</span>
+            </div>
+            <p>${desc}</p>
+            <div class="tags">
+              ${tagHtml}
+            </div>
+            <button class="mobile-card-btn" type="button" data-open-booking${dataBooking}>${btn}</button>
+          </article>`;
+      })
+      .join("\n");
+  }
+
+  function clearWorksGalleryZones() {
+    const zones = [
+      '[data-admin-zone="mobile-works-photos"]',
+      '[data-admin-zone="mobile-works-videos"]',
+      '[data-admin-zone="mobile-works-gallery"]',
+      '[data-admin-zone="desktop-works-photos"]',
+      '[data-admin-zone="desktop-works-videos"]',
+      '[data-admin-zone="desktop-works-gallery"]',
+      '[data-admin-zone="mobile-gallery"]'
+    ];
+    zones.forEach((sel) => {
+      const el = document.querySelector(sel);
+      if (el) el.innerHTML = "";
+    });
+    const desk = document.querySelector('[data-admin-zone="desktop-gallery-works"]');
+    if (desk) setStickerWallHtml(desk, "");
+  }
+
+  function applyWorksGallery(data, lang) {
+    const raw = data.worksGallery;
+    if (!Array.isArray(raw) || raw.length === 0) {
+      clearWorksGalleryZones();
+      return;
+    }
+    const items = prepareItems(raw).filter((it) => mediaSrc(it));
+    if (items.length === 0) {
+      clearWorksGalleryZones();
+      return;
+    }
+
+    const photoItems = items.filter((it) => mediaType(it) !== "video");
+    const videoItems = items.filter((it) => mediaType(it) === "video");
+    const hasVideo = videoItems.length > 0;
+
+    document.querySelectorAll("[data-works-switch]").forEach((sw) => {
+      sw.hidden = !hasVideo;
+      sw.style.display = hasVideo ? "" : "none";
+      if (!hasVideo) {
+        sw.querySelectorAll(".media-tab").forEach((t, i) => t.classList.toggle("active", i === 0));
+      }
+    });
+
+    const mobPhoto = document.querySelector('[data-admin-zone="mobile-works-photos"]');
+    const mobVideo = document.querySelector('[data-admin-zone="mobile-works-videos"]');
+    const deskPhoto = document.querySelector('[data-admin-zone="desktop-works-photos"]');
+    const deskVideo = document.querySelector('[data-admin-zone="desktop-works-videos"]');
+    const mobLegacy = document.querySelector('[data-admin-zone="mobile-works-gallery"]');
+    const deskLegacy = document.querySelector('[data-admin-zone="desktop-works-gallery"]');
+
+    if (mobPhoto && mobVideo) {
+      if (!hasVideo) {
+        mobPhoto.innerHTML = renderMobileGalleryCard(items, lang, "auto");
+        mobVideo.innerHTML = "";
+      } else {
+        mobPhoto.innerHTML = renderMobileGalleryCard(photoItems, lang, "auto");
+        mobVideo.innerHTML = renderMobileGalleryCard(videoItems, lang, "auto");
+      }
+    } else if (mobLegacy) {
+      mobLegacy.innerHTML = renderMobileGalleryCard(items, lang, "auto");
+    }
+
+    const mobMonarchGallery = document.querySelector('[data-admin-zone="mobile-gallery"]');
+    if (mobMonarchGallery) {
+      mobMonarchGallery.innerHTML = renderMobileGalleryCard(items, lang, "auto");
+    }
+
+    const deskSticker = document.querySelector('[data-admin-zone="desktop-gallery-works"]');
+    if (deskSticker) {
+      setStickerWallHtml(deskSticker, renderStickerFigure(items, lang, "auto"));
+    }
+
+    if (deskPhoto && deskVideo) {
+      if (!hasVideo) {
+        setStickerWallHtml(deskPhoto, renderStickerFigure(items, lang, "auto"));
+        setStickerWallHtml(deskVideo, "");
+      } else {
+        setStickerWallHtml(deskPhoto, renderStickerFigure(photoItems, lang, "auto"));
+        setStickerWallHtml(deskVideo, renderStickerFigure(videoItems, lang, "auto"));
+      }
+    } else if (deskLegacy) {
+      setStickerWallHtml(deskLegacy, renderStickerFigure(items, lang, "auto"));
+    }
+
+    document.querySelectorAll("#mobile-works-photos, #desktop-works-photos").forEach((p) => p.classList.add("active"));
+    document.querySelectorAll("#mobile-works-videos, #desktop-works-videos").forEach((p) => p.classList.remove("active"));
+  }
+
+  function applyLandingServices(data) {
+    const raw = data.landingServices;
+    if (!Array.isArray(raw) || raw.length === 0) return;
+    const items = prepareItems(raw);
+    if (!items.length) return;
+    const lang = getSalonLang();
+    const desk = document.querySelector('[data-admin-zone="desktop-services"]');
+    const mob = document.querySelector('[data-admin-zone="mobile-services"]');
+    if (desk) desk.innerHTML = renderLandingDesktop(items, lang);
+    if (mob) mob.innerHTML = renderLandingMobile(items, lang);
+  }
+
+  function applyContactsPhoneDisplay(data) {
+    const c = data.contacts && typeof data.contacts === "object" ? data.contacts : {};
+    if (c.phoneDisplay && typeof c.phoneDisplay === "string" && c.phoneDisplay.trim()) {
+      document.querySelectorAll("[data-salon-contact-phone-display]").forEach((el) => {
+        el.textContent = c.phoneDisplay.trim();
+      });
+    }
+  }
+
+  function applyLandingHero(data, lang) {
+    const lh = data.landingHero && typeof data.landingHero === "object" ? data.landingHero : null;
+    const raw = lh && typeof lh.image === "string" ? lh.image.trim() : "";
+    const src = raw ? normSrc(raw) : "";
+    const alt =
+      lh && lh.alt && typeof lh.alt === "object" ? pickLoc(lh.alt, lang) : "";
+    document.querySelectorAll("[data-salon-hero-panel]").forEach((panel) => {
+      if (!src) {
+        panel.classList.remove("hero--has-cms-photo");
+        panel.style.removeProperty("--hero-cms-url");
+        panel.removeAttribute("aria-label");
+        return;
+      }
+      const safe = src.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      panel.classList.add("hero--has-cms-photo");
+      panel.style.setProperty("--hero-cms-url", `url("${safe}")`);
+      const a = String(alt || "").trim();
+      if (a) panel.setAttribute("aria-label", a);
+      else panel.removeAttribute("aria-label");
+    });
+  }
+
+  function applyContactsAndSocials(data) {
+    const lang = getSalonLang();
+    const c = data.contacts && typeof data.contacts === "object" ? data.contacts : {};
+    const s = data.socials && typeof data.socials === "object" ? data.socials : {};
+
+    const phoneRaw = c.phoneE164 || c.phone || "";
+    const phoneDigits = String(phoneRaw).replace(/[^\d+]/g, "");
+    const telHref = phoneDigits ? (phoneDigits.startsWith("+") ? `tel:${phoneDigits}` : `tel:+${phoneDigits.replace(/^\+/, "")}`) : "";
+
+    if (telHref) {
+      document.querySelectorAll('[data-salon-contact="phone"]').forEach((a) => {
+        a.setAttribute("href", telHref);
+      });
+      window.SALON_PHONE_E164 = phoneDigits.startsWith("+") ? phoneDigits : `+${phoneDigits.replace(/^\+/, "")}`;
+    }
+
+    if (c.mapsUrl && typeof c.mapsUrl === "string") {
+      window.SALON_MAPS_URL = c.mapsUrl.trim();
+    }
+
+    if (c.hoursDisplay && typeof c.hoursDisplay === "string" && c.hoursDisplay.trim()) {
+      const h = c.hoursDisplay.trim();
+      document.querySelectorAll("[data-salon-contact-hours]").forEach((el) => {
+        el.textContent = h;
+      });
+    }
+
+    if (c.mapEmbedUrl && typeof c.mapEmbedUrl === "string") {
+      document.querySelectorAll("[data-salon-map-embed]").forEach((iframe) => {
+        iframe.setAttribute("src", c.mapEmbedUrl.trim());
+      });
+    }
+
+    const mapImgRaw = c.mapImage && String(c.mapImage).trim();
+    if (mapImgRaw) {
+      const mapSrc = normSrc(mapImgRaw);
+      document.querySelectorAll("[data-salon-location-map-img]").forEach((img) => {
+        img.setAttribute("src", mapSrc);
+        img.removeAttribute("hidden");
+        const wrap = img.closest("[data-salon-map-wrap]");
+        if (wrap) wrap.classList.add("map-wrap--static-image");
+      });
+      document.querySelectorAll("[data-salon-map-embed]").forEach((iframe) => {
+        iframe.setAttribute("hidden", "");
+        iframe.classList.add("map-embed--hidden");
+      });
+    } else {
+      document.querySelectorAll("[data-salon-location-map-img]").forEach((img) => {
+        img.removeAttribute("src");
+        img.setAttribute("hidden", "");
+        const wrap = img.closest("[data-salon-map-wrap]");
+        if (wrap) wrap.classList.remove("map-wrap--static-image");
+      });
+      document.querySelectorAll("[data-salon-map-embed]").forEach((iframe) => {
+        iframe.removeAttribute("hidden");
+        iframe.classList.remove("map-embed--hidden");
+      });
+    }
+
+    const addr = c.address;
+    if (addr && typeof addr === "object") {
+      const line = pickLoc(addr, lang);
+      if (line) {
+        document.querySelectorAll("[data-salon-contact-address]").forEach((el) => {
+          el.textContent = line;
+        });
+      }
+    }
+
+    if (s.booksy && typeof s.booksy === "string") {
+      document.querySelectorAll('[data-salon-contact="booksy"]').forEach((a) => {
+        a.setAttribute("href", s.booksy);
+      });
+    }
+    if (s.instagram && typeof s.instagram === "string") {
+      document.querySelectorAll('[data-salon-contact="instagram"]').forEach((a) => {
+        a.setAttribute("href", s.instagram);
+      });
+    }
+    if (s.tiktok && typeof s.tiktok === "string") {
+      document.querySelectorAll('[data-salon-contact="tiktok"]').forEach((a) => {
+        a.setAttribute("href", s.tiktok);
+      });
+    }
+
+    const reviewsUrlRaw =
+      (c.googleReviewsUrl && String(c.googleReviewsUrl).trim()) ||
+      (s.googleReviewsUrl && String(s.googleReviewsUrl).trim()) ||
+      "";
+    if (reviewsUrlRaw) {
+      document.querySelectorAll("[data-salon-google-reviews]").forEach((a) => {
+        a.setAttribute("href", reviewsUrlRaw);
+      });
+    }
+  }
+
+  function tryApplyBookingFromContent(data, attemptsLeft) {
+    var left = attemptsLeft === undefined ? 12 : attemptsLeft;
+    if (typeof window.SALON_applyBookingConfigFromContent === "function") {
+      window.SALON_applyBookingConfigFromContent(data);
+      return;
+    }
+    if (left <= 0) return;
+    window.setTimeout(function () {
+      tryApplyBookingFromContent(data, left - 1);
+    }, 150);
+  }
+
+  function applySalonSiteContent(data) {
+    if (!data || typeof data !== "object") return;
+
+    const lang = getSalonLang();
+
+    ZONE_RENDERERS.forEach(({ key, jobs }) => {
+      const raw = data[key];
+      if (!Array.isArray(raw) || raw.length === 0) return;
+      const items = prepareItems(raw);
+      if (items.length === 0) return;
+
+      jobs.forEach(({ sel, fn }) => {
+        const el = document.querySelector(sel);
+        if (el) fn(el, items, lang);
+      });
+    });
+
+    applyWorksGallery(data, lang);
+
+    applyLandingHero(data, lang);
+
+    applyContactsAndSocials(data);
+
+    applyLandingServices(data);
+
+    if (typeof window.playVisibleSalonVideos === "function") {
+      requestAnimationFrame(() => window.playVisibleSalonVideos());
+    }
+
+    if (typeof window.__SALON_applyI18nStrings === "function") {
+      window.__SALON_applyI18nStrings();
+    }
+
+    applyContactsPhoneDisplay(data);
+
+    tryApplyBookingFromContent(data);
+  }
+
+  window.salonReapplySiteContent = function () {
+    if (window.SALON_SITE_CONTENT) {
+      applySalonSiteContent(window.SALON_SITE_CONTENT);
+    }
+  };
+
+  async function loadContent() {
+    try {
+      const res = await fetch("/api/content", { headers: { Accept: "application/json" } });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data || typeof data !== "object") return;
+      window.SALON_SITE_CONTENT = data;
+      applySalonSiteContent(data);
+    } catch (e) {
+      console.warn("[MONARCH] Site content API unavailable, keeping static markup.", e);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadContent);
+  } else {
+    loadContent();
+  }
+})();

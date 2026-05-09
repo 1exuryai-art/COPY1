@@ -1,0 +1,1183 @@
+console.log("🚀 MONARCH booking server started");
+
+import "dotenv/config";
+import path from "path";
+import { mkdirSync } from "fs";
+import crypto from "crypto";
+import { fileURLToPath } from "url";
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import multer from "multer";
+import { google } from "googleapis";
+import axios from "axios";
+import { initContentStore, getContentStore } from "./contentStore.js";
+import * as dbAuth from "./postgresAuth.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+app.set("trust proxy", 1);
+
+const PORT = Number(process.env.PORT) || 3000;
+const TIMEZONE = process.env.TIMEZONE || "Europe/Warsaw";
+const CONTACT_PHONE = process.env.CONTACT_PHONE || "532377701";
+const OWNER_NOTIFICATION_PHONE = process.env.OWNER_NOTIFICATION_PHONE || "";
+const GOOGLE_CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID || "primary";
+
+const requiredEnv = [
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
+  "GOOGLE_REFRESH_TOKEN",
+  "GOOGLE_CALENDAR_ID"
+];
+
+const missingEnv = requiredEnv.filter((key) => !process.env[key]);
+
+const hasEnvAdminCredentials =
+  Boolean(process.env.ADMIN_LOGIN?.trim()) && Boolean(process.env.ADMIN_PASSWORD?.trim());
+if (!hasEnvAdminCredentials) {
+  console.warn(
+    "[MONARCH Admin] ADMIN_LOGIN / ADMIN_PASSWORD missing — using development defaults (admin / monarch)."
+  );
+}
+const ADMIN_LOGIN = process.env.ADMIN_LOGIN?.trim() || "admin";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD?.trim() || "monarch";
+
+const SESSION_SECRET = process.env.SESSION_SECRET || "dev-session-secret-change-me";
+if (!process.env.SESSION_SECRET && process.env.NODE_ENV === "production") {
+  console.warn("[MONARCH Admin] SESSION_SECRET missing — set a strong secret in production.");
+}
+
+const DATA_DIR = path.join(__dirname, "data");
+const CONTENT_FILE = path.join(DATA_DIR, "site-content.json");
+const ADMIN_UPLOADS_DIR = process.env.UPLOAD_DIR?.trim()
+  ? path.resolve(process.env.UPLOAD_DIR)
+  : path.join(__dirname, "assets", "admin-uploads");
+const ADMIN_DIR = path.join(__dirname, "admin");
+
+function useDatabaseAuth() {
+  return Boolean(process.env.DATABASE_URL?.trim());
+}
+
+function cookieSecure() {
+  return process.env.COOKIE_SECURE === "1" || process.env.NODE_ENV === "production";
+}
+
+const EMPTY_SITE_CONTENT = {
+  bioGallery: [],
+  bioDesktopPreview: [],
+  worksGallery: [],
+  effectPhotos: [],
+  effectVideos: [],
+  vibeGallery: [],
+  barbers: [],
+  landingServices: [],
+  landingHero: {
+    image: "",
+    alt: { pl: "", en: "", ru: "" }
+  },
+  bookingConfig: null,
+  contacts: { mapImage: "" },
+  socials: {}
+};
+
+const adminSessions = new Map();
+const ADMIN_SESSION_MS = 8 * 60 * 60 * 1000;
+
+let siteContentCache = { data: null, loadedAt: 0 };
+const SITE_CONTENT_CACHE_MS = 1500;
+
+function invalidateSiteContentCache() {
+  siteContentCache = { data: null, loadedAt: 0 };
+}
+
+function getSessionToken(req) {
+  const auth = req.headers.authorization || "";
+  if (auth.startsWith("Bearer ")) return auth.slice(7).trim();
+  const signed = req.signedCookies && req.signedCookies.salon_admin_session;
+  if (signed) return String(signed);
+  return "";
+}
+
+function setSessionCookie(res, token) {
+  res.cookie("salon_admin_session", token, {
+    httpOnly: true,
+    secure: cookieSecure(),
+    sameSite: "lax",
+    maxAge: ADMIN_SESSION_MS,
+    path: "/",
+    signed: true
+  });
+}
+
+function requireAdminAuth(req, res, next) {
+  const token = getSessionToken(req);
+  const exp = adminSessions.get(token);
+  if (!token || !exp || exp < Date.now()) {
+    return res.status(401).json({ ok: false, error: "Unauthorized" });
+  }
+  next();
+}
+
+function safeUploadFilename(original) {
+  const ext = path.extname(original || "").toLowerCase();
+  const allowed = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".mp4", ".webm", ".mov"]);
+  if (!allowed.has(ext)) {
+    throw new Error(`Invalid file type: ${ext || "missing extension"}`);
+  }
+  return `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${ext}`;
+}
+
+function ensureUploadDirSync() {
+  mkdirSync(ADMIN_UPLOADS_DIR, { recursive: true });
+}
+
+async function readSiteContent() {
+  const data = await getContentStore().read();
+  return { ...EMPTY_SITE_CONTENT, ...data };
+}
+
+async function writeSiteContent(merged) {
+  await getContentStore().write(merged);
+}
+
+async function loadSiteContentCached() {
+  const now = Date.now();
+  if (siteContentCache.data && now - siteContentCache.loadedAt < SITE_CONTENT_CACHE_MS) {
+    return siteContentCache.data;
+  }
+  const data = await readSiteContent();
+  siteContentCache = { data, loadedAt: now };
+  return data;
+}
+
+const adminUploadStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    try {
+      ensureUploadDirSync();
+      cb(null, ADMIN_UPLOADS_DIR);
+    } catch (e) {
+      cb(e);
+    }
+  },
+  filename: (_req, file, cb) => {
+    try {
+      cb(null, safeUploadFilename(file.originalname));
+    } catch (e) {
+      cb(e);
+    }
+  }
+});
+
+const adminUpload = multer({
+  storage: adminUploadStorage,
+  limits: { fileSize: 80 * 1024 * 1024 }
+});
+
+app.use(cors({ origin: true, credentials: true }));
+app.use(cookieParser(SESSION_SECRET));
+app.use(express.json({ limit: "12mb" }));
+
+app.use((req, res, next) => {
+  if ((req.method === "GET" || req.method === "HEAD") && req.path === "/admin") {
+    return res.redirect(301, "/admin/");
+  }
+  next();
+});
+
+app.use(
+  "/admin",
+  express.static(ADMIN_DIR, {
+    index: "index.html",
+    etag: false,
+    maxAge: 0,
+    setHeaders(res) {
+      res.setHeader("Cache-Control", "no-store");
+    }
+  })
+);
+
+function timingSafeEqualStr(a, b) {
+  const aa = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  if (aa.length !== bb.length) return false;
+  return crypto.timingSafeEqual(aa, bb);
+}
+
+app.get("/api/admin/bootstrap", async (_req, res) => {
+  try {
+    if (!useDatabaseAuth()) {
+      return res.json({ ok: true, needsSetup: false, authMode: "env" });
+    }
+    const n = await dbAuth.countAdmins();
+    return res.json({
+      ok: true,
+      needsSetup: n === 0,
+      authMode: "database",
+      hasSetupCode: Boolean(process.env.ADMIN_SETUP_CODE?.trim())
+    });
+  } catch (e) {
+    console.error("GET /api/admin/bootstrap:", e);
+    res.status(500).json({ ok: false, error: e.message || "bootstrap failed" });
+  }
+});
+
+app.get("/api/admin/session", (req, res) => {
+  const token = getSessionToken(req);
+  const exp = adminSessions.get(token);
+  if (!token || !exp || exp < Date.now()) {
+    return res.status(401).json({ ok: false });
+  }
+  res.json({ ok: true });
+});
+
+app.post("/api/admin/logout", (req, res) => {
+  const token = getSessionToken(req);
+  if (token) adminSessions.delete(token);
+  res.clearCookie("salon_admin_session", { path: "/", signed: true });
+  res.json({ ok: true });
+});
+
+app.post("/api/admin/setup", async (req, res) => {
+  try {
+    if (!useDatabaseAuth()) {
+      return res.status(400).json({ ok: false, error: "Database auth not enabled" });
+    }
+    if ((await dbAuth.countAdmins()) > 0) {
+      return res.status(400).json({ ok: false, error: "Already initialized" });
+    }
+    const expected = process.env.ADMIN_SETUP_CODE?.trim();
+    if (!expected) {
+      return res.status(503).json({ ok: false, error: "ADMIN_SETUP_CODE not configured" });
+    }
+    const body = req.body || {};
+    if (!timingSafeEqualStr(String(body.setupCode || ""), expected)) {
+      return res.status(401).json({ ok: false, error: "Invalid setup code" });
+    }
+    const username = String(body.username || "").trim();
+    const password = String(body.password || "");
+    if (!username || password.length < 8) {
+      return res.status(400).json({ ok: false, error: "Invalid username or weak password (min 8 chars)" });
+    }
+    await dbAuth.createUser(username, password, "admin");
+    const token = crypto.randomBytes(32).toString("hex");
+    adminSessions.set(token, Date.now() + ADMIN_SESSION_MS);
+    setSessionCookie(res, token);
+    res.json({ ok: true, token });
+  } catch (e) {
+    console.error("POST /api/admin/setup:", e);
+    res.status(500).json({ ok: false, error: e.message || "Setup failed" });
+  }
+});
+
+app.post("/api/admin/login", async (req, res) => {
+  try {
+    const body = req.body || {};
+    const login = String(body.login || "").trim();
+    const password = String(body.password || "");
+
+    if (useDatabaseAuth()) {
+      if ((await dbAuth.countAdmins()) === 0) {
+        return res.status(400).json({ ok: false, error: "needs_setup", needsSetup: true });
+      }
+      const user = await dbAuth.findUserByUsername(login);
+      if (!user || !(await dbAuth.verifyPassword(password, user.password_hash))) {
+        return res.status(401).json({ ok: false, error: "Invalid credentials" });
+      }
+    } else if (login !== ADMIN_LOGIN || password !== ADMIN_PASSWORD) {
+      return res.status(401).json({ ok: false, error: "Invalid credentials" });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    adminSessions.set(token, Date.now() + ADMIN_SESSION_MS);
+    setSessionCookie(res, token);
+    res.json({ ok: true, token });
+  } catch (e) {
+    console.error("POST /api/admin/login:", e);
+    res.status(500).json({ ok: false, error: e.message || "Login failed" });
+  }
+});
+
+app.get("/api/content", async (_req, res) => {
+  try {
+    const data = await readSiteContent();
+    res.json(data);
+  } catch (e) {
+    console.error("GET /api/content:", e);
+    res.status(500).json({ ok: false, error: "Failed to read content" });
+  }
+});
+
+app.get("/api/admin/content", requireAdminAuth, async (_req, res) => {
+  try {
+    const data = await readSiteContent();
+    res.json(data);
+  } catch (e) {
+    console.error("GET /api/admin/content:", e);
+    res.status(500).json({ ok: false, error: "Failed to read content" });
+  }
+});
+
+async function saveContentHandler(req, res) {
+  try {
+    const body = req.body;
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return res.status(400).json({ ok: false, error: "Invalid JSON body" });
+    }
+    const merged = { ...EMPTY_SITE_CONTENT, ...body };
+    await writeSiteContent(merged);
+    invalidateSiteContentCache();
+    res.json({ ok: true });
+  } catch (e) {
+    console.error("POST content save:", e);
+    res.status(500).json({ ok: false, error: e.message || "Save failed" });
+  }
+}
+
+app.post("/api/admin/content", requireAdminAuth, saveContentHandler);
+app.post("/api/content/save", requireAdminAuth, saveContentHandler);
+
+app.post("/api/admin/upload", requireAdminAuth, (req, res) => {
+  adminUpload.single("file")(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ ok: false, error: err.message || "Upload failed" });
+    }
+    if (!req.file) {
+      return res.status(400).json({ ok: false, error: "No file" });
+    }
+    const publicPath = `/assets/admin-uploads/${req.file.filename}`;
+    try {
+      const store = getContentStore();
+      if (store.mode === "postgres" && typeof store.recordMedia === "function") {
+        await store.recordMedia({
+          url: publicPath,
+          filename: req.file.filename,
+          mimeType: req.file.mimetype,
+          size: req.file.size
+        });
+      }
+    } catch (e) {
+      console.warn("[upload] media_files insert:", e.message);
+    }
+    res.json({ ok: true, path: publicPath, url: publicPath, filename: req.file.filename });
+  });
+});
+
+app.use(express.urlencoded({ extended: true }));
+app.use("/assets/admin-uploads", express.static(ADMIN_UPLOADS_DIR));
+app.use(express.static(__dirname));
+
+const BARBERS = {
+  tymur: {
+    id: "tymur",
+    name: "Tymur",
+    aliases: ["tymur", "тимур"]
+  },
+  dima: {
+    id: "dima",
+    name: "Dima",
+    aliases: ["dima", "дима", "dmitriy", "dmitri", "дмитрий"]
+  },
+  vlad: {
+    id: "vlad",
+    name: "Vlad",
+    aliases: ["vlad", "влад", "volodymyr", "vladimir"]
+  }
+};
+
+function parseDuration(durationText) {
+  if (!durationText || typeof durationText !== "string") {
+    throw new Error("Invalid duration format");
+  }
+
+  const normalized = durationText.trim().toLowerCase();
+  let totalMinutes = 0;
+
+  const hourMatch = normalized.match(/(\d+)\s*h/);
+  const minuteMatch = normalized.match(/(\d+)\s*min/);
+
+  if (hourMatch) totalMinutes += Number(hourMatch[1]) * 60;
+  if (minuteMatch) totalMinutes += Number(minuteMatch[1]);
+
+  if (!hourMatch && !minuteMatch && /^\d+$/.test(normalized)) {
+    totalMinutes = Number(normalized);
+  }
+
+  if (!Number.isFinite(totalMinutes) || totalMinutes <= 0) {
+    throw new Error(`Unable to parse duration: ${durationText}`);
+  }
+
+  return totalMinutes;
+}
+
+function parseDateParts(dateStr) {
+  const [year, month, day] = String(dateStr).split("-").map(Number);
+
+  if (!year || !month || !day) {
+    throw new Error("Invalid date format. Expected YYYY-MM-DD");
+  }
+
+  return { year, month, day };
+}
+
+function parseTimeParts(timeStr) {
+  const [hour, minute] = String(timeStr).split(":").map(Number);
+
+  if (
+    !Number.isInteger(hour) ||
+    !Number.isInteger(minute) ||
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  ) {
+    throw new Error("Invalid time format. Expected HH:MM");
+  }
+
+  return { hour, minute };
+}
+
+function getTimeZoneOffsetMinutes(date, timeZone) {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    timeZoneName: "shortOffset"
+  });
+
+  const parts = formatter.formatToParts(date);
+  const timeZoneName = parts.find((part) => part.type === "timeZoneName")?.value || "GMT+0";
+
+  const match = timeZoneName.match(/GMT([+-])(\d{1,2})(?::?(\d{2}))?/);
+
+  if (!match) return 0;
+
+  const sign = match[1] === "-" ? -1 : 1;
+  const hours = Number(match[2] || 0);
+  const minutes = Number(match[3] || 0);
+
+  return sign * (hours * 60 + minutes);
+}
+
+function getUtcDateFromTimeZoneLocal(dateStr, timeStr, timeZone = TIMEZONE) {
+  const { year, month, day } = parseDateParts(dateStr);
+  const { hour, minute } = parseTimeParts(timeStr);
+
+  const utcGuess = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+  const offsetMinutes = getTimeZoneOffsetMinutes(utcGuess, timeZone);
+
+  return new Date(utcGuess.getTime() - offsetMinutes * 60 * 1000);
+}
+
+function formatTimeInTimeZone(date, timeZone = TIMEZONE) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(date);
+}
+
+function formatDateTimeForGoogle(date, timeZone = TIMEZONE) {
+  const parts = new Intl.DateTimeFormat("sv-SE", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  }).formatToParts(date);
+
+  const get = (type) => parts.find((part) => part.type === type)?.value || "";
+
+  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}`;
+}
+
+function buildDateTime(dateStr, timeStr) {
+  if (!dateStr || !timeStr) {
+    throw new Error("Date and time are required");
+  }
+
+  return getUtcDateFromTimeZoneLocal(dateStr, timeStr, TIMEZONE);
+}
+
+function addMinutes(date, minutes) {
+  return new Date(date.getTime() + minutes * 60 * 1000);
+}
+
+function normalizeSmsPhone(phone) {
+  const cleaned = String(phone || "").replace(/\s/g, "");
+
+  if (cleaned.startsWith("+")) return cleaned;
+  if (cleaned.startsWith("48")) return `+${cleaned}`;
+
+  return `+48${cleaned}`;
+}
+
+function formatSmsDate(dateStr) {
+  const [year, month, day] = String(dateStr).split("-");
+  if (!year || !month || !day) return dateStr;
+  return `${day}.${month}.${year}`;
+}
+
+function createOAuthClient() {
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET
+  );
+
+  oauth2Client.setCredentials({
+    refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+  });
+
+  return oauth2Client;
+}
+
+function getCalendarClient() {
+  const oauth2Client = createOAuthClient();
+  return google.calendar({ version: "v3", auth: oauth2Client });
+}
+
+async function getTokenOwnerEmail() {
+  try {
+    const auth = createOAuthClient();
+    const oauth2 = google.oauth2({
+      version: "v2",
+      auth
+    });
+
+    const userInfo = await oauth2.userinfo.get();
+    return userInfo.data.email || null;
+  } catch (error) {
+    console.error("Failed to get token owner email:", error.response?.data || error.message);
+    return null;
+  }
+}
+
+function getBarberConfig(barberId) {
+  const barber = BARBERS[barberId];
+
+  if (!barber) {
+    const error = new Error("Nieprawidłowy barber");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return barber;
+}
+
+function getEventSearchText(event) {
+  return [
+    event.summary || "",
+    event.description || "",
+    event.location || ""
+  ]
+    .join(" ")
+    .toLowerCase();
+}
+
+function detectBarberFromEvent(event) {
+  const haystack = getEventSearchText(event);
+
+  for (const barber of Object.values(BARBERS)) {
+    const matched = barber.aliases.some((alias) => haystack.includes(alias.toLowerCase()));
+    if (matched) return barber.id;
+  }
+
+  return null;
+}
+
+function isEventForBarber(event, barberId) {
+  return detectBarberFromEvent(event) === barberId;
+}
+
+function getWeekday(dateStr) {
+  return new Date(`${dateStr}T00:00:00`).getDay();
+}
+
+function defaultWorkingHoursForWeekday(day) {
+  if (day === 0) {
+    return { openHour: 10, closeHour: 18, closed: false };
+  }
+  return { openHour: 10, closeHour: 20, closed: false };
+}
+
+async function getWorkingHoursForDate(dateStr) {
+  const day = getWeekday(dateStr);
+  const dayKey = String(day);
+  try {
+    const data = await loadSiteContentCached();
+    const oh = data?.bookingConfig?.openingHours;
+    if (oh && typeof oh === "object") {
+      const rule = oh[dayKey];
+      if (rule && rule.closed) {
+        return { openHour: 0, closeHour: 0, closed: true };
+      }
+      if (rule && typeof rule.openHour === "number" && typeof rule.closeHour === "number") {
+        return { openHour: rule.openHour, closeHour: rule.closeHour, closed: false };
+      }
+    }
+  } catch (e) {
+    console.warn("[MONARCH] openingHours from site content unavailable, using defaults.", e.message);
+  }
+  return defaultWorkingHoursForWeekday(day);
+}
+
+async function validateBusinessRules(dateStr, timeStr, durationMinutes) {
+  const wh = await getWorkingHoursForDate(dateStr);
+  if (wh.closed) {
+    const error = new Error("W wybranym dniu rezerwacja online jest niedostępna");
+    error.statusCode = 400;
+    throw error;
+  }
+  const { openHour, closeHour } = wh;
+  const { hour, minute } = parseTimeParts(timeStr);
+
+  const startMinutes = hour * 60 + minute;
+  const endMinutes = startMinutes + durationMinutes;
+
+  if (startMinutes < openHour * 60 || startMinutes >= closeHour * 60) {
+    const error = new Error(
+      `Dostępne godziny rezerwacji: ${String(openHour).padStart(2, "0")}:00–${String(closeHour).padStart(2, "0")}:00`
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (endMinutes > closeHour * 60) {
+    const error = new Error(
+      `Wybrana usługa nie mieści się w godzinach pracy ${String(openHour).padStart(2, "0")}:00–${String(closeHour).padStart(2, "0")}:00`
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+}
+
+function formatCalendarDescription(payload) {
+  return [
+    "Źródło: Rezerwacja przez stronę",
+    `BarberTag: ${payload.barberId}`,
+    `Barber: ${payload.barberName}`,
+    `Imię: ${payload.name}`,
+    `Telefon: ${payload.phone}`,
+    `Usługa: ${payload.serviceName}`,
+    `Data: ${payload.date}`,
+    `Godzina: ${payload.time}`,
+    `Czas trwania: ${payload.serviceDuration}`,
+    `Cena: ${payload.servicePrice}`
+  ].join("\n");
+}
+
+function buildBookingSummary(payload) {
+  return `[WWW][${payload.barberName}] ${payload.serviceName} - ${payload.name}`;
+}
+
+async function sendSMS({ phone, message }) {
+  if (!process.env.SMSAPI_TOKEN) {
+    console.warn("SMSAPI_TOKEN is missing. SMS skipped.");
+    return;
+  }
+
+  try {
+    await axios.post(
+      "https://api.smsapi.pl/sms.do",
+      null,
+      {
+        params: {
+          to: normalizeSmsPhone(phone),
+          message,
+          from: process.env.SMS_SENDER || "MONARCH",
+          format: "json"
+        },
+        headers: {
+          Authorization: `Bearer ${process.env.SMSAPI_TOKEN}`
+        }
+      }
+    );
+  } catch (error) {
+    console.error("SMS error:", error.response?.data || error.message);
+  }
+}
+
+function buildBookingSms(payload) {
+  return [
+    "MONARCH BARBERSHOP:",
+    "Twoja rezerwacja została potwierdzona.",
+    `Data: ${formatSmsDate(payload.date)}`,
+    `Godzina: ${payload.time}`,
+    `Usługa: ${payload.serviceName}`,
+    `Barber: ${payload.barberName}`,
+    `Kontakt: ${CONTACT_PHONE}`
+  ].join("\n");
+}
+
+function buildOwnerBookingSms(payload) {
+  return [
+    "MONARCH BARBERSHOP",
+    "Nowa rezerwacja:",
+    `Klient: ${payload.name}`,
+    `Telefon: ${payload.phone}`,
+    `Usługa: ${payload.serviceName}`,
+    `Barber: ${payload.barberName}`,
+    `Data: ${formatSmsDate(payload.date)}`,
+    `Godzina: ${payload.time}`,
+    `Cena: ${payload.servicePrice}`
+  ].join("\n");
+}
+
+async function getEventsForDay(dateStr) {
+  if (!dateStr) {
+    throw new Error("Date is required");
+  }
+
+  console.log("=== GET EVENTS FOR DAY ===");
+  console.log("GOOGLE_CALENDAR_ID:", GOOGLE_CALENDAR_ID);
+  console.log("DATE:", dateStr);
+  console.log("TIMEZONE:", TIMEZONE);
+
+  const calendar = getCalendarClient();
+
+  const dayStart = getUtcDateFromTimeZoneLocal(dateStr, "00:00", TIMEZONE);
+  const dayEnd = getUtcDateFromTimeZoneLocal(dateStr, "23:59", TIMEZONE);
+
+  const response = await calendar.events.list({
+    calendarId: GOOGLE_CALENDAR_ID,
+    timeMin: dayStart.toISOString(),
+    timeMax: dayEnd.toISOString(),
+    singleEvents: true,
+    orderBy: "startTime"
+  });
+
+  return response.data.items || [];
+}
+
+function overlaps(startA, endA, startB, endB) {
+  return startA < endB && endA > startB;
+}
+
+function eventOverlapsSlot(event, startDate, endDate) {
+  const existingStart = new Date(event.start.dateTime).getTime();
+  const existingEnd = new Date(event.end.dateTime).getTime();
+  return overlaps(startDate.getTime(), endDate.getTime(), existingStart, existingEnd);
+}
+
+function getBusyIntervalsForBarber(events, barberId) {
+  return events
+    .filter((event) => event.status !== "cancelled")
+    .filter((event) => event.start?.dateTime && event.end?.dateTime)
+    .filter((event) => isEventForBarber(event, barberId))
+    .map((event) => ({
+      start: formatTimeInTimeZone(new Date(event.start.dateTime), TIMEZONE),
+      end: formatTimeInTimeZone(new Date(event.end.dateTime), TIMEZONE),
+      summary: event.summary || ""
+    }));
+}
+
+async function generateBaseSlotsForDate(dateStr, durationMinutes) {
+  const wh = await getWorkingHoursForDate(dateStr);
+  if (wh.closed) return [];
+  const { openHour, closeHour } = wh;
+  const slots = [];
+  const lastStartMinutes = closeHour * 60 - durationMinutes;
+
+  for (let minutes = openHour * 60; minutes <= lastStartMinutes; minutes += 30) {
+    const hour = Math.floor(minutes / 60);
+    const minute = minutes % 60;
+    slots.push(`${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`);
+  }
+
+  return slots;
+}
+
+function getFreeBarbersForSlot(events, dateStr, timeStr, durationMinutes) {
+  const startDate = buildDateTime(dateStr, timeStr);
+  const endDate = addMinutes(startDate, durationMinutes);
+
+  return Object.values(BARBERS).filter((barber) => {
+    const busyForBarber = events
+      .filter((event) => event.status !== "cancelled")
+      .filter((event) => event.start?.dateTime && event.end?.dateTime)
+      .filter((event) => isEventForBarber(event, barber.id))
+      .some((event) => eventOverlapsSlot(event, startDate, endDate));
+
+    return !busyForBarber;
+  });
+}
+
+function getRandomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+async function getAvailabilityForAuto(dateStr, durationMinutes) {
+  const events = await getEventsForDay(dateStr);
+  const baseSlots = await generateBaseSlotsForDate(dateStr, durationMinutes);
+
+  const availableSlots = baseSlots.filter((time) => {
+    const freeBarbers = getFreeBarbersForSlot(events, dateStr, time, durationMinutes);
+    return freeBarbers.length > 0;
+  });
+
+  return {
+    availableSlots,
+    workingHours: await getWorkingHoursForDate(dateStr)
+  };
+}
+
+async function createEvent(payload) {
+  const calendar = getCalendarClient();
+
+  const durationMinutes = parseDuration(payload.serviceDuration);
+  await validateBusinessRules(payload.date, payload.time, durationMinutes);
+
+  const existingEvents = await getEventsForDay(payload.date);
+
+  let resolvedBarberId = payload.barberId;
+  let resolvedBarberName = payload.barberName;
+
+  if (payload.barberId === "auto") {
+    const freeBarbers = getFreeBarbersForSlot(
+      existingEvents,
+      payload.date,
+      payload.time,
+      durationMinutes
+    );
+
+    if (!freeBarbers.length) {
+      const error = new Error("Brak wolnych barberów na wybraną godzinę");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const selectedBarber = getRandomItem(freeBarbers);
+    resolvedBarberId = selectedBarber.id;
+    resolvedBarberName = selectedBarber.name;
+  } else {
+    getBarberConfig(payload.barberId);
+  }
+
+  const startDate = buildDateTime(payload.date, payload.time);
+  const endDate = addMinutes(startDate, durationMinutes);
+
+  const busyEventsForBarber = existingEvents
+    .filter((item) => item.status !== "cancelled")
+    .filter((item) => item.start?.dateTime && item.end?.dateTime)
+    .filter((item) => isEventForBarber(item, resolvedBarberId))
+    .filter((item) => eventOverlapsSlot(item, startDate, endDate));
+
+  if (busyEventsForBarber.length > 0) {
+    const error = new Error("Ten termin jest już zajęty u wybranego barbera");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const resolvedPayload = {
+    ...payload,
+    barberId: resolvedBarberId,
+    barberName: resolvedBarberName
+  };
+
+  const event = {
+    summary: buildBookingSummary(resolvedPayload),
+    description: formatCalendarDescription(resolvedPayload),
+    start: {
+      dateTime: `${resolvedPayload.date}T${resolvedPayload.time}:00`,
+      timeZone: TIMEZONE
+    },
+    end: {
+      dateTime: formatDateTimeForGoogle(endDate, TIMEZONE),
+      timeZone: TIMEZONE
+    }
+  };
+
+  const response = await calendar.events.insert({
+    calendarId: GOOGLE_CALENDAR_ID,
+    requestBody: event
+  });
+
+  return {
+    createdEvent: response.data,
+    resolvedPayload
+  };
+}
+
+app.get("/api/health", async (_req, res) => {
+  const credentialsReady = missingEnv.length === 0;
+  const tokenOwnerEmail = credentialsReady ? await getTokenOwnerEmail() : null;
+
+  res.json({
+    ok: true,
+    service: "MONARCH booking backend",
+    credentialsReady,
+    missingEnv,
+    timezone: TIMEZONE,
+    calendarIdConfigured: Boolean(process.env.GOOGLE_CALENDAR_ID),
+    calendarIdUsed: GOOGLE_CALENDAR_ID,
+    smsEnabled: Boolean(process.env.SMSAPI_TOKEN),
+    ownerNotificationEnabled: Boolean(OWNER_NOTIFICATION_PHONE),
+    mode: "single-calendar-auto-assignment",
+    tokenOwnerEmail
+  });
+});
+
+app.get("/api/debug-calendar", async (_req, res) => {
+  try {
+    if (missingEnv.length > 0) {
+      return res.status(500).json({
+        ok: false,
+        error: `Missing env variables: ${missingEnv.join(", ")}`
+      });
+    }
+
+    const calendar = getCalendarClient();
+    const tokenOwnerEmail = await getTokenOwnerEmail();
+    const result = await calendar.calendarList.list();
+
+    return res.json({
+      ok: true,
+      tokenOwnerEmail,
+      currentCalendarId: GOOGLE_CALENDAR_ID,
+      calendars: (result.data.items || []).map((item) => ({
+        id: item.id,
+        summary: item.summary,
+        primary: Boolean(item.primary),
+        accessRole: item.accessRole || null
+      }))
+    });
+  } catch (error) {
+    console.error("Debug calendar error:", error.response?.data || error.message);
+
+    return res.status(error.response?.status || 500).json({
+      ok: false,
+      error: error.response?.data?.error?.message || error.message || "Debug calendar failed",
+      details: error.response?.data || null
+    });
+  }
+});
+
+app.get("/api/availability", async (req, res) => {
+  try {
+    if (missingEnv.length > 0) {
+      return res.status(500).json({
+        ok: false,
+        error: `Missing env variables: ${missingEnv.join(", ")}`
+      });
+    }
+
+    const date = String(req.query.date || "").trim();
+    const barberId = String(req.query.barberId || "").trim();
+    const durationMinutes = Number(req.query.durationMinutes || 0);
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({
+        ok: false,
+        error: "Query param 'date' must be in format YYYY-MM-DD"
+      });
+    }
+
+    if (!barberId) {
+      return res.status(400).json({
+        ok: false,
+        error: "Query param 'barberId' is required"
+      });
+    }
+
+    if (barberId === "auto") {
+      if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+        return res.status(400).json({
+          ok: false,
+          error: "Query param 'durationMinutes' must be a positive number"
+        });
+      }
+
+      const result = await getAvailabilityForAuto(date, durationMinutes);
+
+      return res.json({
+        ok: true,
+        date,
+        barberId: "auto",
+        timeZone: TIMEZONE,
+        calendarId: GOOGLE_CALENDAR_ID,
+        availableSlots: result.availableSlots,
+        workingHours: result.workingHours
+      });
+    }
+
+    getBarberConfig(barberId);
+
+    const events = await getEventsForDay(date);
+    const busy = getBusyIntervalsForBarber(events, barberId);
+
+    return res.json({
+      ok: true,
+      date,
+      barberId,
+      timeZone: TIMEZONE,
+      calendarId: GOOGLE_CALENDAR_ID,
+      busy,
+      workingHours: await getWorkingHoursForDate(date)
+    });
+  } catch (error) {
+    console.error("Availability error message:", error.message);
+    console.error("Availability error response:", error.response?.data);
+    console.error("Calendar ID used:", GOOGLE_CALENDAR_ID);
+
+    return res.status(error.statusCode || error.response?.status || 500).json({
+      ok: false,
+      error: error.response?.data?.error?.message || error.message || "Internal server error",
+      googleDetails: error.response?.data || null,
+      calendarIdUsed: GOOGLE_CALENDAR_ID
+    });
+  }
+});
+
+app.post("/api/book", async (req, res) => {
+  try {
+    if (missingEnv.length > 0) {
+      return res.status(500).json({
+        ok: false,
+        error: `Missing env variables: ${missingEnv.join(", ")}`
+      });
+    }
+
+    const {
+      name,
+      phone,
+      serviceName,
+      serviceDuration,
+      servicePrice,
+      barberName,
+      barberId,
+      date,
+      time
+    } = req.body || {};
+
+    const requiredFields = {
+      name,
+      phone,
+      serviceName,
+      serviceDuration,
+      servicePrice,
+      barberId,
+      date,
+      time
+    };
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(([, value]) => !value || String(value).trim() === "")
+      .map(([key]) => key);
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        ok: false,
+        error: `Missing required fields: ${missingFields.join(", ")}`
+      });
+    }
+
+    const payload = {
+      name: String(name).trim(),
+      phone: String(phone).trim(),
+      serviceName: String(serviceName).trim(),
+      serviceDuration: String(serviceDuration).trim(),
+      servicePrice: String(servicePrice).trim(),
+      barberName: String(barberName || "").trim(),
+      barberId: String(barberId).trim(),
+      date: String(date).trim(),
+      time: String(time).trim()
+    };
+
+    if (payload.barberId !== "auto") {
+      if (!payload.barberName) {
+        return res.status(400).json({
+          ok: false,
+          error: "Missing required field: barberName"
+        });
+      }
+
+      getBarberConfig(payload.barberId);
+    }
+
+    const { createdEvent, resolvedPayload } = await createEvent(payload);
+
+    await sendSMS({
+      phone: resolvedPayload.phone,
+      message: buildBookingSms(resolvedPayload)
+    });
+
+    if (OWNER_NOTIFICATION_PHONE) {
+      await sendSMS({
+        phone: OWNER_NOTIFICATION_PHONE,
+        message: buildOwnerBookingSms(resolvedPayload)
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      message: "Booking saved to Google Calendar",
+      eventId: createdEvent.id,
+      eventLink: createdEvent.htmlLink,
+      resolvedBarberId: resolvedPayload.barberId,
+      resolvedBarberName: resolvedPayload.barberName
+    });
+  } catch (error) {
+    console.error("Booking error:", error.message);
+    console.error("Booking error response:", error.response?.data);
+
+    return res.status(error.statusCode || error.response?.status || 500).json({
+      ok: false,
+      error: error.response?.data?.error?.message || error.message || "Internal server error",
+      googleDetails: error.response?.data || null,
+      calendarIdUsed: GOOGLE_CALENDAR_ID
+    });
+  }
+});
+
+app.get("/api/test-calendar", async (_req, res) => {
+  try {
+    const calendar = getCalendarClient();
+
+    const meta = await calendar.calendars.get({
+      calendarId: GOOGLE_CALENDAR_ID
+    });
+
+    return res.json({
+      ok: true,
+      calendarId: GOOGLE_CALENDAR_ID,
+      summary: meta.data.summary,
+      timeZone: meta.data.timeZone
+    });
+  } catch (error) {
+    console.error("TEST CALENDAR ERROR:", error.response?.data || error.message);
+
+    return res.status(error.response?.status || 500).json({
+      ok: false,
+      error: error.response?.data?.error?.message || error.message,
+      details: error.response?.data || null,
+      calendarIdUsed: GOOGLE_CALENDAR_ID
+    });
+  }
+});
+
+async function startServer() {
+  await initContentStore({ contentFile: CONTENT_FILE, emptyTemplate: EMPTY_SITE_CONTENT });
+  if (useDatabaseAuth()) {
+    await dbAuth.ensureAuthSchema();
+  }
+  ensureUploadDirSync();
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`MONARCH booking app running on port ${PORT}`);
+    console.log("PORT:", PORT);
+    console.log("TIMEZONE:", TIMEZONE);
+    console.log("GOOGLE_CALENDAR_ID:", GOOGLE_CALENDAR_ID);
+    console.log("SMS ENABLED:", Boolean(process.env.SMSAPI_TOKEN));
+    console.log("CONTENT_STORE:", process.env.CONTENT_STORE || "json");
+    console.log("UPLOAD DIR:", ADMIN_UPLOADS_DIR);
+    console.log("DB AUTH:", useDatabaseAuth());
+  });
+}
+
+startServer().catch((err) => {
+  console.error("Server failed to start:", err);
+  process.exit(1);
+});
